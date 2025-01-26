@@ -1,4 +1,4 @@
-name: Expo CI
+name: Lost-in-Faubourg CI
 
 on:
   push:
@@ -23,17 +23,17 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        working-directory: MiniCapstone
+        working-directory: map-application
         run: npm install
 
       - name: Run linting
-        working-directory: MiniCapstone
+        working-directory: map-application
         run: npm run lint
 
       - name: Run tests
-        working-directory: MiniCapstone
+        working-directory: map-application
         run: npm test
 
       - name: Build the project
-        working-directory: MiniCapstone
+        working-directory: map-application
         run: npx expo export --platform web
