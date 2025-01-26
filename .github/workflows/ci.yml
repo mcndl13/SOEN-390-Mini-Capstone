@@ -23,15 +23,20 @@ jobs:
         with:
           node-version: "20.17.0"
           cache: "npm"
+          cache-dependency-path: "map-application/package-lock.json"
 
       - name: Install dependencies
-        run: cd map-application && npm install
+        working-directory: map-application
+        run: npm install
 
       - name: Run Linter
-        run: cd map-application && npm run lint
+        working-directory: map-application
+        run: npm run lint
 
       - name: Run Test Suite
-        run: cd map-application && npm test
+        working-directory: map-application
+        run: npm test
 
       - name: Build the Project
-        run: cd map-application && npx expo export --platform web
+        working-directory: map-application
+        run: npx expo export --platform web
