@@ -33,9 +33,17 @@ jobs:
         run: npm run lint
         working-directory: map-application
 
-      - name: Run Test Suite
-        run: npm test
+      - name: Run Test Suite with Coverage
+        run: npm test -- --coverage
         working-directory: map-application
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: map-application/coverage
+          fail_ci_if_error: true
+          verbose: true
 
       - name: Build the Project
         run: npx expo export --platform web
