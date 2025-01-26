@@ -1,1 +1,39 @@
+name: Lost-in-Faubourg CI
 
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.17.0"
+          cache: "npm"
+
+      - name: Install dependencies
+        working-directory: map-application
+        run: npm install
+
+      - name: Run linting
+        working-directory: map-application
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: map-application
+        run: npm test
+
+      - name: Build the project
+        working-directory: map-application
+        run: npx expo export --platform web
