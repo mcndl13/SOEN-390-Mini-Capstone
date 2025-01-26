@@ -1,22 +1,39 @@
-name: CI Pipeline
+name: Expo CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup environment
-        run: |
-          echo "Setting up environment"
-          # Add setup cmd
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.17.0"
+          cache: "npm"
+
+      - name: Install dependencies
+        working-directory: MiniCapstone
+        run: npm install
+
+      - name: Run linting
+        working-directory: MiniCapstone
+        run: npm run lint
 
       - name: Run tests
-        run: |
-          echo "Running tests"
-          # Add test cmd
+        working-directory: MiniCapstone
+        run: npm test
 
+      - name: Build the project
+        working-directory: MiniCapstone
+        run: npx expo export --platform web
