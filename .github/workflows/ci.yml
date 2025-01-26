@@ -1,12 +1,14 @@
-name: Lost-in-Faubourg CI
+name: Lost-in-Faubourg CI/CD
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - "map-application/**"
   pull_request:
     branches:
       - main
+    paths:
+      - "map-application/**"
 
 jobs:
   build:
@@ -14,26 +16,22 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "20.17.0"
           cache: "npm"
 
       - name: Install dependencies
-        working-directory: map-application
-        run: npm install
+        run: cd map-application && npm install
 
-      - name: Run linting
-        working-directory: map-application
-        run: npm run lint
+      - name: Run Linter
+        run: cd map-application && npm run lint
 
-      - name: Run tests
-        working-directory: map-application
-        run: npm test
+      - name: Run Test Suite
+        run: cd map-application && npm test
 
-      - name: Build the project
-        working-directory: map-application
-        run: npx expo export --platform web
+      - name: Build the Project
+        run: cd map-application && npx expo export --platform web
