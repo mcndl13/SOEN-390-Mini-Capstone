@@ -1,13 +1,11 @@
 # SOEN-390-Mini-Capstone: Campus Guide Mobile App
 
 ## Project Overview
-The **Campus Guide Mobile App** is designed to help students, faculty, and visitors navigate the university campus more efficiently. It offers essential features, including real-time location tracking, outdoor and indoor navigation, and easy access to campus facilities and resources. The app aims to enhance the overall user experience on campus by incorporating advanced mapping technologies and a user-friendly design.
+The Campus Guide Mobile App is designed to help students, faculty, and visitors navigate the university campus more efficiently. It offers essential features, including real-time location tracking, outdoor and indoor navigation, and easy access to campus facilities and resources. By incorporating advanced mapping technologies and a user-friendly design, the app aims to enhance the overall user experience on campus.
 
 ---
 
 ## Features
-
-### Core Features
 1. **Real-Time Location Tracking**:
    - Displays the user’s current location on the campus map.
    - Allows seamless switching between different campus locations.
@@ -29,10 +27,50 @@ Create an intuitive and functional guide for navigating the Concordia University
 
 ---
 
+## Installation & Setup
+
+#### 1. Clone the Repository
+
+First, clone the project repository from GitHub to your local machine:
+
+```bash
+git clone https://github.com/YOUR-USERNAME/SOEN-390-Mini-Capstone
+```
+
+#### 2. Frontend Setup
+
+- Navigate to the map-application directory:
+
+```bash
+cd SOEN-390-Mini-Capstone/map-application/
+```
+
+- Install all required libraries and dependencies:
+
+```bash
+npm install
+```
+- Install @expo/ngrok locally inside your project:
+```bash
+npm install @expo/ngrok --save-dev
+```
+
+#### 3. Start the App
+- On home wifi:
+  
+```bash
+npx expo start
+```
+
+- On Concordia Wifi:
+  
+```bash
+npx expo start --tunnel
+```
+---
 ## Technologies Used
 - **Front-End**: React Native
-- **Mapping**: Mapbox or Google Maps API
+- **Mapping**: Google Maps API
 - **Back-End**: Firebase
 - **Tools**: GitHub, ZenHub
-
 ---
