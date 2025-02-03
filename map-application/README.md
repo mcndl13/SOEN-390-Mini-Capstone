@@ -15,7 +15,25 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    ```bash
     npx expo start
    ```
+---
+<em>(Not if you are on the the Concordia Wifi)</em>
+1. Install dependencies
 
+   ```bash
+   npm install
+   ```
+
+2. Install @expo/ngrok locally inside your project
+
+   ```bash
+    npm install @expo/ngrok --save-dev
+   ```
+4. Start the app
+
+   ```bash
+    npx expo start --tunnel
+   ```
+---
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
