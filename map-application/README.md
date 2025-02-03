@@ -16,7 +16,7 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
     npx expo start
    ```
 ---
-<em>(Not if you are on the the Concordia Wifi)</em>
+<em>(Note, if you are on the the Concordia Wifi)</em>
 1. Install dependencies
 
    ```bash
