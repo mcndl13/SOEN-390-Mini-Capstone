@@ -1,6 +1,6 @@
 import axios from 'axios';
+import { GOOGLE_MAPS_API_KEY } from '@env';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyDfv2-YoXgh3gE2ck-LhfNj9njU8Hj9LxU';
 
 /**
  * Function to convert an address to latitude/longitude using Google Geocoding API.
