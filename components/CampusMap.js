@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import MapView, { Marker, Callout, Polygon } from "react-native-maps";
+import MapView, { Marker, Polygon } from "react-native-maps";
 import * as Location from "expo-location";
 import { polygons } from "./polygonCoordinates";
 
@@ -8,63 +8,33 @@ const CampusMap = () => {
   const [location, setLocation] = useState(null);
   const [region, setRegion] = useState(null);
   const [selectedCampus, setSelectedCampus] = useState(null);
+  const [selectedBuilding, setSelectedBuilding] = useState(null);
 
   // SGW and Loyola Campus Coordinates
   const SGW_COORDS = { latitude: 45.4953534, longitude: -73.578549 };
   const LOYOLA_COORDS = { latitude: 45.4582, longitude: -73.6405 };
 
-  // SGW Campus Buildings with Corrected Data
-  const buildings = [
-    {
-      id: 1,
-      name: "EV Building",
-      address: "1515 Ste-Catherine W",
-      latitude: 45.4957,
-      longitude: -73.5781,
-    },
-    {
-      id: 2,
-      name: "Hall Building",
-      address: "1455 De Maisonneuve W",
-      latitude: 45.4972,
-      longitude: -73.578,
-    },
-    {
-      id: 3,
-      name: "Black Perspectives Office",
-      address: "4847 GM-806",
-      latitude: 45.4965,
-      longitude: -73.579,
-    },
-    {
-      id: 4,
-      name: "Birks Student Service Centre",
-      address: "2668 LB-185",
-      latitude: 45.4975,
-      longitude: -73.5775,
-    },
-    {
-      id: 5,
-      name: "Book Stop",
-      address: "3615 LB-03",
-      latitude: 45.498,
-      longitude: -73.5765,
-    },
-    {
-      id: 6,
-      name: "Career and Planning Services",
-      address: "7345 H-745",
-      latitude: 45.4962,
-      longitude: -73.5778,
-    },
-    {
-      id: 7,
-      name: "Centre de la Petite Enfance Concordia",
-      address: "8789 GN-110",
-      latitude: 45.4959,
-      longitude: -73.5789,
-    },
-  ];
+  // Function to calculate the center of a polygon
+  const getPolygonCenter = (boundaries) => {
+    let latSum = 0, lonSum = 0;
+    boundaries.forEach(coord => {
+      latSum += coord.latitude;
+      lonSum += coord.longitude;
+    });
+    return {
+      latitude: latSum / boundaries.length,
+      longitude: lonSum / boundaries.length,
+    };
+  };
+
+  // Buildings for both SGW and Loyola Campuses
+  const buildings = polygons.map((polygon, index) => ({
+    id: index + 1,
+    name: polygon.name,
+    latitude: getPolygonCenter(polygon.boundaries).latitude,
+    longitude: getPolygonCenter(polygon.boundaries).longitude,
+    address: `${polygon.name} - Concordia University`
+  }));
 
   useEffect(() => {
     (async () => {
@@ -93,6 +63,7 @@ const CampusMap = () => {
       longitudeDelta: 0.005,
     });
     setSelectedCampus(campusName);
+    setSelectedBuilding(null);
   };
 
   return (
@@ -117,14 +88,8 @@ const CampusMap = () => {
                 longitude: building.longitude,
               }}
               pinColor="red"
-            >
-              <Callout>
-                <View>
-                  <Text style={{ fontWeight: "bold" }}>{building.name}</Text>
-                  <Text>{building.address}</Text>
-                </View>
-              </Callout>
-            </Marker>
+              onPress={() => setSelectedBuilding(building)}
+            />
           ))}
           {/* Polygon Highlight */}
           {polygons.map((polygon, index) => (
@@ -141,18 +106,25 @@ const CampusMap = () => {
         <Text>Loading Map...</Text>
       )}
 
+      {selectedBuilding && (
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoText}>Building: {selectedBuilding.name}</Text>
+          <Text style={styles.infoText}>Address: {selectedBuilding.address}</Text>
+        </View>
+      )}
+
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[
             styles.circularButton,
-            selectedCampus === "SGW" && styles.selectedButton, // Apply selected style if SGW is selected
+            selectedCampus === "SGW" && styles.selectedButton,
           ]}
           onPress={() => switchToCampus(SGW_COORDS, "SGW")}
         >
           <Text
             style={[
               styles.buttonText,
-              selectedCampus === "SGW" && styles.selectedButtonText, // Change text color for selected button
+              selectedCampus === "SGW" && styles.selectedButtonText,
             ]}
           >
             SGW Campus
@@ -161,14 +133,14 @@ const CampusMap = () => {
         <TouchableOpacity
           style={[
             styles.circularButton,
-            selectedCampus === "Loyola" && styles.selectedButton, // Apply selected style if Loyola is selected
+            selectedCampus === "Loyola" && styles.selectedButton,
           ]}
           onPress={() => switchToCampus(LOYOLA_COORDS, "Loyola")}
         >
           <Text
             style={[
               styles.buttonText,
-              selectedCampus === "Loyola" && styles.selectedButtonText, // Change text color for selected button
+              selectedCampus === "Loyola" && styles.selectedButtonText,
             ]}
           >
             Loyola Campus
@@ -182,6 +154,23 @@ const CampusMap = () => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { width: "100%", height: "100%" },
+  infoContainer: {
+    position: "absolute",
+    bottom: 140,
+    left: 20,
+    right: 20,
+    backgroundColor: "white",
+    padding: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  infoText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   buttonContainer: {
     position: "absolute",
     bottom: 80,
@@ -192,13 +181,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   circularButton: {
-    backgroundColor: "white", // Burgundy color
+    backgroundColor: "white",
     width: 150,
     height: 50,
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
-    //add a shadow:
     shadowColor: "#000",
     shadowOffset: { width: 4, height: 6 },
     shadowOpacity: 0.25,
@@ -210,10 +198,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   selectedButton: {
-    backgroundColor: "#912338", // Change button background color when selected
+    backgroundColor: "#912338",
   },
   selectedButtonText: {
-    color: "white", // Change text color when selected
+    color: "white",
   },
 });
 
