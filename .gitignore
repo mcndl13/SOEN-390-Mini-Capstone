@@ -1,0 +1,9 @@
+# Ignore environment variables
+.env
+
+# Ignore Node modules
+node_modules/
+
+# Ignore Expo cache & logs
+.expo/
+.expo-shared/
