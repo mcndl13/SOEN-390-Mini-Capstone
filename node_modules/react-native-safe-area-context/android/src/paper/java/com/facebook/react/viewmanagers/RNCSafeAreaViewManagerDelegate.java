@@ -17,7 +17,9 @@ import com.facebook.react.uimanager.BaseViewManagerDelegate;
 import com.facebook.react.uimanager.LayoutShadowNode;
 
 public class RNCSafeAreaViewManagerDelegate<
-        T extends View, U extends BaseViewManager<T, ? extends LayoutShadowNode> & RNCSafeAreaViewManagerInterface<T>>
+        T extends View,
+        U extends
+            BaseViewManager<T, ? extends LayoutShadowNode> & RNCSafeAreaViewManagerInterface<T>>
     extends BaseViewManagerDelegate<T, U> {
   public RNCSafeAreaViewManagerDelegate(U viewManager) {
     super(viewManager);

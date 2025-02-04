@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 export default function HomeScreen({ navigation }) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome Steven</Text>
+      <Text style={styles.title}>Welcome</Text>
       <ScrollView>
         <TouchableOpacity
           style={styles.button}
