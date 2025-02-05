@@ -31,15 +31,15 @@ export default function DirectionsScreen() {
       const locationSubscription = await Location.watchPositionAsync(
         { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 10 },
         (position) => {
-          setCurrentLocation({
+          const loc = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-          });
+          };
+          setCurrentLocation(loc);
 
           if (mapRef.current) {
             mapRef.current.animateToRegion({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
+              ...loc,
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
             });
@@ -50,6 +50,20 @@ export default function DirectionsScreen() {
       return () => locationSubscription.remove();
     })();
   }, []);
+
+  useEffect(() => {
+    if (currentLocation && !start) {
+      (async () => {
+        try {
+          const [addressData] = await Location.reverseGeocodeAsync(currentLocation);
+          const address = `${addressData.name || ''} ${addressData.street || ''}, ${addressData.city || ''}`.trim();
+          setStart(address);
+        } catch (error) {
+          console.error("Error during reverse geocoding:", error);
+        }
+      })();
+    }
+  }, [currentLocation]);
 
   // Function to fetch autocomplete suggestions
   const fetchAutocomplete = async (input, setSuggestions) => {
