@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Text, Button } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-
-const GOOGLE_MAPS_API_KEY = 'AIzaSyDfv2-YoXgh3gE2ck-LhfNj9njU8Hj9LxU';
+import { GOOGLE_MAPS_API_KEY } from '@env';
 
 export default function LocationScreen() {
   const [location, setLocation] = useState(null);
