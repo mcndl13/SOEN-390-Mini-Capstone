@@ -1,0 +1,50 @@
+name: Lost-in-Faubourg CI/CD
+
+on:
+  push:
+    paths:
+      - "map-application/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "map-application/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.17.0"
+          cache: "npm"
+          cache-dependency-path: "map-application/package-lock.json"
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: map-application
+
+      - name: Run Linter
+        run: npm run lint
+        working-directory: map-application
+
+      - name: Run Test Suite with Coverage
+        run: npm test -- --coverage
+        working-directory: map-application
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: map-application/coverage
+          fail_ci_if_error: true
+          verbose: true
+
+      - name: Build the Project
+        run: npx expo export --platform web
+        working-directory: map-application
