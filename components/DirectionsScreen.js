@@ -4,8 +4,7 @@ import MapView, { Polyline, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import axios from 'axios';
 import { getDirections, getCoordinates } from '../services/navigationService';
-
-const GOOGLE_MAPS_API_KEY = 'AIzaSyDfv2-YoXgh3gE2ck-LhfNj9njU8Hj9LxU';
+import { GOOGLE_MAPS_API_KEY } from '@env';
 
 export default function DirectionsScreen() {
   const [currentLocation, setCurrentLocation] = useState(null);
