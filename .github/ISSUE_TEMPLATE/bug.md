@@ -2,7 +2,7 @@
 name: Bug Report
 about: Report an issue to help us ensure quality
 labels: bug
-assignees: ""
+assignees: ''
 ---
 
 ### **Bug Title**
@@ -22,6 +22,7 @@ Describe what you expected to happen.
 Describe what actually happens.
 
 **Steps to Reproduce:**
+
 1. Go to '...'
 2. Click on '...'
 3. Scroll down to '...'
@@ -38,6 +39,7 @@ If applicable, add screenshots to help explain your problem.
 ### **Environment**
 
 Provide details about the environment where the issue occurred:
+
 - **OS:** [e.g., Windows 10, macOS]
 - **Browser:** [e.g., Chrome, Safari]
 - **Device:** [e.g., Desktop, Mobile]

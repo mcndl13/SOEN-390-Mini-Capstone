@@ -1,31 +1,32 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import MapView, { Marker, Polygon } from "react-native-maps";
-import * as Location from "expo-location";
-import { polygons } from "./polygonCoordinates";
+import React, { useEffect, useState } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import MapView, { Marker, Polygon } from 'react-native-maps'
+import * as Location from 'expo-location'
+import { polygons } from './polygonCoordinates'
 
 const CampusMap = () => {
-  const [location, setLocation] = useState(null);
-  const [region, setRegion] = useState(null);
-  const [selectedCampus, setSelectedCampus] = useState(null);
-  const [selectedBuilding, setSelectedBuilding] = useState(null);
+  const [location, setLocation] = useState(null)
+  const [region, setRegion] = useState(null)
+  const [selectedCampus, setSelectedCampus] = useState(null)
+  const [selectedBuilding, setSelectedBuilding] = useState(null)
 
   // SGW and Loyola Campus Coordinates
-  const SGW_COORDS = { latitude: 45.4953534, longitude: -73.578549 };
-  const LOYOLA_COORDS = { latitude: 45.4582, longitude: -73.6405 };
+  const SGW_COORDS = { latitude: 45.4953534, longitude: -73.578549 }
+  const LOYOLA_COORDS = { latitude: 45.4582, longitude: -73.6405 }
 
   // Function to calculate the center of a polygon
   const getPolygonCenter = (boundaries) => {
-    let latSum = 0, lonSum = 0;
-    boundaries.forEach(coord => {
-      latSum += coord.latitude;
-      lonSum += coord.longitude;
-    });
+    let latSum = 0,
+      lonSum = 0
+    boundaries.forEach((coord) => {
+      latSum += coord.latitude
+      lonSum += coord.longitude
+    })
     return {
       latitude: latSum / boundaries.length,
       longitude: lonSum / boundaries.length,
-    };
-  };
+    }
+  }
 
   // Buildings for both SGW and Loyola Campuses
   const buildings = polygons.map((polygon, index) => ({
@@ -33,27 +34,27 @@ const CampusMap = () => {
     name: polygon.name,
     latitude: getPolygonCenter(polygon.boundaries).latitude,
     longitude: getPolygonCenter(polygon.boundaries).longitude,
-    address: `${polygon.name} - Concordia University`
-  }));
+    address: `${polygon.name} - Concordia University`,
+  }))
 
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.log("Permission to access location was denied");
-        return;
+    ;(async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync()
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied')
+        return
       }
 
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation.coords);
+      let currentLocation = await Location.getCurrentPositionAsync({})
+      setLocation(currentLocation.coords)
       setRegion({
         latitude: currentLocation.coords.latitude,
         longitude: currentLocation.coords.longitude,
         latitudeDelta: 0.005,
         longitudeDelta: 0.005,
-      });
-    })();
-  }, []);
+      })
+    })()
+  }, [])
 
   const switchToCampus = (campusCoords, campusName) => {
     setRegion({
@@ -61,10 +62,10 @@ const CampusMap = () => {
       longitude: campusCoords.longitude,
       latitudeDelta: 0.005,
       longitudeDelta: 0.005,
-    });
-    setSelectedCampus(campusName);
-    setSelectedBuilding(null);
-  };
+    })
+    setSelectedCampus(campusName)
+    setSelectedBuilding(null)
+  }
 
   return (
     <View style={styles.container}>
@@ -109,7 +110,9 @@ const CampusMap = () => {
       {selectedBuilding && (
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>Building: {selectedBuilding.name}</Text>
-          <Text style={styles.infoText}>Address: {selectedBuilding.address}</Text>
+          <Text style={styles.infoText}>
+            Address: {selectedBuilding.address}
+          </Text>
         </View>
       )}
 
@@ -117,14 +120,14 @@ const CampusMap = () => {
         <TouchableOpacity
           style={[
             styles.circularButton,
-            selectedCampus === "SGW" && styles.selectedButton,
+            selectedCampus === 'SGW' && styles.selectedButton,
           ]}
-          onPress={() => switchToCampus(SGW_COORDS, "SGW")}
+          onPress={() => switchToCampus(SGW_COORDS, 'SGW')}
         >
           <Text
             style={[
               styles.buttonText,
-              selectedCampus === "SGW" && styles.selectedButtonText,
+              selectedCampus === 'SGW' && styles.selectedButtonText,
             ]}
           >
             SGW Campus
@@ -133,14 +136,14 @@ const CampusMap = () => {
         <TouchableOpacity
           style={[
             styles.circularButton,
-            selectedCampus === "Loyola" && styles.selectedButton,
+            selectedCampus === 'Loyola' && styles.selectedButton,
           ]}
-          onPress={() => switchToCampus(LOYOLA_COORDS, "Loyola")}
+          onPress={() => switchToCampus(LOYOLA_COORDS, 'Loyola')}
         >
           <Text
             style={[
               styles.buttonText,
-              selectedCampus === "Loyola" && styles.selectedButtonText,
+              selectedCampus === 'Loyola' && styles.selectedButtonText,
             ]}
           >
             Loyola Campus
@@ -148,61 +151,61 @@ const CampusMap = () => {
         </TouchableOpacity>
       </View>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  map: { width: "100%", height: "100%" },
+  map: { width: '100%', height: '100%' },
   infoContainer: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 140,
     left: 20,
     right: 20,
-    backgroundColor: "white",
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 10,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
   infoText: {
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   buttonContainer: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 80,
     left: 0,
     right: 0,
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     paddingHorizontal: 10,
   },
   circularButton: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     width: 150,
     height: 50,
     borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 4, height: 6 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
   },
   buttonText: {
-    color: "black",
-    textAlign: "center",
-    fontWeight: "bold",
+    color: 'black',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
   selectedButton: {
-    backgroundColor: "#912338",
+    backgroundColor: '#912338',
   },
   selectedButtonText: {
-    color: "white",
+    color: 'white',
   },
-});
+})
 
-export default CampusMap;
+export default CampusMap

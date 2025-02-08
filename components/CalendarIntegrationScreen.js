@@ -1,17 +1,17 @@
 // CalendarIntegrationScreen.js
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, Text, StyleSheet } from 'react-native';
-import { getCalendarEvents } from '../services/calendarService';
+import React, { useState, useEffect } from 'react'
+import { View, ScrollView, Text, StyleSheet } from 'react-native'
+import { getCalendarEvents } from '../services/calendarService'
 
 export default function CalendarIntegrationScreen() {
-  const [events, setEvents] = useState([]);
+  const [events, setEvents] = useState([])
 
   useEffect(() => {
-    (async () => {
-      const data = await getCalendarEvents();
-      setEvents(data);
-    })();
-  }, []);
+    ;(async () => {
+      const data = await getCalendarEvents()
+      setEvents(data)
+    })()
+  }, [])
 
   return (
     <ScrollView style={styles.container}>
@@ -20,14 +20,16 @@ export default function CalendarIntegrationScreen() {
           <View key={index} style={styles.eventContainer}>
             <Text style={styles.eventTitle}>{event.summary}</Text>
             <Text style={styles.eventDetails}>{`Start: ${event.start}`}</Text>
-            <Text style={styles.eventDetails}>{`Location: ${event.location || 'N/A'}`}</Text>
+            <Text
+              style={styles.eventDetails}
+            >{`Location: ${event.location || 'N/A'}`}</Text>
           </View>
         ))
       ) : (
         <Text style={styles.noEvents}>No events found.</Text>
       )}
     </ScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -54,4 +56,4 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
   },
-});
+})

@@ -1,74 +1,88 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, TextInput, TouchableOpacity, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
-import MapView, { Polyline, Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
-import axios from 'axios';
-import { getDirections, getCoordinates } from '../services/navigationService';
-import { GOOGLE_MAPS_API_KEY } from '@env';
+import React, { useState, useEffect, useRef } from 'react'
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  Text,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native'
+import MapView, { Polyline, Marker } from 'react-native-maps'
+import * as Location from 'expo-location'
+import axios from 'axios'
+import { getDirections, getCoordinates } from '../services/navigationService'
+import { GOOGLE_MAPS_API_KEY } from '@env'
 
 export default function DirectionsScreen() {
-  const [currentLocation, setCurrentLocation] = useState(null);
-  const [start, setStart] = useState('');
-  const [destination, setDestination] = useState('');
-  const [route, setRoute] = useState(null);
-  const [eta, setEta] = useState(null);
-  const [mode, setMode] = useState('driving'); // Default to driving mode
-  const [startSuggestions, setStartSuggestions] = useState([]);
-  const [destinationSuggestions, setDestinationSuggestions] = useState([]);
-  const mapRef = useRef(null);
+  const [currentLocation, setCurrentLocation] = useState(null)
+  const [start, setStart] = useState('')
+  const [destination, setDestination] = useState('')
+  const [route, setRoute] = useState(null)
+  const [eta, setEta] = useState(null)
+  const [mode, setMode] = useState('driving') // Default to driving mode
+  const [startSuggestions, setStartSuggestions] = useState([])
+  const [destinationSuggestions, setDestinationSuggestions] = useState([])
+  const mapRef = useRef(null)
 
   // Get live location updates
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
+    ;(async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync()
       if (status !== 'granted') {
-        alert('Permission to access location was denied');
-        return;
+        alert('Permission to access location was denied')
+        return
       }
 
       // Get and track live location
       const locationSubscription = await Location.watchPositionAsync(
-        { accuracy: Location.Accuracy.High, timeInterval: 5000, distanceInterval: 10 },
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 5000,
+          distanceInterval: 10,
+        },
         (position) => {
           const loc = {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-          };
-          setCurrentLocation(loc);
+          }
+          setCurrentLocation(loc)
 
           if (mapRef.current) {
             mapRef.current.animateToRegion({
               ...loc,
               latitudeDelta: 0.01,
               longitudeDelta: 0.01,
-            });
+            })
           }
-        }
-      );
+        },
+      )
 
-      return () => locationSubscription.remove();
-    })();
-  }, []);
+      return () => locationSubscription.remove()
+    })()
+  }, [])
 
   useEffect(() => {
     if (currentLocation && !start) {
-      (async () => {
+      ;(async () => {
         try {
-          const [addressData] = await Location.reverseGeocodeAsync(currentLocation);
-          const address = `${addressData.name || ''} ${addressData.street || ''}, ${addressData.city || ''}`.trim();
-          setStart(address);
+          const [addressData] =
+            await Location.reverseGeocodeAsync(currentLocation)
+          const address =
+            `${addressData.name || ''} ${addressData.street || ''}, ${addressData.city || ''}`.trim()
+          setStart(address)
         } catch (error) {
-          console.error("Error during reverse geocoding:", error);
+          console.error('Error during reverse geocoding:', error)
         }
-      })();
+      })()
     }
-  }, [currentLocation]);
+  }, [currentLocation])
 
   // Function to fetch autocomplete suggestions
   const fetchAutocomplete = async (input, setSuggestions) => {
     if (!input) {
-      setSuggestions([]);
-      return;
+      setSuggestions([])
+      return
     }
 
     try {
@@ -80,68 +94,66 @@ export default function DirectionsScreen() {
             key: GOOGLE_MAPS_API_KEY,
             types: 'geocode',
           },
-        }
-      );
+        },
+      )
 
       if (response.data.status === 'OK') {
-        setSuggestions(response.data.predictions);
+        setSuggestions(response.data.predictions)
       } else {
-        setSuggestions([]);
+        setSuggestions([])
       }
     } catch (error) {
-      console.error('Error fetching autocomplete:', error);
-      setSuggestions([]);
+      console.error('Error fetching autocomplete:', error)
+      setSuggestions([])
     }
-  };
+  }
 
   // Fetch route based on current location
   const fetchDirections = async () => {
     if ((!currentLocation && !start) || !destination) {
-      alert('Please enter a valid start and destination');
-      return;
+      alert('Please enter a valid start and destination')
+      return
     }
-  
-    console.log("Fetching directions...");
-    console.log("Start input:", start);
-    console.log("Destination input:", destination);
-  
-    let startCoords = start ? await getCoordinates(start) : currentLocation;
-    let destinationCoords = await getCoordinates(destination);
-  
-    console.log("Start Coordinates:", startCoords);
-    console.log("Destination Coordinates:", destinationCoords);
-  
+
+    console.log('Fetching directions...')
+    console.log('Start input:', start)
+    console.log('Destination input:', destination)
+
+    let startCoords = start ? await getCoordinates(start) : currentLocation
+    let destinationCoords = await getCoordinates(destination)
+
+    console.log('Start Coordinates:', startCoords)
+    console.log('Destination Coordinates:', destinationCoords)
+
     if (!startCoords || !destinationCoords) {
-      alert('Invalid start or destination');
-      console.error('Start or destination coordinates are null.');
-      return;
+      alert('Invalid start or destination')
+      console.error('Start or destination coordinates are null.')
+      return
     }
-  
-    const polyline = await getDirections(startCoords, destinationCoords, mode);
-  
-    console.log("Google API Response:", polyline);
-  
+
+    const polyline = await getDirections(startCoords, destinationCoords, mode)
+
+    console.log('Google API Response:', polyline)
+
     if (!polyline || !polyline.path || polyline.path.length === 0) {
-      alert('No route found');
-      console.log("API response:", polyline);
-      return;
+      alert('No route found')
+      console.log('API response:', polyline)
+      return
     }
-  
-    console.log("Route successfully fetched:", polyline);
-  
-    setRoute(polyline.path);
-    setEta(polyline.duration); // ✅ Store ETA
-  
+
+    console.log('Route successfully fetched:', polyline)
+
+    setRoute(polyline.path)
+    setEta(polyline.duration) // ✅ Store ETA
+
     // Fit map to route
     if (mapRef.current) {
       mapRef.current.fitToCoordinates(polyline.path, {
         edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
         animated: true,
-      });
+      })
     }
-  };
-  
-  
+  }
 
   return (
     <View style={styles.container}>
@@ -152,8 +164,8 @@ export default function DirectionsScreen() {
             style={styles.input}
             placeholder="Start Location"
             onChangeText={(text) => {
-              setStart(text);
-              fetchAutocomplete(text, setStartSuggestions);
+              setStart(text)
+              fetchAutocomplete(text, setStartSuggestions)
             }}
             value={start}
           />
@@ -166,8 +178,8 @@ export default function DirectionsScreen() {
                 <TouchableOpacity
                   style={styles.suggestionItem}
                   onPress={() => {
-                    setStart(item.description);
-                    setStartSuggestions([]);
+                    setStart(item.description)
+                    setStartSuggestions([])
                   }}
                 >
                   <Text>{item.description}</Text>
@@ -181,8 +193,8 @@ export default function DirectionsScreen() {
             style={styles.input}
             placeholder="Destination"
             onChangeText={(text) => {
-              setDestination(text);
-              fetchAutocomplete(text, setDestinationSuggestions);
+              setDestination(text)
+              fetchAutocomplete(text, setDestinationSuggestions)
             }}
             value={destination}
           />
@@ -195,8 +207,8 @@ export default function DirectionsScreen() {
                 <TouchableOpacity
                   style={styles.suggestionItem}
                   onPress={() => {
-                    setDestination(item.description);
-                    setDestinationSuggestions([]);
+                    setDestination(item.description)
+                    setDestinationSuggestions([])
                   }}
                 >
                   <Text>{item.description}</Text>
@@ -208,17 +220,33 @@ export default function DirectionsScreen() {
           {/* Mode Selector */}
           <View style={styles.modeSelector}>
             <TouchableOpacity onPress={() => setMode('walking')}>
-              <Text style={mode === 'walking' ? styles.selectedMode : styles.mode}>Walk</Text>
+              <Text
+                style={mode === 'walking' ? styles.selectedMode : styles.mode}
+              >
+                Walk
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setMode('driving')}>
-              <Text style={mode === 'driving' ? styles.selectedMode : styles.mode}>Drive</Text>
+              <Text
+                style={mode === 'driving' ? styles.selectedMode : styles.mode}
+              >
+                Drive
+              </Text>
             </TouchableOpacity>
           </View>
 
           {/* Map */}
           <MapView ref={mapRef} style={styles.map}>
-            {currentLocation && <Marker coordinate={currentLocation} title="You are here" />}
-            {route && <Polyline coordinates={route} strokeWidth={5} strokeColor="blue" />}
+            {currentLocation && (
+              <Marker coordinate={currentLocation} title="You are here" />
+            )}
+            {route && (
+              <Polyline
+                coordinates={route}
+                strokeWidth={5}
+                strokeColor="blue"
+              />
+            )}
           </MapView>
 
           {/* Estimated Time of Arrival (ETA) */}
@@ -237,7 +265,7 @@ export default function DirectionsScreen() {
         <ActivityIndicator size="large" />
       )}
     </View>
-  );
+  )
 }
 
 // Styles
@@ -281,5 +309,4 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: 'center',
   },
-});
-
+})

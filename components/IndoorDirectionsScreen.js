@@ -1,17 +1,17 @@
 // IndoorDirectionsScreen.js
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { getIndoorMapData } from '../services/navigationService';
+import React, { useState, useEffect } from 'react'
+import { View, Text, StyleSheet } from 'react-native'
+import { getIndoorMapData } from '../services/navigationService'
 
 export default function IndoorDirectionsScreen() {
-  const [floorData, setFloorData] = useState([]);
+  const [floorData, setFloorData] = useState([])
 
   useEffect(() => {
-    (async () => {
-      const data = await getIndoorMapData();
-      setFloorData(data);
-    })();
-  }, []);
+    ;(async () => {
+      const data = await getIndoorMapData()
+      setFloorData(data)
+    })()
+  }, [])
 
   return (
     <View style={styles.container}>
@@ -19,14 +19,16 @@ export default function IndoorDirectionsScreen() {
         floorData.map((floor, index) => (
           <View key={index} style={styles.floorContainer}>
             <Text style={styles.floorTitle}>{`Floor: ${floor.name}`}</Text>
-            <Text style={styles.floorDetails}>{`Points of Interest: ${floor.pointsOfInterest.join(', ')}`}</Text>
+            <Text
+              style={styles.floorDetails}
+            >{`Points of Interest: ${floor.pointsOfInterest.join(', ')}`}</Text>
           </View>
         ))
       ) : (
         <Text style={styles.noData}>No indoor map data available.</Text>
       )}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -53,4 +55,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
   },
-});
+})
