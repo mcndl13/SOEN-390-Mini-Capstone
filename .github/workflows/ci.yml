@@ -40,6 +40,10 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
+      # Set GOOGLE_MAPS_API_KEY environment variable for Expo build
+      - name: Set GOOGLE_MAPS_API_KEY
+        run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> $GITHUB_ENV
+
       - name: Build the Project (ios)
         run: npx expo export --platform ios
 
