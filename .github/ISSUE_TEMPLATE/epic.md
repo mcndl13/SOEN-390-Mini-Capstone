@@ -2,7 +2,7 @@
 name: Epic
 about: Track a large feature or initiative that encompasses multiple tasks
 labels: epic
-assignees: ""
+assignees: ''
 ---
 
 ### **Epic Title**
