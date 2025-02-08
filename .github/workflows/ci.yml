@@ -1,14 +1,12 @@
-name: Lost-in-Faubourg CI/CD
+name: Lost-in-faubourg CI/CD Workflow
 
 on:
   push:
-    paths:
-      - "map-application/**"
+    branches:
+      - main
   pull_request:
     branches:
       - main
-    paths:
-      - "map-application/**"
 
 jobs:
   build:
@@ -21,30 +19,32 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.17.0"
-          cache: "npm"
-          cache-dependency-path: "map-application/package-lock.json"
+          node-version: '18.x'
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json'
 
       - name: Install dependencies
         run: npm install
-        working-directory: map-application
 
       - name: Run Linter
         run: npm run lint
-        working-directory: map-application
 
       - name: Run Test Suite with Coverage
         run: npm test -- --coverage
-        working-directory: map-application
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          directory: map-application/coverage
+          files: ./coverage/lcov.info
           fail_ci_if_error: true
           verbose: true
 
-      - name: Build the Project
-        run: npx expo export --platform web
-        working-directory: map-application
+      - name: Set GOOGLE_MAPS_API_KEY
+        run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> $GITHUB_ENV
+
+      - name: Build the Project (ios)
+        run: npx expo export --platform ios
+
+      - name: Build the Project (android)
+        run: npx expo export --platform android
