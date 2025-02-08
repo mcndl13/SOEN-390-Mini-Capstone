@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest --watchAll",
+    "test": "jest --coverage",
     "start": "npx expo start",
     "android": "npx expo start --android",
     "ios": "npx expo start --ios",
