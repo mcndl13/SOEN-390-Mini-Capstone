@@ -1,1 +1,22 @@
-{"version":0,"bundler":"metro","fileMetadata":{"android":{"bundle":"_expo/static/js/android/index-e7595cab13ec70310a8fca5d63774152.hbc","assets":[{"path":"assets/369745d4a4a6fa62fa0ed495f89aa964","ext":"png"},{"path":"assets/4f355ba1efca4b9c0e7a6271af047f61","ext":"png"},{"path":"assets/817aca47ff3cea63020753d336e628a4","ext":"png"},{"path":"assets/5b50965d3dfbc518fe50ce36c314a6ec","ext":"png"},{"path":"assets/e62addcde857ebdb7342e6b9f1095e97","ext":"png"},{"path":"assets/778ffc9fe8773a878e9c30a6304784de","ext":"png"},{"path":"assets/376d6a4c7f622917c39feb23671ef71d","ext":"png"},{"path":"assets/c79c3606a1cf168006ad3979763c7e0c","ext":"png"},{"path":"assets/02bc1fa7c0313217bde2d65ccbff40c9","ext":"png"},{"path":"assets/35ba0eaec5a4f5ed12ca16fabeae451d","ext":"png"},{"path":"assets/5223c8d9b0d08b82a5670fb5f71faf78","ext":"png"}]}}}
+{
+  "version": 0,
+  "bundler": "metro",
+  "fileMetadata": {
+    "android": {
+      "bundle": "_expo/static/js/android/index-e7595cab13ec70310a8fca5d63774152.hbc",
+      "assets": [
+        { "path": "assets/369745d4a4a6fa62fa0ed495f89aa964", "ext": "png" },
+        { "path": "assets/4f355ba1efca4b9c0e7a6271af047f61", "ext": "png" },
+        { "path": "assets/817aca47ff3cea63020753d336e628a4", "ext": "png" },
+        { "path": "assets/5b50965d3dfbc518fe50ce36c314a6ec", "ext": "png" },
+        { "path": "assets/e62addcde857ebdb7342e6b9f1095e97", "ext": "png" },
+        { "path": "assets/778ffc9fe8773a878e9c30a6304784de", "ext": "png" },
+        { "path": "assets/376d6a4c7f622917c39feb23671ef71d", "ext": "png" },
+        { "path": "assets/c79c3606a1cf168006ad3979763c7e0c", "ext": "png" },
+        { "path": "assets/02bc1fa7c0313217bde2d65ccbff40c9", "ext": "png" },
+        { "path": "assets/35ba0eaec5a4f5ed12ca16fabeae451d", "ext": "png" },
+        { "path": "assets/5223c8d9b0d08b82a5670fb5f71faf78", "ext": "png" }
+      ]
+    }
+  }
+}
