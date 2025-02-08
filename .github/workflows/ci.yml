@@ -1,4 +1,4 @@
-name: SOEN-390 CI/CD Workflow
+name: Lost-in-faubourg CI/CD Workflow
 
 on:
   push:
@@ -40,7 +40,6 @@ jobs:
           fail_ci_if_error: true
           verbose: true
 
-      # Set GOOGLE_MAPS_API_KEY environment variable for Expo build
       - name: Set GOOGLE_MAPS_API_KEY
         run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> $GITHUB_ENV
 
