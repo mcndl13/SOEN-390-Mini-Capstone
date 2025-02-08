@@ -3,8 +3,8 @@ module.exports = {
   testEnvironment: 'node',
   setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|expo|@expo(nent)?/.*|@react-native-community|react-navigation|@react-navigation/.*))',
-  ],
+    'node_modules/(?!(react-native|@react-native|expo|@expo(nent)?/.*|@react-native(-community)?|react-navigation|@react-navigation/.*|react-native-gesture-handler|@unimodules|@babel/runtime))',
+  ],  
   collectCoverage: true,
   coverageDirectory: './coverage',
   coverageReporters: ['json', 'lcov', 'text', 'clover'],

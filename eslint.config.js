@@ -1,7 +1,6 @@
 const react = require('eslint-plugin-react')
 const reactNative = require('eslint-plugin-react-native')
 const jest = require('eslint-plugin-jest')
-const prettier = require('eslint-plugin-prettier')
 
 module.exports = [
   {
@@ -26,10 +25,8 @@ module.exports = [
       react,
       reactNative,
       jest,
-      prettier,
     },
     rules: {
-      'prettier/prettier': ['error'],
       'react/prop-types': 'off',
       'no-unused-vars': 'warn',
     },
