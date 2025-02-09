@@ -61,7 +61,7 @@ export default function DirectionsScreen() {
       return () => locationSubscription.remove()
     })()
   }, [])
-
+  // Automatically fetches a human-readable address for the user's current location when the location is available and no starting address has been set yet.
   useEffect(() => {
     if (currentLocation && !start) {
       ;(async () => {
@@ -119,7 +119,15 @@ export default function DirectionsScreen() {
     console.log('Start input:', start)
     console.log('Destination input:', destination)
 
-    let startCoords = start ? await getCoordinates(start) : currentLocation
+    //If using current location as start, check if inside a building. If truthy, use building center as start coordinates.
+    let startCoords = start ? await getCoordinates(start) : (() => {
+        const buildingCenter = isUserInBuilding(currentLocation, polygons);
+        if (buildingCenter) {
+          console.log('User is inside a building. Using building center as start coordinates.');
+        }
+        return buildingCenter || currentLocation;
+      })();
+
     let destinationCoords = await getCoordinates(destination)
 
     console.log('Start Coordinates:', startCoords)

@@ -56,8 +56,26 @@ function isPointInPolygon(point, polygon) {
 export function isUserInBuilding(point, polygons) {
     for (const buildingPolygon of polygons) {
       if (isPointInPolygon(point, buildingPolygon.boundaries)) {
-        return buildingPolygon.address; //Assuming the address is stored in the buildingPolygon object
+        return getPolygonCenter(buildingPolygon.boundaries);
       }
     }
     return null;
+}
+
+/**
+ * Calculates the center of a polygon given its boundary coordinates.
+ * @param {Array} boundaries - An array of coordinate objects (each with `latitude` and `longitude`).
+ * @returns {Object} An object containing the average `latitude` and `longitude` of the polygon.
+ */
+export const getPolygonCenter = (boundaries) => {
+    let latSum = 0,
+      lonSum = 0
+    boundaries.forEach((coord) => {
+      latSum += coord.latitude
+      lonSum += coord.longitude
+    })
+    return {
+      latitude: latSum / boundaries.length,
+      longitude: lonSum / boundaries.length,
+    }
 }
