@@ -70,7 +70,7 @@ const CampusMap = () => {
   return (
     <View style={styles.container}>
       {region ? (
-        <MapView style={styles.map} region={region}>
+        <MapView style={styles.map} region={region} testID="mapView">
           {location && (
             <Marker
               coordinate={{
@@ -79,6 +79,7 @@ const CampusMap = () => {
               }}
               title="You are here"
               pinColor="blue"
+              testID="marker-current-location"
             />
           )}
           {buildings.map((building) => (
@@ -90,6 +91,7 @@ const CampusMap = () => {
               }}
               pinColor="red"
               onPress={() => setSelectedBuilding(building)}
+              testID={`marker-${building.id}`}
             />
           ))}
           {/* Polygon Highlight */}
