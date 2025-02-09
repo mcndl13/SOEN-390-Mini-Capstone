@@ -2,6 +2,13 @@ module.exports = {
   preset: 'jest-expo',
   testEnvironment: 'node',
   setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
+  transform: {
+    '^.+\\.(js|jsx)$': [
+      'babel-jest',
+      { plugins: ['babel-plugin-syntax-hermes-parser'] },
+    ],
+    '^.+\\.(ts|tsx)$': 'babel-jest',
+  },
   transformIgnorePatterns: [
     'node_modules/(?!(react-native|@react-native|expo|@expo(nent)?/.*|@react-native-community|react-navigation|@react-navigation/.*))',
   ],

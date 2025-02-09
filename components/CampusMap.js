@@ -70,7 +70,7 @@ const CampusMap = () => {
   return (
     <View style={styles.container}>
       {region ? (
-        <MapView style={styles.map} region={region}>
+        <MapView style={styles.map} region={region} testID="mapView">
           {location && (
             <Marker
               coordinate={{
