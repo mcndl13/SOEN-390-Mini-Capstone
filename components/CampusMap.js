@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import MapView, { Marker, Polygon } from 'react-native-maps'
 import * as Location from 'expo-location'
+import { getPolygonCenter } from './utils'
 import { polygons } from './polygonCoordinates'
 
 const CampusMap = () => {
@@ -13,20 +14,6 @@ const CampusMap = () => {
   // SGW and Loyola Campus Coordinates
   const SGW_COORDS = { latitude: 45.4953534, longitude: -73.578549 }
   const LOYOLA_COORDS = { latitude: 45.4582, longitude: -73.6405 }
-
-  // Function to calculate the center of a polygon
-  const getPolygonCenter = (boundaries) => {
-    let latSum = 0,
-      lonSum = 0
-    boundaries.forEach((coord) => {
-      latSum += coord.latitude
-      lonSum += coord.longitude
-    })
-    return {
-      latitude: latSum / boundaries.length,
-      longitude: lonSum / boundaries.length,
-    }
-  }
 
   // Buildings for both SGW and Loyola Campuses
   const buildings = polygons.map((polygon, index) => ({
