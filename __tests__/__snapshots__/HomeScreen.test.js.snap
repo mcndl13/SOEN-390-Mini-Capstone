@@ -13,9 +13,10 @@ exports[`HomeScreen renders correctly 1`] = `
   <Text
     style={
       {
-        "fontSize": 24,
-        "fontWeight": "bold",
-        "marginBottom": 20,
+        "fontSize": 32,
+        "fontWeight": "semi-bold",
+        "marginBottom": 40,
+        "marginTop": 60,
       }
     }
   >
@@ -53,11 +54,14 @@ exports[`HomeScreen renders correctly 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "backgroundColor": "#007BFF",
-            "borderRadius": 5,
-            "margin": 10,
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 5,
             "opacity": 1,
-            "padding": 10,
+            "padding": 20,
           }
         }
       >
@@ -102,11 +106,14 @@ exports[`HomeScreen renders correctly 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "backgroundColor": "#007BFF",
-            "borderRadius": 5,
-            "margin": 10,
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 5,
             "opacity": 1,
-            "padding": 10,
+            "padding": 20,
           }
         }
       >
@@ -151,11 +158,14 @@ exports[`HomeScreen renders correctly 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "backgroundColor": "#007BFF",
-            "borderRadius": 5,
-            "margin": 10,
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 5,
             "opacity": 1,
-            "padding": 10,
+            "padding": 20,
           }
         }
       >
@@ -200,11 +210,14 @@ exports[`HomeScreen renders correctly 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "backgroundColor": "#007BFF",
-            "borderRadius": 5,
-            "margin": 10,
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 5,
             "opacity": 1,
-            "padding": 10,
+            "padding": 20,
           }
         }
       >
@@ -249,11 +262,14 @@ exports[`HomeScreen renders correctly 1`] = `
         onStartShouldSetResponder={[Function]}
         style={
           {
-            "backgroundColor": "#007BFF",
-            "borderRadius": 5,
-            "margin": 10,
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 5,
             "opacity": 1,
-            "padding": 10,
+            "padding": 20,
           }
         }
       >
