@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1739113818662" clover="3.2.0">
-  <project timestamp="1739113818662" name="All files">
+<coverage generated="1739141296791" clover="3.2.0">
+  <project timestamp="1739141296791" name="All files">
     <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="6" elements="13" coveredelements="13" complexity="0" loc="7" ncloc="7" packages="1" files="1" classes="1"/>
     <file name="HomeScreen.js" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/SOEN-390-Mini-Capstone/components/HomeScreen.js">
       <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="6"/>
