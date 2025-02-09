@@ -15,4 +15,14 @@ module.exports = {
   collectCoverage: true,
   coverageDirectory: './coverage',
   coverageReporters: ['json', 'lcov', 'text', 'clover'],
+  reporters: [
+    'default', // Keep the default console output
+    [
+      'jest-junit',
+      {
+        outputDirectory: './test-results', // Directory for JUnit results
+        outputName: 'junit.xml', // File name for JUnit results
+      },
+    ],
+  ],
 }
