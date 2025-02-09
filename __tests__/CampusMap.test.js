@@ -106,6 +106,39 @@ describe('CampusMap', () => {
     })
   })
 
+  it('renders "You are here" marker correctly', async () => {
+    Location.requestForegroundPermissionsAsync.mockResolvedValue({
+      status: 'granted',
+    })
+    Location.getCurrentPositionAsync.mockResolvedValue({
+      coords: { latitude: 45.4953534, longitude: -73.578549 },
+    })
+
+    const { getByTestId } = render(<CampusMap />)
+
+    await waitFor(() => {
+      const mapView = getByTestId('mapView')
+
+      if (mapView) {
+        const flatChildren = mapView.props.children.flat()
+
+        const markerComponent = flatChildren.find(
+          (child) => child.props.testID === 'marker-current-location',
+        )
+
+        expect(markerComponent).toBeTruthy()
+        expect(markerComponent.props.coordinate).toEqual({
+          latitude: 45.4953534,
+          longitude: -73.578549,
+        })
+        expect(markerComponent.props.title).toBe('You are here')
+        expect(markerComponent.props.pinColor).toBe('blue')
+      } else {
+        console.error('MapView not found')
+      }
+    })
+  })
+
   polygons.forEach((polygon, index) => {
     it(`displays ${polygon.name} building information on marker press`, async () => {
       Location.requestForegroundPermissionsAsync.mockResolvedValue({
@@ -131,10 +164,8 @@ describe('CampusMap', () => {
         })
       })
 
-      // Simulate pressing a marker
       fireEvent.press(getByTestId(`marker-${index + 1}`))
 
-      // Verify that the building information is displayed
       await waitFor(() => {
         expect(getByText(`Building: ${polygon.name}`)).toBeTruthy()
         expect(
@@ -178,39 +209,6 @@ describe('CampusMap', () => {
           }
           expect(polygonComponent).toBeTruthy()
         })
-      } else {
-        console.error('MapView not found')
-      }
-    })
-  })
-
-  it('renders "You are here" marker correctly', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    })
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    })
-
-    const { getByTestId } = render(<CampusMap />)
-
-    await waitFor(() => {
-      const mapView = getByTestId('mapView')
-
-      if (mapView) {
-        const flatChildren = mapView.props.children.flat()
-
-        const markerComponent = flatChildren.find(
-          (child) => child.props.testID === 'marker-current-location',
-        )
-
-        expect(markerComponent).toBeTruthy()
-        expect(markerComponent.props.coordinate).toEqual({
-          latitude: 45.4953534,
-          longitude: -73.578549,
-        })
-        expect(markerComponent.props.title).toBe('You are here')
-        expect(markerComponent.props.pinColor).toBe('blue')
       } else {
         console.error('MapView not found')
       }
