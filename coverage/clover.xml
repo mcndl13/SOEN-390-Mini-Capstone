@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1739132607691" clover="3.2.0">
-  <project timestamp="1739132607692" name="All files">
-    <metrics statements="36" coveredstatements="34" conditionals="16" coveredconditionals="15" methods="12" coveredmethods="12" elements="64" coveredelements="61" complexity="0" loc="36" ncloc="36" packages="1" files="2" classes="2"/>
+<coverage generated="1739142469059" clover="3.2.0">
+  <project timestamp="1739142469059" name="All files">
+    <metrics statements="43" coveredstatements="41" conditionals="16" coveredconditionals="15" methods="18" coveredmethods="18" elements="77" coveredelements="74" complexity="0" loc="43" ncloc="43" packages="1" files="3" classes="3"/>
     <file name="CampusMap.js" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/SOEN-390-Mini-Capstone/components/CampusMap.js">
       <metrics statements="35" coveredstatements="33" conditionals="16" coveredconditionals="15" methods="12" coveredmethods="12"/>
       <line num="7" count="1" type="stmt"/>
@@ -39,6 +39,16 @@
       <line num="127" count="1" type="stmt"/>
       <line num="143" count="1" type="stmt"/>
       <line num="159" count="1" type="stmt"/>
+    </file>
+    <file name="HomeScreen.js" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/SOEN-390-Mini-Capstone/components/HomeScreen.js">
+      <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="6"/>
+      <line num="12" count="7" type="stmt"/>
+      <line num="18" count="1" type="stmt"/>
+      <line num="24" count="1" type="stmt"/>
+      <line num="30" count="1" type="stmt"/>
+      <line num="36" count="1" type="stmt"/>
+      <line num="42" count="1" type="stmt"/>
+      <line num="51" count="1" type="stmt"/>
     </file>
     <file name="polygonCoordinates.js" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/SOEN-390-Mini-Capstone/components/polygonCoordinates.js">
       <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
