@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1739131915491" clover="3.2.0">
-  <project timestamp="1739131915492" name="All files">
+<coverage generated="1739132607691" clover="3.2.0">
+  <project timestamp="1739132607692" name="All files">
     <metrics statements="36" coveredstatements="34" conditionals="16" coveredconditionals="15" methods="12" coveredmethods="12" elements="64" coveredelements="61" complexity="0" loc="36" ncloc="36" packages="1" files="2" classes="2"/>
     <file name="CampusMap.js" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/SOEN-390-Mini-Capstone/components/CampusMap.js">
       <metrics statements="35" coveredstatements="33" conditionals="16" coveredconditionals="15" methods="12" coveredmethods="12"/>
