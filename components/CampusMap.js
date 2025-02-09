@@ -79,6 +79,7 @@ const CampusMap = () => {
               }}
               title="You are here"
               pinColor="blue"
+              testID="marker-current-location"
             />
           )}
           {buildings.map((building) => (
@@ -90,6 +91,7 @@ const CampusMap = () => {
               }}
               pinColor="red"
               onPress={() => setSelectedBuilding(building)}
+              testID={`marker-${building.id}`}
             />
           ))}
           {/* Polygon Highlight */}

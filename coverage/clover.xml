@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1739124488441" clover="3.2.0">
-  <project timestamp="1739124488441" name="All files">
-    <metrics statements="36" coveredstatements="33" conditionals="16" coveredconditionals="14" methods="12" coveredmethods="11" elements="64" coveredelements="58" complexity="0" loc="36" ncloc="36" packages="1" files="2" classes="2"/>
+<coverage generated="1739129451829" clover="3.2.0">
+  <project timestamp="1739129451829" name="All files">
+    <metrics statements="36" coveredstatements="34" conditionals="16" coveredconditionals="15" methods="12" coveredmethods="12" elements="64" coveredelements="61" complexity="0" loc="36" ncloc="36" packages="1" files="2" classes="2"/>
     <file name="CampusMap.js" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/SOEN-390-Mini-Capstone/components/CampusMap.js">
-      <metrics statements="35" coveredstatements="32" conditionals="16" coveredconditionals="14" methods="12" coveredmethods="11"/>
+      <metrics statements="35" coveredstatements="33" conditionals="16" coveredconditionals="15" methods="12" coveredmethods="12"/>
       <line num="7" count="1" type="stmt"/>
-      <line num="8" count="6" type="stmt"/>
-      <line num="9" count="6" type="stmt"/>
-      <line num="10" count="6" type="stmt"/>
-      <line num="11" count="6" type="stmt"/>
-      <line num="14" count="6" type="stmt"/>
-      <line num="15" count="6" type="stmt"/>
-      <line num="18" count="6" type="stmt"/>
-      <line num="19" count="684" type="stmt"/>
-      <line num="20" count="684" type="stmt"/>
-      <line num="21" count="684" type="stmt"/>
-      <line num="22" count="6480" type="stmt"/>
-      <line num="23" count="6480" type="stmt"/>
-      <line num="25" count="684" type="stmt"/>
-      <line num="32" count="342" type="stmt"/>
-      <line num="40" count="6" type="stmt"/>
-      <line num="41" count="3" type="stmt"/>
-      <line num="42" count="3" type="stmt"/>
-      <line num="43" count="3" type="cond" truecount="1" falsecount="1"/>
+      <line num="8" count="181" type="stmt"/>
+      <line num="9" count="181" type="stmt"/>
+      <line num="10" count="181" type="stmt"/>
+      <line num="11" count="181" type="stmt"/>
+      <line num="14" count="181" type="stmt"/>
+      <line num="15" count="181" type="stmt"/>
+      <line num="18" count="181" type="stmt"/>
+      <line num="19" count="20634" type="stmt"/>
+      <line num="20" count="20634" type="stmt"/>
+      <line num="21" count="20634" type="stmt"/>
+      <line num="22" count="195480" type="stmt"/>
+      <line num="23" count="195480" type="stmt"/>
+      <line num="25" count="20634" type="stmt"/>
+      <line num="32" count="10317" type="stmt"/>
+      <line num="40" count="181" type="stmt"/>
+      <line num="41" count="62" type="stmt"/>
+      <line num="42" count="62" type="stmt"/>
+      <line num="43" count="62" type="cond" truecount="1" falsecount="1"/>
       <line num="44" count="0" type="stmt"/>
       <line num="45" count="0" type="stmt"/>
-      <line num="48" count="3" type="stmt"/>
-      <line num="49" count="3" type="stmt"/>
-      <line num="50" count="3" type="stmt"/>
-      <line num="59" count="6" type="stmt"/>
+      <line num="48" count="62" type="stmt"/>
+      <line num="49" count="62" type="stmt"/>
+      <line num="50" count="62" type="stmt"/>
+      <line num="59" count="181" type="stmt"/>
       <line num="60" count="2" type="stmt"/>
       <line num="66" count="2" type="stmt"/>
       <line num="67" count="2" type="stmt"/>
-      <line num="70" count="6" type="stmt"/>
-      <line num="85" count="171" type="stmt"/>
-      <line num="92" count="0" type="stmt"/>
-      <line num="97" count="171" type="stmt"/>
-      <line num="125" count="1" type="stmt"/>
-      <line num="141" count="1" type="stmt"/>
-      <line num="157" count="1" type="stmt"/>
+      <line num="70" count="181" type="stmt"/>
+      <line num="86" count="6783" type="stmt"/>
+      <line num="93" count="57" type="stmt"/>
+      <line num="99" count="6783" type="stmt"/>
+      <line num="127" count="1" type="stmt"/>
+      <line num="143" count="1" type="stmt"/>
+      <line num="159" count="1" type="stmt"/>
     </file>
     <file name="polygonCoordinates.js" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/SOEN-390-Mini-Capstone/components/polygonCoordinates.js">
       <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
