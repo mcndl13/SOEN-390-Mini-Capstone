@@ -35,7 +35,7 @@ const CampusMap = () => {
 		name: polygon.name,
 		latitude: getPolygonCenter(polygon.boundaries).latitude,
 		longitude: getPolygonCenter(polygon.boundaries).longitude,
-		address: `${polygon.name} - Concordia University`,
+		address: `${polygon.address} - Concordia University`,
 	}));
 
 	useEffect(() => {
