@@ -12,7 +12,7 @@ import MapView, { Polyline, Marker } from 'react-native-maps'
 import * as Location from 'expo-location'
 import axios from 'axios'
 import { getDirections, getCoordinates } from '../services/navigationService'
-import { isUserInBuilding } from '..utils/geometry'
+import { isUserInBuilding } from '../utils/geometry'
 import { GOOGLE_MAPS_API_KEY } from '@env'
 
 export default function DirectionsScreen() {
