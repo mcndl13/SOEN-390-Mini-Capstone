@@ -222,7 +222,10 @@ export default function DirectionsScreen() {
   };
 
   // Simple helper to remove HTML tags
-  const stripHtml = (html = '') => html.replace(/<[^>]*>/g, '');
+  const stripHtml = (html = '') => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || '';
+  };
 
   // Button handlers to set origin to SGW or Loyola
   const setCampusOrigin = (campusCoords: {
