@@ -85,5 +85,7 @@ npx expo start --tunnel
 - **Mapping**: Google Maps API
 - **Back-End**: Firebase
 - **Tools**: GitHub, ZenHub
+- **Testing**: Jest, Maestro
+- **Report**: https://sonarcloud.io/project/overview?id=mcndl13_SOEN-390-Mini-Capstone
 
 ---
