@@ -2,6 +2,7 @@ export const polygons = [
   {
     name: "JMSB",
     address: "1450 Guy St, Montreal, QC H3H 0A1",
+
     boundaries: [
       { latitude: 45.49551700939489, longitude: -73.57919959372754 },
       { latitude: 45.4954397197586, longitude: -73.57896102832657 },
@@ -17,6 +18,7 @@ export const polygons = [
   {
     name: "B Annex",
     address: "2160 Bishop St, Montreal, QC H3G 2E9",
+
     boundaries: [
       { latitude: 45.49792095946769, longitude: -73.57946059720679 },
       { latitude: 45.497883828222086, longitude: -73.57938683641203 },
@@ -114,6 +116,7 @@ export const polygons = [
     ],
   },
   {
+
     name: "FB Building",
     address: "1250 Guy St, Montreal, QC H3H 2T4",
     boundaries: [
@@ -881,4 +884,4 @@ export const polygons = [
       { latitude: 45.45767342207378, longitude: -73.6419260008635 },
     ],
   },
-];
+]

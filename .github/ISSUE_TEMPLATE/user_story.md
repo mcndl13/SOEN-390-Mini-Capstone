@@ -2,7 +2,7 @@
 name: User Story
 about: Describe a feature or functionality from the user's perspective
 labels: user story
-assignees: ""
+assignees: ''
 ---
 
 ### **User Story Title**

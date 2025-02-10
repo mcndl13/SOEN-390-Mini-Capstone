@@ -1,6 +1,12 @@
 // HomeScreen.js
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React from 'react'
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native'
 
 export default function HomeScreen({ navigation }) {
   return (
@@ -39,7 +45,7 @@ export default function HomeScreen({ navigation }) {
         </TouchableOpacity>
       </ScrollView>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -47,20 +53,34 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    fontSize: 32,
+    fontWeight: 'semi-bold',
+    marginTop: 60,
+    marginBottom: 40,
   },
   button: {
     backgroundColor: '#007BFF',
     padding: 10,
     margin: 10,
     borderRadius: 5,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#912338',
+    padding: 20,
+    margin: 5,
+    borderRadius: 30,
   },
   buttonText: {
     color: 'white',
+    color: 'white',
     fontSize: 18,
   },
-});
+})
