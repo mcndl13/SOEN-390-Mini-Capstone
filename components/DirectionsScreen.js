@@ -12,6 +12,7 @@ import MapView, { Polyline, Marker } from 'react-native-maps'
 import * as Location from 'expo-location'
 import axios from 'axios'
 import { getDirections, getCoordinates } from '../services/navigationService'
+import { isUserInBuilding } from '..utils/geometry'
 import { GOOGLE_MAPS_API_KEY } from '@env'
 
 export default function DirectionsScreen() {
@@ -123,7 +124,7 @@ export default function DirectionsScreen() {
     let startCoords = start
       ? await getCoordinates(start)
       : (() => {
-          const buildingCenter = isUserInBuilding(currentLocation, polygons)
+          const buildingCenter = isUserInBuilding(currentLocation)
           if (buildingCenter) {
             console.log(
               'User is inside a building. Using building center as start coordinates.',

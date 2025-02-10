@@ -1,3 +1,4 @@
+import { polygons } from "../components/polygonCoordinates"
 /**
  * Calculates the bounding box for a polygon.
  * @param {Array} polygon - Array of points, each with `latitude` and `longitude`.
@@ -55,9 +56,8 @@ function isPointInPolygon(point, polygon) {
  * Returns the polygon that contains the given point.
  * If the point is not inside any polygon, returns null.
  * @param {Object} point - An object with `latitude` and `longitude`.
- * @param {Array} polygons - Array of polygon objects (each with `name` and `boundaries`).
  */
-export function isUserInBuilding(point, polygons) {
+export function isUserInBuilding(point) {
   for (const buildingPolygon of polygons) {
     if (isPointInPolygon(point, buildingPolygon.boundaries)) {
       return getPolygonCenter(buildingPolygon.boundaries)
