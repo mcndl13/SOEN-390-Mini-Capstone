@@ -12,6 +12,7 @@ import MapView, { Polyline, Marker } from 'react-native-maps'
 import * as Location from 'expo-location'
 import axios from 'axios'
 import { getDirections, getCoordinates } from '../services/navigationService'
+import { isUserInBuilding } from '../utils/geometry'
 import { GOOGLE_MAPS_API_KEY } from '@env'
 
 export default function DirectionsScreen() {
@@ -61,7 +62,7 @@ export default function DirectionsScreen() {
       return () => locationSubscription.remove()
     })()
   }, [])
-
+  // Automatically fetches a human-readable address for the user's current location when the location is available and no starting address has been set yet.
   useEffect(() => {
     if (currentLocation && !start) {
       ;(async () => {
@@ -119,7 +120,19 @@ export default function DirectionsScreen() {
     console.log('Start input:', start)
     console.log('Destination input:', destination)
 
-    let startCoords = start ? await getCoordinates(start) : currentLocation
+    //If using current location as start, check if inside a building. If truthy, use building center as start coordinates.
+    let startCoords = start
+      ? await getCoordinates(start)
+      : (() => {
+          const buildingCenter = isUserInBuilding(currentLocation)
+          if (buildingCenter) {
+            console.log(
+              'User is inside a building. Using building center as start coordinates.',
+            )
+          }
+          return buildingCenter || currentLocation
+        })()
+
     let destinationCoords = await getCoordinates(destination)
 
     console.log('Start Coordinates:', startCoords)
