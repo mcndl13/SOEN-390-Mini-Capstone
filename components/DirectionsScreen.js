@@ -120,13 +120,17 @@ export default function DirectionsScreen() {
     console.log('Destination input:', destination)
 
     //If using current location as start, check if inside a building. If truthy, use building center as start coordinates.
-    let startCoords = start ? await getCoordinates(start) : (() => {
-        const buildingCenter = isUserInBuilding(currentLocation, polygons);
-        if (buildingCenter) {
-          console.log('User is inside a building. Using building center as start coordinates.');
-        }
-        return buildingCenter || currentLocation;
-      })();
+    let startCoords = start
+      ? await getCoordinates(start)
+      : (() => {
+          const buildingCenter = isUserInBuilding(currentLocation, polygons)
+          if (buildingCenter) {
+            console.log(
+              'User is inside a building. Using building center as start coordinates.',
+            )
+          }
+          return buildingCenter || currentLocation
+        })()
 
     let destinationCoords = await getCoordinates(destination)
 

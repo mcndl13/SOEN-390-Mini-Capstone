@@ -1,12 +1,12 @@
 /**
  * Buildings missing:
  *  Loyola: Terrebonne Building (TA) - 7079 Terrebonne, Vanier Extension (VE) - 7141 Sherbrooke W., Vanier Building Library (VL) - 7141 Sherbrooke W.
- *  SGW: Grey Nuns Annex (GA) - 1211-1215 St-Mathieu St., LD Building (LD) - 1424 Bishop Street 
+ *  SGW: Grey Nuns Annex (GA) - 1211-1215 St-Mathieu St., LD Building (LD) - 1424 Bishop Street
  */
 
 export const polygons = [
   {
-    name: "John Molson Building (MB)",
+    name: 'John Molson Building (MB)',
     boundaries: [
       { latitude: 45.49551700939489, longitude: -73.57919959372754 },
       { latitude: 45.4954397197586, longitude: -73.57896102832657 },
@@ -20,7 +20,7 @@ export const polygons = [
     ],
   },
   {
-    name: "B Annex (B)",
+    name: 'B Annex (B)',
     boundaries: [
       { latitude: 45.49792095946769, longitude: -73.57946059720679 },
       { latitude: 45.497883828222086, longitude: -73.57938683641203 },
@@ -29,7 +29,7 @@ export const polygons = [
     ],
   },
   {
-    name: "CI Annex (CI)",
+    name: 'CI Annex (CI)',
     boundaries: [
       { latitude: 45.497584772601584, longitude: -73.57983829805465 },
       { latitude: 45.49754529100982, longitude: -73.57976051398938 },
@@ -38,7 +38,7 @@ export const polygons = [
     ],
   },
   {
-    name: "CL Annex (CL)",
+    name: 'CL Annex (CL)',
     boundaries: [
       { latitude: 45.49447132432611, longitude: -73.5792829162498 },
       { latitude: 45.494260599618514, longitude: -73.57893678577295 },
@@ -49,7 +49,7 @@ export const polygons = [
     ],
   },
   {
-    name: "D Annex (D)",
+    name: 'D Annex (D)',
     boundaries: [
       { latitude: 45.49788370958742, longitude: -73.57938523006008 },
       { latitude: 45.49784751830836, longitude: -73.57931348089716 },
@@ -62,7 +62,7 @@ export const polygons = [
     ],
   },
   {
-    name: "EN Annex (EN)",
+    name: 'EN Annex (EN)',
     boundaries: [
       { latitude: 45.49698630180552, longitude: -73.5797415843998 },
       { latitude: 45.496949169963464, longitude: -73.57966581200046 },
@@ -73,7 +73,7 @@ export const polygons = [
     ],
   },
   {
-    name: "ER Building (ER)",
+    name: 'ER Building (ER)',
     boundaries: [
       { latitude: 45.49642205927201, longitude: -73.5803519706359 },
       { latitude: 45.49629705006199, longitude: -73.57985133782692 },
@@ -87,7 +87,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Engineering, Computer Science, and Visual Arts Integrated Complex (EV)",
+    name: 'Engineering, Computer Science, and Visual Arts Integrated Complex (EV)',
     boundaries: [
       { latitude: 45.495864910655214, longitude: -73.5784949088164 },
       { latitude: 45.49544740149519, longitude: -73.57761297797327 },
@@ -102,7 +102,7 @@ export const polygons = [
     ],
   },
   {
-    name: "FA Annex (FA)",
+    name: 'FA Annex (FA)',
     boundaries: [
       { latitude: 45.496948005596415, longitude: -73.57966550307407 },
       { latitude: 45.496907520116025, longitude: -73.57957844786766 },
@@ -111,7 +111,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Faubourg Building (FB)",
+    name: 'Faubourg Building (FB)',
     boundaries: [
       { latitude: 45.494910829307685, longitude: -73.57778731254975 },
       { latitude: 45.494869794198756, longitude: -73.5777118267677 },
@@ -130,7 +130,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Faubourg Ste-Catherine Building (FG)",
+    name: 'Faubourg Ste-Catherine Building (FG)',
     boundaries: [
       { latitude: 45.49469528170287, longitude: -73.57803758887717 },
       { latitude: 45.49444362886454, longitude: -73.57760516680655 },
@@ -152,7 +152,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Grey Nuns Building (GN)",
+    name: 'Grey Nuns Building (GN)',
     boundaries: [
       { latitude: 45.49438634877265, longitude: -73.57705379340725 },
       { latitude: 45.49401699180863, longitude: -73.57628160350787 },
@@ -212,7 +212,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Guy-de Maisonneuve Building (GM)",
+    name: 'Guy-de Maisonneuve Building (GM)',
     boundaries: [
       { latitude: 45.496127875902936, longitude: -73.57880793921294 },
       { latitude: 45.49594500840482, longitude: -73.57843483789237 },
@@ -223,7 +223,7 @@ export const polygons = [
     ],
   },
   {
-    name: "GS Building (GS)",
+    name: 'GS Building (GS)',
     boundaries: [
       { latitude: 45.49675255522154, longitude: -73.58136675153412 },
       { latitude: 45.49674206620078, longitude: -73.58132373010108 },
@@ -238,7 +238,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Henry F. Hall Building (H)",
+    name: 'Henry F. Hall Building (H)',
     boundaries: [
       { latitude: 45.49770855552633, longitude: -73.57903354341569 },
       { latitude: 45.497373319897925, longitude: -73.57833984117559 },
@@ -247,7 +247,7 @@ export const polygons = [
     ],
   },
   {
-    name: "K Annex (K)",
+    name: 'K Annex (K)',
     boundaries: [
       { latitude: 45.497741466457285, longitude: -73.57963574821775 },
       { latitude: 45.49773566772766, longitude: -73.57953026960946 },
@@ -256,7 +256,7 @@ export const polygons = [
     ],
   },
   {
-    name: "J.W. McConnell Building (LB)",
+    name: 'J.W. McConnell Building (LB)',
     boundaries: [
       { latitude: 45.49725839136548, longitude: -73.57805850161982 },
       { latitude: 45.49704004318071, longitude: -73.57759018965103 },
@@ -279,7 +279,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Learning Square (LS)",
+    name: 'Learning Square (LS)',
     boundaries: [
       { latitude: 45.49653374701379, longitude: -73.57956990256748 },
       { latitude: 45.49638147665505, longitude: -73.57923444889067 },
@@ -290,7 +290,7 @@ export const polygons = [
     ],
   },
   {
-    name: "M Annex (M)",
+    name: 'M Annex (M)',
     boundaries: [
       { latitude: 45.49742664469608, longitude: -73.57975562224226 },
       { latitude: 45.49738763308881, longitude: -73.57968119104282 },
@@ -299,7 +299,7 @@ export const polygons = [
     ],
   },
   {
-    name: "MI Annex (MI)",
+    name: 'MI Annex (MI)',
     boundaries: [
       { latitude: 45.497145688060556, longitude: -73.58004258190762 },
       { latitude: 45.4971151308179, longitude: -73.5799775601368 },
@@ -308,7 +308,7 @@ export const polygons = [
     ],
   },
   {
-    name: "MU Annex (MU)",
+    name: 'MU Annex (MU)',
     boundaries: [
       { latitude: 45.49796235489539, longitude: -73.57953690960254 },
       { latitude: 45.49792034354915, longitude: -73.57946198964135 },
@@ -317,7 +317,7 @@ export const polygons = [
     ],
   },
   {
-    name: "P Annex (P)",
+    name: 'P Annex (P)',
     boundaries: [
       { latitude: 45.49679777025396, longitude: -73.57933313172266 },
       { latitude: 45.496784050678215, longitude: -73.57930307354754 },
@@ -326,7 +326,7 @@ export const polygons = [
     ],
   },
   {
-    name: "PR Annex (PR)",
+    name: 'PR Annex (PR)',
     boundaries: [
       { latitude: 45.49697618368829, longitude: -73.57990716507766 },
       { latitude: 45.49700062485126, longitude: -73.57994069260441 },
@@ -335,7 +335,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Q Annex (Q)",
+    name: 'Q Annex (Q)',
     boundaries: [
       { latitude: 45.49667618698685, longitude: -73.57908077242534 },
       { latitude: 45.496645635316945, longitude: -73.57902444612301 },
@@ -344,7 +344,7 @@ export const polygons = [
     ],
   },
   {
-    name: "R Annex (R)",
+    name: 'R Annex (R)',
     boundaries: [
       { latitude: 45.496837546460505, longitude: -73.57942022786025 },
       { latitude: 45.49679994456985, longitude: -73.57934512594144 },
@@ -353,7 +353,7 @@ export const polygons = [
     ],
   },
   {
-    name: "RR Annex (RR)",
+    name: 'RR Annex (RR)',
     boundaries: [
       { latitude: 45.496831906175686, longitude: -73.57944503832626 },
       { latitude: 45.49679054410886, longitude: -73.57935451368968 },
@@ -362,7 +362,7 @@ export const polygons = [
     ],
   },
   {
-    name: "S Annex (S)",
+    name: 'S Annex (S)',
     boundaries: [
       { latitude: 45.49749068391561, longitude: -73.57981334272769 },
       { latitude: 45.49745919263725, longitude: -73.57975299305292 },
@@ -373,7 +373,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Samuel Bronfman Building (SB)",
+    name: 'Samuel Bronfman Building (SB)',
     boundaries: [
       { latitude: 45.49668345633299, longitude: -73.58608699270188 },
       { latitude: 45.496652904603266, longitude: -73.58601390251683 },
@@ -384,7 +384,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Toronto-Dominion Building (TD)",
+    name: 'Toronto-Dominion Building (TD)',
     boundaries: [
       { latitude: 45.49503798021289, longitude: -73.5783455966998 },
       { latitude: 45.495117886635555, longitude: -73.57848238914504 },
@@ -393,7 +393,7 @@ export const polygons = [
     ],
   },
   {
-    name: "V Annex (V)",
+    name: 'V Annex (V)',
     boundaries: [
       { latitude: 45.497087190183805, longitude: -73.57991517059297 },
       { latitude: 45.4970481782724, longitude: -73.57983403377729 },
@@ -402,7 +402,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Visual Arts Building (VA)",
+    name: 'Visual Arts Building (VA)',
     boundaries: [
       { latitude: 45.49618526149293, longitude: -73.57379772657498 },
       { latitude: 45.49606642975251, longitude: -73.57356251091662 },
@@ -413,7 +413,7 @@ export const polygons = [
     ],
   },
   {
-    name: "X Annex (X)",
+    name: 'X Annex (X)',
     boundaries: [
       { latitude: 45.49701825801721, longitude: -73.57982924145175 },
       { latitude: 45.49697830609942, longitude: -73.57975078691274 },
@@ -422,7 +422,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Z Annex (Z)",
+    name: 'Z Annex (Z)',
     boundaries: [
       { latitude: 45.497087821235226, longitude: -73.57991574272076 },
       { latitude: 45.49704880941643, longitude: -73.57983460581892 },
@@ -431,7 +431,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Administration Building (AD)",
+    name: 'Administration Building (AD)',
     boundaries: [
       { latitude: 45.45800335055294, longitude: -73.6396736034014 },
       { latitude: 45.45802404580459, longitude: -73.63975138745974 },
@@ -453,7 +453,7 @@ export const polygons = [
     ],
   },
   {
-    name: "BB Annex (BB)",
+    name: 'BB Annex (BB)',
     boundaries: [
       { latitude: 45.45969472027361, longitude: -73.63916844992578 },
       { latitude: 45.459726007683315, longitude: -73.6392434266539 },
@@ -462,7 +462,7 @@ export const polygons = [
     ],
   },
   {
-    name: "BH Annex (BH)",
+    name: 'BH Annex (BH)',
     boundaries: [
       { latitude: 45.4596656895243, longitude: -73.63909275582184 },
       { latitude: 45.45969579081858, longitude: -73.63916584601458 },
@@ -471,7 +471,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Central Building (CC)",
+    name: 'Central Building (CC)',
     boundaries: [
       { latitude: 45.4581042021557, longitude: -73.63995784322546 },
       { latitude: 45.45809537104427, longitude: -73.63996287928404 },
@@ -486,7 +486,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Communication Studies and Journalism Building (CJ)",
+    name: 'Communication Studies and Journalism Building (CJ)',
     boundaries: [
       { latitude: 45.45740882916023, longitude: -73.64020736298139 },
       { latitude: 45.45717741566173, longitude: -73.64039243539604 },
@@ -512,7 +512,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Stinger Dome (DO)",
+    name: 'Stinger Dome (DO)',
     boundaries: [
       { latitude: 45.45792374396299, longitude: -73.63524187780685 },
       { latitude: 45.45696046430309, longitude: -73.63636304113045 },
@@ -521,7 +521,7 @@ export const polygons = [
     ],
   },
   {
-    name: "F. C. Smith Building (FC)",
+    name: 'F. C. Smith Building (FC)',
     boundaries: [
       { latitude: 45.45838268252303, longitude: -73.63904194723771 },
       { latitude: 45.45850801353835, longitude: -73.63942164268585 },
@@ -540,7 +540,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Centre for Structural and Functional Genomics (GE)",
+    name: 'Centre for Structural and Functional Genomics (GE)',
     boundaries: [
       { latitude: 45.45679811634551, longitude: -73.64035333241623 },
       { latitude: 45.456896593505434, longitude: -73.64060858986035 },
@@ -553,7 +553,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Hingston Hall, wing HA (HA)",
+    name: 'Hingston Hall, wing HA (HA)',
     boundaries: [
       { latitude: 45.45925073011908, longitude: -73.64106265529762 },
       { latitude: 45.459283041472254, longitude: -73.64114162537777 },
@@ -566,7 +566,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Hingston Hall, wing HB (HB)",
+    name: 'Hingston Hall, wing HB (HB)',
     boundaries: [
       { latitude: 45.4589717294752, longitude: -73.64181214555022 },
       { latitude: 45.45899583377771, longitude: -73.64187923916282 },
@@ -583,7 +583,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Hingston Hall, wing HC (HC)",
+    name: 'Hingston Hall, wing HC (HC)',
     boundaries: [
       { latitude: 45.459540431991925, longitude: -73.64201762469914 },
       { latitude: 45.45962697336985, longitude: -73.64224427135211 },
@@ -596,7 +596,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Applied Science Hub (HU)",
+    name: 'Applied Science Hub (HU)',
     boundaries: [
       { latitude: 45.45829238873858, longitude: -73.64171908628015 },
       { latitude: 45.45844590809539, longitude: -73.64211875660926 },
@@ -605,7 +605,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Jesuit Residence (JR)",
+    name: 'Jesuit Residence (JR)',
     boundaries: [
       { latitude: 45.45846738431191, longitude: -73.64309715060635 },
       { latitude: 45.458396433612236, longitude: -73.6431539376945 },
@@ -628,7 +628,7 @@ export const polygons = [
     ],
   },
   {
-    name: "PERFORM Centre (PC)",
+    name: 'PERFORM Centre (PC)',
     boundaries: [
       { latitude: 45.4566832023212, longitude: -73.63698931998641 },
       { latitude: 45.45701184580415, longitude: -73.6378394869645 },
@@ -637,7 +637,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Physical Services Building (PS)",
+    name: 'Physical Services Building (PS)',
     boundaries: [
       { latitude: 45.45929263659354, longitude: -73.63945158167996 },
       { latitude: 45.45934807931811, longitude: -73.63960088711397 },
@@ -657,7 +657,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Oscar Peterson Concert Hall (PT)",
+    name: 'Oscar Peterson Concert Hall (PT)',
     boundaries: [
       { latitude: 45.45916334535203, longitude: -73.63878134145095 },
       { latitude: 45.459333969279335, longitude: -73.63922059274914 },
@@ -668,7 +668,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Psychology Building (PY)",
+    name: 'Psychology Building (PY)',
     boundaries: [
       { latitude: 45.45868128971848, longitude: -73.64055340303679 },
       { latitude: 45.45876218832274, longitude: -73.64077066195541 },
@@ -691,7 +691,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Quadrangle (QA)",
+    name: 'Quadrangle (QA)',
     boundaries: [
       { latitude: 45.45896436784346, longitude: -73.64001082041777 },
       { latitude: 45.45882860088644, longitude: -73.63969282910347 },
@@ -700,7 +700,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Recreation and Athletics Complex (RA)",
+    name: 'Recreation and Athletics Complex (RA)',
     boundaries: [
       { latitude: 45.45700879547161, longitude: -73.63805322213418 },
       { latitude: 45.4569671204416, longitude: -73.63793779050737 },
@@ -713,7 +713,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Loyola Jesuit Hall and Conference Centre (RF)",
+    name: 'Loyola Jesuit Hall and Conference Centre (RF)',
     boundaries: [
       { latitude: 45.45880734336593, longitude: -73.64116267777592 },
       { latitude: 45.45880313929571, longitude: -73.64114619532359 },
@@ -744,7 +744,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Student Centre (SC)",
+    name: 'Student Centre (SC)',
     boundaries: [
       { latitude: 45.45918653124292, longitude: -73.63935394855122 },
       { latitude: 45.45907882296455, longitude: -73.63905421166972 },
@@ -753,7 +753,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Solar House (SH)",
+    name: 'Solar House (SH)',
     boundaries: [
       { latitude: 45.45933420269998, longitude: -73.64265845517272 },
       { latitude: 45.45933081688494, longitude: -73.64239744701572 },
@@ -762,7 +762,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Saint Ignatius of Loyola Catholic Church (SI)",
+    name: 'Saint Ignatius of Loyola Catholic Church (SI)',
     boundaries: [
       { latitude: 45.45816640264312, longitude: -73.64252315784637 },
       { latitude: 45.45811784212762, longitude: -73.64240039852407 },
@@ -802,7 +802,7 @@ export const polygons = [
     ],
   },
   {
-    name: "Richard J. Renaud Science Complex (SP)",
+    name: 'Richard J. Renaud Science Complex (SP)',
     boundaries: [
       { latitude: 45.458326098999855, longitude: -73.64141277416134 },
       { latitude: 45.45819394999942, longitude: -73.64104205802843 },
