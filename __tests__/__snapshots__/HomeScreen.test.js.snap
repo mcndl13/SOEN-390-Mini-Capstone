@@ -1,0 +1,290 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HomeScreen renders correctly 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "justifyContent": "center",
+    }
+  }
+>
+  <Text
+    style={
+      {
+        "fontSize": 32,
+        "fontWeight": "semi-bold",
+        "marginBottom": 40,
+        "marginTop": 60,
+      }
+    }
+  >
+    Welcome
+  </Text>
+  <RCTScrollView>
+    <View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 5,
+            "opacity": 1,
+            "padding": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "white",
+              "fontSize": 18,
+            }
+          }
+        >
+          Explore Campus Map
+        </Text>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 5,
+            "opacity": 1,
+            "padding": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "white",
+              "fontSize": 18,
+            }
+          }
+        >
+          Get Directions
+        </Text>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 5,
+            "opacity": 1,
+            "padding": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "white",
+              "fontSize": 18,
+            }
+          }
+        >
+          Connect to Google Calendar
+        </Text>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 5,
+            "opacity": 1,
+            "padding": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "white",
+              "fontSize": 18,
+            }
+          }
+        >
+          Indoor Navigation
+        </Text>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 5,
+            "opacity": 1,
+            "padding": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "white",
+              "fontSize": 18,
+            }
+          }
+        >
+          Find Points of Interest
+        </Text>
+      </View>
+    </View>
+  </RCTScrollView>
+</View>
+`;
