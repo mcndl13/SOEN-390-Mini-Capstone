@@ -1,0 +1,1 @@
+{"version":3,"names":["_ReactNativeViewConfigRegistry","require"],"sources":["customDirectEventTypes.ts"],"sourcesContent":["// @ts-ignore - its taken straight from RN\nexport { customDirectEventTypes } from 'react-native/Libraries/Renderer/shims/ReactNativeViewConfigRegistry';\n"],"mappings":";;;;;;;;;;;AACA,IAAAA,8BAAA,GAAAC,OAAA","ignoreList":[]}

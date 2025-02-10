@@ -1,0 +1,1 @@
+{"version":3,"names":["_PressabilityDebug","require"],"sources":["PressabilityDebugView.tsx"],"sourcesContent":["// @ts-ignore it's not exported so we need to import it from path\nexport { PressabilityDebugView } from 'react-native/Libraries/Pressability/PressabilityDebug';\n"],"mappings":";;;;;;;;;;;AACA,IAAAA,kBAAA,GAAAC,OAAA","ignoreList":[]}
