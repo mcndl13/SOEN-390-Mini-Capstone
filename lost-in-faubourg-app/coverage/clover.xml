@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1739208994047" clover="3.2.0">
-  <project timestamp="1739208994047" name="All files">
+<coverage generated="1739202228651" clover="3.2.0">
+  <project timestamp="1739202228651" name="All files">
     <metrics statements="42" coveredstatements="40" conditionals="16" coveredconditionals="15" methods="18" coveredmethods="18" elements="76" coveredelements="73" complexity="0" loc="42" ncloc="42" packages="1" files="3" classes="3"/>
-    <file name="CampusMap.tsx" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/SOEN-390-Mini-Capstone/lost-in-faubourg-app/components/CampusMap.tsx">
+    <file name="CampusMap.tsx" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/MinimalDemo/lost-in-faubourg-app/components/CampusMap.tsx">
       <metrics statements="34" coveredstatements="32" conditionals="16" coveredconditionals="15" methods="12" coveredmethods="12"/>
       <line num="20" count="1" type="stmt"/>
       <line num="21" count="181" type="stmt"/>
@@ -39,7 +39,7 @@
       <line num="156" count="1" type="stmt"/>
       <line num="172" count="1" type="stmt"/>
     </file>
-    <file name="HomeScreen.tsx" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/SOEN-390-Mini-Capstone/lost-in-faubourg-app/components/HomeScreen.tsx">
+    <file name="HomeScreen.tsx" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/MinimalDemo/lost-in-faubourg-app/components/HomeScreen.tsx">
       <metrics statements="7" coveredstatements="7" conditionals="0" coveredconditionals="0" methods="6" coveredmethods="6"/>
       <line num="18" count="7" type="stmt"/>
       <line num="24" count="1" type="stmt"/>
@@ -49,7 +49,7 @@
       <line num="48" count="1" type="stmt"/>
       <line num="57" count="1" type="stmt"/>
     </file>
-    <file name="polygonCoordinates.tsx" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/SOEN-390-Mini-Capstone/lost-in-faubourg-app/components/polygonCoordinates.tsx">
+    <file name="polygonCoordinates.tsx" path="/Users/mouhamedcoundoul/Downloads/School/3rd Year/Winter 2025/SOEN 390/MinimalDemo/lost-in-faubourg-app/components/polygonCoordinates.tsx">
       <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <line num="1" count="1" type="stmt"/>
     </file>
