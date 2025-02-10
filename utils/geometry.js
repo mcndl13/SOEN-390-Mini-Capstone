@@ -1,4 +1,4 @@
-import { polygons } from "../components/polygonCoordinates"
+import { polygons } from '../components/polygonCoordinates'
 /**
  * Calculates the bounding box for a polygon.
  * @param {Array} polygon - Array of points, each with `latitude` and `longitude`.
