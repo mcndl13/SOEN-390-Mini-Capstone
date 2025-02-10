@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
 import MapView, { Marker, Polygon } from 'react-native-maps'
 import * as Location from 'expo-location'
-import { getPolygonCenter } from './utils'
+import { getPolygonCenter } from '../utils/geometry'
 import { polygons } from './polygonCoordinates'
 
 const CampusMap = () => {
