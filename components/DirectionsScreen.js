@@ -1,312 +1,379 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react';
 import {
   View,
-  TextInput,
-  TouchableOpacity,
   Text,
-  FlatList,
   StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Modal,
   ActivityIndicator,
-} from 'react-native'
-import MapView, { Polyline, Marker } from 'react-native-maps'
-import * as Location from 'expo-location'
-import axios from 'axios'
-import { getDirections, getCoordinates } from '../services/navigationService'
-import { GOOGLE_MAPS_API_KEY } from '@env'
+} from 'react-native';
+import MapView, { Polyline, Marker } from 'react-native-maps';
+import { getDirections } from '../services/navigationService';
+import {polygons} from './polygonCoordinates';
 
-export default function DirectionsScreen() {
-  const [currentLocation, setCurrentLocation] = useState(null)
-  const [start, setStart] = useState('')
-  const [destination, setDestination] = useState('')
-  const [route, setRoute] = useState(null)
-  const [eta, setEta] = useState(null)
-  const [mode, setMode] = useState('driving') // Default to driving mode
-  const [startSuggestions, setStartSuggestions] = useState([])
-  const [destinationSuggestions, setDestinationSuggestions] = useState([])
-  const mapRef = useRef(null)
+const buildings = polygons; // Using the polygons array you provided
 
-  // Get live location updates
-  useEffect(() => {
-    ;(async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync()
-      if (status !== 'granted') {
-        alert('Permission to access location was denied')
-        return
-      }
+export default function CampusDirectionsScreen() {
+  // State management
+  const [startBuilding, setStartBuilding] = useState(null);
+  const [destinationBuilding, setDestinationBuilding] = useState(null);
+  const [route, setRoute] = useState(null);
+  const [eta, setEta] = useState(null);
+  const [mode, setMode] = useState('walking');
+  const [showStartModal, setShowStartModal] = useState(false);
+  const [showDestModal, setShowDestModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const mapRef = useRef(null);
 
-      // Get and track live location
-      const locationSubscription = await Location.watchPositionAsync(
-        {
-          accuracy: Location.Accuracy.High,
-          timeInterval: 5000,
-          distanceInterval: 10,
-        },
-        (position) => {
-          const loc = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          }
-          setCurrentLocation(loc)
+  // Calculate center point of a building's boundaries
+  const getBuildingCenter = (boundaries) => {
+    const latSum = boundaries.reduce((sum, coord) => sum + coord.latitude, 0);
+    const lngSum = boundaries.reduce((sum, coord) => sum + coord.longitude, 0);
+    alert(latSum);
+    alert(lngSum);
 
-          if (mapRef.current) {
-            mapRef.current.animateToRegion({
-              ...loc,
-              latitudeDelta: 0.01,
-              longitudeDelta: 0.01,
-            })
-          }
-        },
-      )
+    return {
+      latitude: latSum / boundaries.length,
+      longitude: lngSum / boundaries.length,
+    };
+  };
 
-      return () => locationSubscription.remove()
-    })()
-  }, [])
-
-  useEffect(() => {
-    if (currentLocation && !start) {
-      ;(async () => {
-        try {
-          const [addressData] =
-            await Location.reverseGeocodeAsync(currentLocation)
-          const address =
-            `${addressData.name || ''} ${addressData.street || ''}, ${addressData.city || ''}`.trim()
-          setStart(address)
-        } catch (error) {
-          console.error('Error during reverse geocoding:', error)
-        }
-      })()
+  // Get directions between selected buildings
+  const fetchDirections = async () => {
+    if (!startBuilding || !destinationBuilding) {
+      alert('Please select both buildings');
+      return;
     }
-  }, [currentLocation])
-
-  // Function to fetch autocomplete suggestions
-  const fetchAutocomplete = async (input, setSuggestions) => {
-    if (!input) {
-      setSuggestions([])
-      return
-    }
+    
+    // Debug logs
+    console.log('Start Building:', startBuilding.name);
+    console.log('Destination Building:', destinationBuilding.name);
 
     try {
-      const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/place/autocomplete/json`,
-        {
-          params: {
-            input,
-            key: GOOGLE_MAPS_API_KEY,
-            types: 'geocode',
-          },
-        },
-      )
+      setLoading(true);
+      //alert('true')
+      const startCoords = getBuildingCenter(startBuilding.boundaries);
+      const destCoords = getBuildingCenter(destinationBuilding.boundaries);
+      
+      //alert(startCoords);
+      console.log('Destination Coordinates:', destCoords);
+      //alert('getDirections');
 
-      if (response.data.status === 'OK') {
-        setSuggestions(response.data.predictions)
+      const result = await getDirections(startCoords, destCoords, mode);
+      //alert(result)
+
+      if (result && result.path) {
+        setRoute(result.path);
+        setEta(result.duration);
+
+        // Fit map to show the entire route
+        if (mapRef.current) {
+          alert('mapRef')
+          mapRef.current.fitToCoordinates(result.path, {
+            edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+            animated: true,
+          });
+        }
       } else {
-        setSuggestions([])
+        alert('Could not find a route between these buildings');
       }
     } catch (error) {
-      console.error('Error fetching autocomplete:', error)
-      setSuggestions([])
+      console.error('Error fetching directions:', error);
+      alert('Error getting directions');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  // Fetch route based on current location
-  const fetchDirections = async () => {
-    if ((!currentLocation && !start) || !destination) {
-      alert('Please enter a valid start and destination')
-      return
-    }
-
-    console.log('Fetching directions...')
-    console.log('Start input:', start)
-    console.log('Destination input:', destination)
-
-    let startCoords = start ? await getCoordinates(start) : currentLocation
-    let destinationCoords = await getCoordinates(destination)
-
-    console.log('Start Coordinates:', startCoords)
-    console.log('Destination Coordinates:', destinationCoords)
-
-    if (!startCoords || !destinationCoords) {
-      alert('Invalid start or destination')
-      console.error('Start or destination coordinates are null.')
-      return
-    }
-
-    const polyline = await getDirections(startCoords, destinationCoords, mode)
-
-    console.log('Google API Response:', polyline)
-
-    if (!polyline || !polyline.path || polyline.path.length === 0) {
-      alert('No route found')
-      console.log('API response:', polyline)
-      return
-    }
-
-    console.log('Route successfully fetched:', polyline)
-
-    setRoute(polyline.path)
-    setEta(polyline.duration) // ✅ Store ETA
-
-    // Fit map to route
-    if (mapRef.current) {
-      mapRef.current.fitToCoordinates(polyline.path, {
-        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-        animated: true,
-      })
-    }
-  }
+  // Building selection modal component
+  const BuildingSelector = ({ visible, onClose, onSelect, title }) => (
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{title}</Text>
+          <ScrollView style={styles.buildingList}>
+            {buildings.map((building) => (
+              <TouchableOpacity
+                key={building.name}
+                style={styles.buildingItem}
+                onPress={() => {
+                  onSelect(building);
+                  onClose();
+                }}
+              >
+                <Text>{building.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <TouchableOpacity 
+            style={styles.closeButton} 
+            onPress={onClose}
+          >
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
 
   return (
     <View style={styles.container}>
-      {currentLocation ? (
-        <>
-          {/* Start Location Input */}
-          <TextInput
-            style={styles.input}
-            placeholder="Start Location"
-            onChangeText={(text) => {
-              setStart(text)
-              fetchAutocomplete(text, setStartSuggestions)
-            }}
-            value={start}
+      {/* Map */}
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        initialRegion={{
+          latitude: 45.458825,
+          longitude: -73.640408,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }}
+      >
+        {/* Start Building Marker */}
+        {startBuilding && (
+          <Marker
+            coordinate={getBuildingCenter(startBuilding.boundaries)}
+            title={startBuilding.name}
+            pinColor="green"
           />
-          {/* Start Location Suggestions */}
-          {startSuggestions.length > 0 && (
-            <FlatList
-              data={startSuggestions}
-              keyExtractor={(item) => item.place_id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.suggestionItem}
-                  onPress={() => {
-                    setStart(item.description)
-                    setStartSuggestions([])
-                  }}
-                >
-                  <Text>{item.description}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          )}
-
-          {/* Destination Input */}
-          <TextInput
-            style={styles.input}
-            placeholder="Destination"
-            onChangeText={(text) => {
-              setDestination(text)
-              fetchAutocomplete(text, setDestinationSuggestions)
-            }}
-            value={destination}
+        )}
+        
+        {/* Destination Building Marker */}
+        {destinationBuilding && (
+          <Marker
+            coordinate={getBuildingCenter(destinationBuilding.boundaries)}
+            title={destinationBuilding.name}
+            pinColor="red"
           />
-          {/* Destination Suggestions */}
-          {destinationSuggestions.length > 0 && (
-            <FlatList
-              data={destinationSuggestions}
-              keyExtractor={(item) => item.place_id}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.suggestionItem}
-                  onPress={() => {
-                    setDestination(item.description)
-                    setDestinationSuggestions([])
-                  }}
-                >
-                  <Text>{item.description}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          )}
+        )}
+        
+        {/* Route Line */}
+        {route && (
+          <Polyline
+            coordinates={route}
+            strokeWidth={4}
+            strokeColor="#007AFF"
+          />
+        )}
+      </MapView>
 
-          {/* Mode Selector */}
-          <View style={styles.modeSelector}>
-            <TouchableOpacity onPress={() => setMode('walking')}>
-              <Text
-                style={mode === 'walking' ? styles.selectedMode : styles.mode}
-              >
-                Walk
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setMode('driving')}>
-              <Text
-                style={mode === 'driving' ? styles.selectedMode : styles.mode}
-              >
-                Drive
-              </Text>
-            </TouchableOpacity>
-          </View>
+      {/* Controls */}
+      <View style={styles.overlay}>
+        {/* Building Selection Buttons */}
+        <TouchableOpacity
+          style={styles.input}
+          onPress={() => setShowStartModal(true)}
+        >
+          <Text>
+            {startBuilding ? startBuilding.name : 'Select Start Building'}
+          </Text>
+        </TouchableOpacity>
 
-          {/* Map */}
-          <MapView ref={mapRef} style={styles.map}>
-            {currentLocation && (
-              <Marker coordinate={currentLocation} title="You are here" />
-            )}
-            {route && (
-              <Polyline
-                coordinates={route}
-                strokeWidth={5}
-                strokeColor="blue"
-              />
-            )}
-          </MapView>
+        <TouchableOpacity
+          style={styles.input}
+          onPress={() => setShowDestModal(true)}
+        >
+          <Text>
+            {destinationBuilding ? destinationBuilding.name : 'Select Destination Building'}
+          </Text>
+        </TouchableOpacity>
 
-          {/* Estimated Time of Arrival (ETA) */}
-          {eta && (
-            <Text style={styles.etaText}>
-              Estimated Arrival Time: {eta} mins
+        {/* Travel Mode Buttons */}
+        <View style={styles.modeSelector}>
+          <TouchableOpacity
+            style={[
+              styles.modeButton,
+              mode === 'walking' && styles.selectedMode,
+            ]}
+            onPress={() => setMode('walking')}
+          >
+            <Text style={[
+              styles.modeText,
+              mode === 'walking' && styles.selectedModeText,
+            ]}>
+              🚶 Walk
             </Text>
-          )}
-
-          {/* Get Directions Button */}
-          <TouchableOpacity style={styles.button} onPress={fetchDirections}>
-            <Text style={styles.buttonText}>Get Directions</Text>
           </TouchableOpacity>
-        </>
-      ) : (
-        <ActivityIndicator size="large" />
-      )}
+
+          <TouchableOpacity
+            style={[
+              styles.modeButton,
+              mode === 'bicycling' && styles.selectedMode,
+            ]}
+            onPress={() => setMode('bicycling')}
+          >
+            <Text style={[
+              styles.modeText,
+              mode === 'bicycling' && styles.selectedModeText,
+            ]}>
+              🚲 Bike
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ETA Display */}
+        {eta && (
+          <View style={styles.etaContainer}>
+            <Text style={styles.etaText}>
+              Estimated arrival: {eta} mins
+            </Text>
+          </View>
+        )}
+
+        {/* Get Directions Button */}
+        <TouchableOpacity
+          style={styles.button}
+          onPress={fetchDirections}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Get Directions</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* Building Selection Modals */}
+      <BuildingSelector
+        visible={showStartModal}
+        onClose={() => setShowStartModal(false)}
+        onSelect={setStartBuilding}
+        title="Select Start Building"
+      />
+      <BuildingSelector
+        visible={showDestModal}
+        onClose={() => setShowDestModal(false)}
+        onSelect={setDestinationBuilding}
+        title="Select Destination Building"
+      />
     </View>
-  )
+  );
 }
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  map: {
+    flex: 1,
+  },
+  overlay: {
+    position: 'absolute',
+    top: 40,
+    left: 0,
+    right: 0,
     padding: 20,
-    backgroundColor: '#fff',
   },
   input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
+    height: 50,
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    paddingHorizontal: 20,
     marginBottom: 10,
-    paddingHorizontal: 10,
-    borderRadius: 5,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  suggestionItem: {
+  modeSelector: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    padding: 5,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modeButton: {
+    flex: 1,
     padding: 10,
-    backgroundColor: '#f9f9f9',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderRadius: 20,
+    alignItems: 'center',
+  },
+  selectedMode: {
+    backgroundColor: '#007AFF',
+  },
+  modeText: {
+    color: '#666',
+  },
+  selectedModeText: {
+    color: '#fff',
+  },
+  etaContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 25,
+    padding: 15,
+    marginBottom: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  etaText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   button: {
     backgroundColor: '#007AFF',
-    padding: 10,
+    borderRadius: 25,
+    padding: 15,
     alignItems: 'center',
-    borderRadius: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
+    fontWeight: 'bold',
   },
-  map: {
+  modalContainer: {
     flex: 1,
-    marginTop: 10,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  etaText: {
+  modalContent: {
+    backgroundColor: '#fff',
+    margin: 20,
+    borderRadius: 20,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 10,
+    marginBottom: 15,
     textAlign: 'center',
   },
-})
+  buildingList: {
+    maxHeight: '80%',
+  },
+  buildingItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  closeButton: {
+    marginTop: 15,
+    padding: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+});

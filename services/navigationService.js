@@ -44,104 +44,111 @@ async function getCoordinates(address) {
 /**
  * Function to get directions using Google Directions API.
  */
-export async function getDirections(start, destination, mode) {
+console.log('API Key available:', !!GOOGLE_MAPS_API_KEY);
+
+// Inside navigationService.js
+export async function getDirections(startCoords, endCoords, mode = 'walking') {
   try {
-    const startCoords =
-      typeof start === 'string' ? await getCoordinates(start) : start
-    const destinationCoords =
-      typeof destination === 'string'
-        ? await getCoordinates(destination)
-        : destination
-
-    if (!startCoords || !destinationCoords) {
-      console.error('Invalid start or destination location.')
-      return null
+    if (!GOOGLE_MAPS_API_KEY) {
+      throw new Error('Google Maps API key is not configured');
     }
 
-    console.log('Calling Google Directions API...')
+    console.log('Making directions request with:', {
+      startCoords,
+      endCoords,
+      mode
+    });
 
-    const response = await axios.get(
-      `https://maps.googleapis.com/maps/api/directions/json`,
-      {
-        params: {
-          origin: `${startCoords.lat},${startCoords.lng}`,
-          destination: `${destinationCoords.lat},${destinationCoords.lng}`,
-          mode: mode,
-          key: GOOGLE_MAPS_API_KEY,
-        },
-      },
-    )
+    const url = `https://maps.googleapis.com/maps/api/directions/json`;
+    const params = {
+      origin: `${startCoords.latitude},${startCoords.longitude}`,
+      destination: `${endCoords.latitude},${endCoords.longitude}`,
+      mode: mode,
+      key: GOOGLE_MAPS_API_KEY,
+    };
 
-    console.log('Google API Response:', response.data)
+    console.log('Request URL:', url);
+    console.log('Request Params:', params);
 
-    if (
-      !response.data ||
-      response.data.status !== 'OK' ||
-      response.data.routes.length === 0
-    ) {
-      console.error('No routes found:', response.data)
-      return null
+    const response = await axios.get(url, { 
+      params,
+      timeout: 10000 
+    });
+
+    console.log('Raw API Response:', response.data);
+
+    if (response.data.status !== 'OK') {
+      throw new Error(`API returned status: ${response.data.status}`);
     }
 
-    const route = response.data.routes[0]
-    const leg = route.legs[0]
+    const route = response.data.routes[0];
+    const leg = route.legs[0];
+    const path = decodePolyline(route.overview_polyline.points);
 
-    if (!leg) {
-      console.error('No legs found in the route:', route)
-      return null
-    }
-
-    // Extract full polyline
-    const polyline = decodePolyline(route.overview_polyline.points)
+    console.log('Processed route:', {
+      points: path.length,
+      duration: leg.duration.text,
+      distance: leg.distance.text
+    });
 
     return {
-      startLocation: startCoords,
-      endLocation: destinationCoords,
-      path: polyline,
-      duration: leg.duration.text, // ✅ Estimated arrival time
-    }
+      path: path,
+      duration: Math.ceil(leg.duration.value / 60)
+    };
+
   } catch (error) {
-    console.error(
-      'Error fetching directions:',
-      error.response?.data || error.message,
-    )
-    return null
+    console.error('Directions API Error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status
+    });
+    throw error;
   }
 }
 
-/**
- * Decodes a Google Maps polyline string into latitude/longitude coordinates.
- */
 function decodePolyline(encoded) {
-  let points = []
-  let index = 0,
-    len = encoded.length
-  let lat = 0,
-    lng = 0
+  if (!encoded) {
+    console.error('No polyline to decode');
+    return [];
+  }
+
+  const poly = [];
+  let index = 0;
+  const len = encoded.length;
+  let lat = 0;
+  let lng = 0;
 
   while (index < len) {
-    let b,
-      shift = 0,
-      result = 0
-    do {
-      b = encoded.charCodeAt(index++) - 63
-      result |= (b & 0x1f) << shift
-      shift += 5
-    } while (b >= 0x20)
-    let dlat = result & 1 ? ~(result >> 1) : result >> 1
-    lat += dlat
+    let b;
+    let shift = 0;
+    let result = 0;
 
-    shift = 0
-    result = 0
     do {
-      b = encoded.charCodeAt(index++) - 63
-      result |= (b & 0x1f) << shift
-      shift += 5
-    } while (b >= 0x20)
-    let dlng = result & 1 ? ~(result >> 1) : result >> 1
-    lng += dlng
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
 
-    points.push({ latitude: lat / 1e5, longitude: lng / 1e5 })
+    const dlat = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+
+    const dlng = ((result & 1) ? ~(result >> 1) : (result >> 1));
+    lng += dlng;
+
+    poly.push({
+      latitude: lat / 1e5,
+      longitude: lng / 1e5,
+    });
   }
-  return points
+
+  return poly;
 }
