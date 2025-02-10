@@ -10,7 +10,7 @@ import {
 import MapView, { Marker, Polygon, PROVIDER_DEFAULT } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Constants from 'expo-constants';
-import MapViewDirections, { MapViewDirectionsMode } from 'react-native-maps-directions';
+import MapViewDirections from 'react-native-maps-directions';
 import * as Location from 'expo-location';
 import 'react-native-get-random-values';
 
@@ -37,15 +37,7 @@ const SGW_COORDS = { latitude: 45.4953534, longitude: -73.578549 };
 const LOYOLA_COORDS = { latitude: 45.4582, longitude: -73.6405 };
 
 // Reusable Input Autocomplete component
-function InputAutocomplete({
-  label,
-  placeholder,
-  onPlaceSelected,
-}: {
-  label: string;
-  placeholder: string;
-  onPlaceSelected: (details: any) => void;
-}) {
+function InputAutocomplete({ label, placeholder, onPlaceSelected }) {
   // Minimal custom styling for Google Autocomplete
   const googleAutocompleteStyles = {
     container: { flex: 0 },
@@ -89,22 +81,22 @@ function InputAutocomplete({
 }
 
 export default function DirectionsScreen() {
-  const [origin, setOrigin] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [destination, setDestination] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [origin, setOrigin] = useState(null);
+  const [destination, setDestination] = useState(null);
 
   // We still fetch userLocation if you want to show the user's position,
   // but no button for "Use My Location" (optional).
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [userLocation, setUserLocation] = useState(null);
 
   const [showDirections, setShowDirections] = useState(false);
   const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [steps, setSteps] = useState<{ html_instructions: string }[]>([]);
+  const [steps, setSteps] = useState([]);
 
   // Keep track of travel mode: DRIVING, WALKING, BICYCLING, TRANSIT
-  const [travelMode, setTravelMode] = useState<MapViewDirectionsMode>('DRIVING');
+  const [travelMode, setTravelMode] = useState('DRIVING');
 
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef(null);
 
   // Request location permission & get user location on mount (optional)
   useEffect(() => {
@@ -124,7 +116,7 @@ export default function DirectionsScreen() {
   }, []);
 
   // Helper to animate camera
-  const moveTo = async (position: { latitude: number; longitude: number }) => {
+  const moveTo = async (position) => {
     const camera = await mapRef.current?.getCamera();
     if (camera) {
       camera.center = position;
@@ -142,7 +134,7 @@ export default function DirectionsScreen() {
   };
 
   // On route ready
-  const traceRouteOnReady = (result: { distance: number; duration: number }) => {
+  const traceRouteOnReady = (result) => {
     if (result) {
       setDistance(result.distance);
       setDuration(result.duration);
@@ -151,11 +143,7 @@ export default function DirectionsScreen() {
   };
 
   // Fetch step-by-step instructions separately
-  const fetchDetailedDirections = async (
-    orig: { latitude: number; longitude: number } | null,
-    dest: { latitude: number; longitude: number } | null,
-    mode: string
-  ) => {
+  const fetchDetailedDirections = async (orig, dest, mode) => {
     try {
       if (!orig || !dest) return;
       const url =
@@ -194,7 +182,7 @@ export default function DirectionsScreen() {
   };
 
   // Called by GooglePlacesAutocomplete
-  const onPlaceSelected = (details: any, flag: string) => {
+  const onPlaceSelected = (details, flag) => {
     const position = {
       latitude: details?.geometry.location.lat || 0,
       longitude: details?.geometry.location.lng || 0,
@@ -211,7 +199,7 @@ export default function DirectionsScreen() {
   const stripHtml = (html = '') => html.replace(/<[^>]*>/g, '');
 
   // Button handlers to set origin to SGW or Loyola
-  const setCampusOrigin = (campusCoords: { latitude: number; longitude: number }) => {
+  const setCampusOrigin = (campusCoords) => {
     setOrigin(campusCoords);
     moveTo(campusCoords);
   };
@@ -275,12 +263,10 @@ export default function DirectionsScreen() {
       <View style={styles.searchContainer}>
         <InputAutocomplete
           label="Origin"
-          placeholder="Enter origin"
           onPlaceSelected={(details) => onPlaceSelected(details, 'origin')}
         />
         <InputAutocomplete
           label="Destination"
-          placeholder="Enter destination"
           onPlaceSelected={(details) => onPlaceSelected(details, 'destination')}
         />
 
@@ -393,7 +379,7 @@ export default function DirectionsScreen() {
         <View style={styles.directionsContainer}>
           <Text style={styles.directionsHeader}>Directions</Text>
           <ScrollView>
-            {steps.map((step: { html_instructions: string }, index: number) => {
+            {steps.map((step, index) => {
               const instruction = stripHtml(step.html_instructions);
               return (
                 <Text style={styles.stepText} key={index}>
