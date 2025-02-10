@@ -5,7 +5,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 // Import all your screens
 import HomeScreen from "../../components/HomeScreen";
 import CampusMap from "../../components/CampusMap";
-import DirectionsScreen from "../../components/DirectionsScreen"; // newly created file
+import DirectionsScreen from "../../components/DirectionsScreen"; 
 import CalendarIntegrationScreen from "../../components/CalendarIntegrationScreen";
 import IndoorDirectionsScreen from "../../components/IndoorDirectionsScreen";
 import PointsOfInterestScreen from "../../components/PointsOfInterestScreen";

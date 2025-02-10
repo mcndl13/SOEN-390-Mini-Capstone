@@ -10,14 +10,15 @@ import {
 import MapView, { Marker, Polygon, PROVIDER_DEFAULT } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Constants from 'expo-constants';
-import MapViewDirections, { MapViewDirectionsMode } from 'react-native-maps-directions';
+import MapViewDirections, {
+  MapViewDirectionsMode,
+} from 'react-native-maps-directions';
 import * as Location from 'expo-location';
 import 'react-native-get-random-values';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 
 // Import the polygons array from your coordinates file
 import { polygons } from './polygonCoordinates';
-
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -89,12 +90,21 @@ function InputAutocomplete({
 }
 
 export default function DirectionsScreen() {
-  const [origin, setOrigin] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [destination, setDestination] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [origin, setOrigin] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [destination, setDestination] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   // We still fetch userLocation if you want to show the user's position,
   // but no button for "Use My Location" (optional).
-  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   const [showDirections, setShowDirections] = useState(false);
   const [distance, setDistance] = useState(0);
@@ -102,7 +112,8 @@ export default function DirectionsScreen() {
   const [steps, setSteps] = useState<{ html_instructions: string }[]>([]);
 
   // Keep track of travel mode: DRIVING, WALKING, BICYCLING, TRANSIT
-  const [travelMode, setTravelMode] = useState<MapViewDirectionsMode>('DRIVING');
+  const [travelMode, setTravelMode] =
+    useState<MapViewDirectionsMode>('DRIVING');
 
   const mapRef = useRef<MapView>(null);
 
@@ -142,7 +153,10 @@ export default function DirectionsScreen() {
   };
 
   // On route ready
-  const traceRouteOnReady = (result: { distance: number; duration: number }) => {
+  const traceRouteOnReady = (result: {
+    distance: number;
+    duration: number;
+  }) => {
     if (result) {
       setDistance(result.distance);
       setDuration(result.duration);
@@ -154,7 +168,7 @@ export default function DirectionsScreen() {
   const fetchDetailedDirections = async (
     orig: { latitude: number; longitude: number } | null,
     dest: { latitude: number; longitude: number } | null,
-    mode: string
+    mode: string,
   ) => {
     try {
       if (!orig || !dest) return;
@@ -211,7 +225,10 @@ export default function DirectionsScreen() {
   const stripHtml = (html = '') => html.replace(/<[^>]*>/g, '');
 
   // Button handlers to set origin to SGW or Loyola
-  const setCampusOrigin = (campusCoords: { latitude: number; longitude: number }) => {
+  const setCampusOrigin = (campusCoords: {
+    latitude: number;
+    longitude: number;
+  }) => {
     setOrigin(campusCoords);
     moveTo(campusCoords);
   };
