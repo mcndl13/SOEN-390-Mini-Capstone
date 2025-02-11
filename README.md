@@ -48,7 +48,7 @@ git clone https://github.com/YOUR-USERNAME/SOEN-390-Mini-Capstone
 - Navigate to the map-application directory:
 
 ```bash
-cd SOEN-390-Mini-Capstone/map-application/
+cd SOEN-390-Mini-Capstone/lost-in-faubourg-app/
 ```
 
 - Install all required libraries and dependencies:
