@@ -23,6 +23,7 @@ const CampusMap: React.FC = () => {
   const [selectedCampus, setSelectedCampus] = useState<string | null>(null);
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
 
+  // SGW and Loyola Campus Coordinates
   const SGW_COORDS: LocationCoords = { latitude: 45.4953534, longitude: -73.578549 };
   const LOYOLA_COORDS: LocationCoords = { latitude: 45.4582, longitude: -73.6405 };
 
