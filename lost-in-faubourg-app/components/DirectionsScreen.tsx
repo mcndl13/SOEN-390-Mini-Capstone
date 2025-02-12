@@ -222,9 +222,10 @@ export default function DirectionsScreen() {
   };
 
   // Simple helper to remove HTML tags
+  // Safely removes HTML tags without relying on DOMParser
   const stripHtml = (html = '') => {
-    const doc = new DOMParser().parseFromString(html, 'text/html');
-    return doc.body.textContent || '';
+    if (!html) return '';
+    return html.replace(/<[^>]*>?/gm, ''); // Use a regex to strip tags
   };
 
   // Button handlers to set origin to SGW or Loyola
@@ -244,7 +245,7 @@ export default function DirectionsScreen() {
         provider={PROVIDER_DEFAULT}
         initialRegion={INITIAL_POSITION}
       >
-        {/* Polygons for Concordia buildings (fill + stroke) */}
+        {/* Polygons for Concordia buildings */}
         {polygons.map((polygon, idx) => (
           <Polygon
             key={idx}
@@ -255,7 +256,7 @@ export default function DirectionsScreen() {
           />
         ))}
 
-        {/* Marker for user location (blue) */}
+        {/* Markers */}
         {userLocation && (
           <Marker
             coordinate={userLocation}
@@ -263,18 +264,14 @@ export default function DirectionsScreen() {
             pinColor="blue"
           />
         )}
-
-        {/* Marker for origin */}
         {origin && (
           <Marker coordinate={origin} title="Origin" pinColor="green" />
         )}
-
-        {/* Marker for destination */}
         {destination && (
           <Marker coordinate={destination} title="Destination" pinColor="red" />
         )}
 
-        {/* Directions line */}
+        {/* Directions Line */}
         {showDirections && origin && destination && (
           <MapViewDirections
             origin={origin}
@@ -284,143 +281,129 @@ export default function DirectionsScreen() {
             strokeWidth={4}
             mode={travelMode}
             onReady={traceRouteOnReady}
-            onError={(errorMsg) => {
-              console.log('MapViewDirections ERROR:', errorMsg);
-            }}
+            onError={(errorMsg) =>
+              console.log('MapViewDirections ERROR:', errorMsg)
+            }
           />
         )}
       </MapView>
 
-      {/* Search + Mode Buttons + "Trace Route" */}
-      <View style={styles.searchContainer}>
-        <InputAutocomplete
-          label="Origin"
-          placeholder="Enter origin"
-          onPlaceSelected={(details) => onPlaceSelected(details, 'origin')}
-        />
-        <InputAutocomplete
-          label="Destination"
-          placeholder="Enter destination"
-          onPlaceSelected={(details) => onPlaceSelected(details, 'destination')}
-        />
+      {/* Conditionally Render the Search Bar */}
+      {!showDirections && (
+        <View style={styles.searchContainer}>
+          <InputAutocomplete
+            label="Origin"
+            placeholder="Enter origin"
+            onPlaceSelected={(details) => onPlaceSelected(details, 'origin')}
+          />
+          <InputAutocomplete
+            label="Destination"
+            placeholder="Enter destination"
+            onPlaceSelected={(details) =>
+              onPlaceSelected(details, 'destination')
+            }
+          />
 
-        {/* Two buttons for campuses instead of "My Location" */}
-        <View style={styles.campusButtonsContainer}>
-          <TouchableOpacity
-            style={styles.campusButton}
-            onPress={() => setCampusOrigin(SGW_COORDS)}
-          >
-            <Text style={styles.campusButtonText}>SGW Campus</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.campusButton}
-            onPress={() => setCampusOrigin(LOYOLA_COORDS)}
-          >
-            <Text style={styles.campusButtonText}>Loyola Campus</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Travel Mode Buttons */}
-        <View style={styles.modeContainer}>
-          <TouchableOpacity
-            style={[
-              styles.modeButton,
-              travelMode === 'DRIVING' && styles.activeModeButton,
-            ]}
-            onPress={() => setTravelMode('DRIVING')}
-          >
-            <Text
-              style={[
-                styles.modeButtonText,
-                travelMode === 'DRIVING' && styles.activeModeButtonText,
-              ]}
+          {/* Campus Buttons */}
+          <View style={styles.campusButtonsContainer}>
+            <TouchableOpacity
+              style={styles.campusButton}
+              onPress={() => setCampusOrigin(SGW_COORDS)}
             >
-              Driving
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.modeButton,
-              travelMode === 'WALKING' && styles.activeModeButton,
-            ]}
-            onPress={() => setTravelMode('WALKING')}
-          >
-            <Text
-              style={[
-                styles.modeButtonText,
-                travelMode === 'WALKING' && styles.activeModeButtonText,
-              ]}
+              <Text style={styles.campusButtonText}>SGW Campus</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.campusButton}
+              onPress={() => setCampusOrigin(LOYOLA_COORDS)}
             >
-              Walking
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.modeButton,
-              travelMode === 'BICYCLING' && styles.activeModeButton,
-            ]}
-            onPress={() => setTravelMode('BICYCLING')}
-          >
-            <Text
-              style={[
-                styles.modeButtonText,
-                travelMode === 'BICYCLING' && styles.activeModeButtonText,
-              ]}
-            >
-              Bicycling
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.modeButton,
-              travelMode === 'TRANSIT' && styles.activeModeButton,
-            ]}
-            onPress={() => setTravelMode('TRANSIT')}
-          >
-            <Text
-              style={[
-                styles.modeButtonText,
-                travelMode === 'TRANSIT' && styles.activeModeButtonText,
-              ]}
-            >
-              Transit
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity style={styles.traceButton} onPress={traceRoute}>
-          <Text style={styles.buttonText}>Trace route</Text>
-        </TouchableOpacity>
-
-        {/* Distance / Duration */}
-        {distance > 0 && duration > 0 && (
-          <View style={{ marginTop: 10 }}>
-            <Text style={{ fontWeight: '600' }}>
-              Distance: {distance.toFixed(2)} km
-            </Text>
-            <Text style={{ fontWeight: '600' }}>
-              Duration: {Math.ceil(duration)} min
-            </Text>
+              <Text style={styles.campusButtonText}>Loyola Campus</Text>
+            </TouchableOpacity>
           </View>
-        )}
-      </View>
 
-      {/* Bottom container for step-by-step instructions */}
+          {/* Travel Mode Buttons */}
+          <View style={styles.modeContainer}>
+            <TouchableOpacity
+              style={[
+                styles.modeButton,
+                travelMode === 'DRIVING' && styles.activeModeButton,
+              ]}
+              onPress={() => setTravelMode('DRIVING')}
+            >
+              <Text
+                style={[
+                  styles.modeButtonText,
+                  travelMode === 'DRIVING' && styles.activeModeButtonText,
+                ]}
+              >
+                Driving
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.modeButton,
+                travelMode === 'WALKING' && styles.activeModeButton,
+              ]}
+              onPress={() => setTravelMode('WALKING')}
+            >
+              <Text
+                style={[
+                  styles.modeButtonText,
+                  travelMode === 'WALKING' && styles.activeModeButtonText,
+                ]}
+              >
+                Walking
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.modeButton,
+                travelMode === 'BICYCLING' && styles.activeModeButton,
+              ]}
+              onPress={() => setTravelMode('BICYCLING')}
+            >
+              <Text
+                style={[
+                  styles.modeButtonText,
+                  travelMode === 'BICYCLING' && styles.activeModeButtonText,
+                ]}
+              >
+                Bicycling
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.modeButton,
+                travelMode === 'TRANSIT' && styles.activeModeButton,
+              ]}
+              onPress={() => setTravelMode('TRANSIT')}
+            >
+              <Text
+                style={[
+                  styles.modeButtonText,
+                  travelMode === 'TRANSIT' && styles.activeModeButtonText,
+                ]}
+              >
+                Transit
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={styles.traceButton} onPress={traceRoute}>
+            <Text style={styles.buttonText}>Trace route</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Directions */}
       {steps.length > 0 && (
         <View style={styles.directionsContainer}>
           <Text style={styles.directionsHeader}>Directions</Text>
           <ScrollView>
-            {steps.map((step: { html_instructions: string }, index: number) => {
-              const instruction = stripHtml(step.html_instructions);
-              return (
-                <Text style={styles.stepText} key={index}>
-                  {index + 1}. {instruction}
-                </Text>
-              );
-            })}
+            {steps.map((step, index) => (
+              <Text style={styles.stepText} key={index}>
+                {index + 1}. {stripHtml(step.html_instructions)}
+              </Text>
+            ))}
           </ScrollView>
         </View>
       )}
