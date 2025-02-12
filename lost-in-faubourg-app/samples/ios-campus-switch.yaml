@@ -1,0 +1,17 @@
+appId: Expo Go
+---
+- tapOn:
+    id: 'Expo Go'
+    waitToSettleTimeoutMs: 500
+- tapOn: 'Explore Campus Map'
+- tapOn: 
+    text: 'Loyola Campus'
+    waitToSettleTimeoutMs: 100
+
+- tapOn: 
+    text: 'SGW Campus'
+    waitToSettleTimeoutMs: 100
+
+- tapOn: 
+    text: 'Loyola Campus'
+    waitToSettleTimeoutMs: 100
