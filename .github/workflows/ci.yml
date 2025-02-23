@@ -26,6 +26,10 @@ jobs:
       - name: Install dependencies
         run: cd lost-in-faubourg-app && npm ci
 
+      - name: Create .env file
+        run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > lost-in-faubourg-app/.env
+
+
       - name: Run Linter
         run: cd lost-in-faubourg-app && npm run lint
 
