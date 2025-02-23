@@ -59,7 +59,7 @@ jobs:
         with:
           projectBaseDir: lost-in-faubourg-app
           args: >
-            -Dsonar.projectKey=lost-in-faubourg
+            -Dsonar.projectKey=mcndl13_SOEN-390-Mini-Capstone
             -Dsonar.organization=lost-in-faubourg
             -Dsonar.host.url=https://sonarcloud.io
       
