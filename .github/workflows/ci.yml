@@ -59,7 +59,7 @@ jobs:
         with:
           projectBaseDir: lost-in-faubourg-app
           args: >
-            -Dsonar.projectKey=my_project_key
+            -Dsonar.projectKey=lost-in-faubourg
             -Dsonar.organization=lost-in-faubourg
             -Dsonar.host.url=https://sonarcloud.io
       
