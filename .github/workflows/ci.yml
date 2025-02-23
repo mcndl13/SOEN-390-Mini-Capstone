@@ -54,14 +54,15 @@ jobs:
 
       - name: SonarQube Analysis
         uses: sonarsource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           projectBaseDir: lost-in-faubourg-app
           args: >
             -Dsonar.projectKey=my_project_key
             -Dsonar.organization=my_organization
             -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
+      
       - name: Build the Project (iOS)
         run: cd lost-in-faubourg-app && npx expo export --platform ios
 
