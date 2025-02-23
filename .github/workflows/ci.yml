@@ -32,7 +32,7 @@ jobs:
       - name: Run Test Suite with Coverage and Generate JUnit Report
         env:
           CI: true
-        run: cd lost-in-faubourg-app && npm test -- --coverage
+        run: cd lost-in-faubourg-app && npm test -- --watchAll=false --coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
