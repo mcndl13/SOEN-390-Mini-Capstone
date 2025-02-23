@@ -1,14 +1,6 @@
-// HomeScreen.js
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
-
-import { NavigationProp } from '@react-navigation/native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { NavigationProp } from "@react-navigation/native";
 
 type HomeScreenProps = {
   navigation: NavigationProp<any>;
