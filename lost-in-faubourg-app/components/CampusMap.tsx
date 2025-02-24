@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Polygon, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { polygons } from './polygonCoordinates';
+import { getBuildingDescription } from '../scripts/buildingDescriptions';
 
 interface LocationCoords {
   latitude: number;
@@ -18,19 +19,29 @@ interface Building {
 }
 
 const CampusMap: React.FC = () => {
-  const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
+  const [location, setLocation] =
+    useState<Location.LocationObjectCoords | null>(null);
   const [region, setRegion] = useState<Region | null>(null);
   const [selectedCampus, setSelectedCampus] = useState<string | null>(null);
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(
+    null,
+  );
 
   // SGW and Loyola Campus Coordinates
-  const SGW_COORDS: LocationCoords = { latitude: 45.4953534, longitude: -73.578549 };
-  const LOYOLA_COORDS: LocationCoords = { latitude: 45.4582, longitude: -73.6405 };
+  const SGW_COORDS: LocationCoords = {
+    latitude: 45.4953534,
+    longitude: -73.578549,
+  };
+  const LOYOLA_COORDS: LocationCoords = {
+    latitude: 45.4582,
+    longitude: -73.6405,
+  };
 
   // Function to calculate the center of a polygon
   const getPolygonCenter = (boundaries: LocationCoords[]): LocationCoords => {
-    let latSum = 0, lonSum = 0;
-    boundaries.forEach(coord => {
+    let latSum = 0,
+      lonSum = 0;
+    boundaries.forEach((coord) => {
       latSum += coord.latitude;
       lonSum += coord.longitude;
     });
@@ -82,10 +93,7 @@ const CampusMap: React.FC = () => {
   return (
     <View style={styles.container}>
       {region ? (
-        <MapView style={styles.map} 
-        region={region}
-        testID="mapView"
-        >
+        <MapView style={styles.map} region={region} testID="mapView">
           {location && (
             <Marker
               coordinate={{
@@ -127,7 +135,12 @@ const CampusMap: React.FC = () => {
       {selectedBuilding && (
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>Building: {selectedBuilding.name}</Text>
-          <Text style={styles.infoText}>Address: {selectedBuilding.address}</Text>
+          <Text style={styles.infoText}>
+            Address: {selectedBuilding.address}
+          </Text>
+          <Text style={styles.infoText}>
+            Description: {getBuildingDescription(selectedBuilding.name)}
+          </Text>
         </View>
       )}
 
