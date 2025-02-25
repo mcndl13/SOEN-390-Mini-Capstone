@@ -49,6 +49,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         >
           <Text style={styles.buttonText}>Find Points of Interest</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate("Settings")}
+        >
+          <Text style={styles.buttonText}>Settings and Accessibility</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

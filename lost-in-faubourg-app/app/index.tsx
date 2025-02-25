@@ -9,6 +9,7 @@ import DirectionsScreen from "../components/DirectionsScreen";
 import CalendarIntegrationScreen from "../components/CalendarIntegrationScreen";
 import IndoorDirectionsScreen from "../components/IndoorDirectionsScreen";
 import PointsOfInterestScreen from "../components/PointsOfInterestScreen";
+import AccessibilitySettings from "@/components/AccessibilitySettings";
 
 const Stack = createStackNavigator();
 
@@ -51,6 +52,12 @@ export default function MainNavigator() {
           name="PointsOfInterest"
           component={PointsOfInterestScreen}
           options={{ headerTitle: "Points of Interest" }}
+        />
+
+        <Stack.Screen
+          name="Settings"
+          component={AccessibilitySettings}
+          options={{ headerTitle: "Settings/Accessibilities" }}
         />
       </Stack.Navigator>
     </>
