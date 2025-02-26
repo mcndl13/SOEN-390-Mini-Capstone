@@ -2,7 +2,7 @@ export const polygons = [
   {
     name: "JMSB",
     address: "1450 Guy St, Montreal, QC H3H 0A1",
-    description: "To Be Filled",
+    description:'The MB Building is the 15-storey home of the John Molson School of Business, made up of study areas, lecture rooms and group work spaces. The John Dobson Formula Growth Investment Room gives finance students practical knowledge of the markets through financial software. The Faculty of Fine Arts’ performance spaces for theatre, contemporary dance and music are also here.',
     boundaries: [
       { latitude: 45.49551700939489, longitude: -73.57919959372754 },
       { latitude: 45.4954397197586, longitude: -73.57896102832657 },
@@ -18,7 +18,7 @@ export const polygons = [
   {
     name: "B Annex",
     address: "2160 Bishop St, Montreal, QC H3G 2E9",
-    description: "To Be Filled",
+    description: "The B annex is the location of the Engineering and Computer Science Association.",
     boundaries: [
       { latitude: 45.49792095946769, longitude: -73.57946059720679 },
       { latitude: 45.497883828222086, longitude: -73.57938683641203 },
@@ -29,7 +29,7 @@ export const polygons = [
   {
     name: "CI Annex",
     address: "2149 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "The CI Annex is the location of the School of community and public affairs",
     boundaries: [
       { latitude: 45.497584772601584, longitude: -73.57983829805465 },
       { latitude: 45.49754529100982, longitude: -73.57976051398938 },
@@ -40,7 +40,7 @@ export const polygons = [
   {
     name: "CL Annex",
     address: "1665 St. Catherine St W., Montreal, QC H3H 1L9",
-    description: "To Be Filled",
+    description: "The CL Annex is the location of Concordia continuing education classrooms",
     boundaries: [
       { latitude: 45.49447132432611, longitude: -73.5792829162498 },
       { latitude: 45.494260599618514, longitude: -73.57893678577295 },
@@ -53,7 +53,7 @@ export const polygons = [
   {
     name: "D Annex",
     address: "2140 Bishop St, Montreal, QC H3G 2E9",
-    description: "To Be Filled",
+    description: "The D Annex is the location of the department of Theological Studies",
     boundaries: [
       { latitude: 45.49788370958742, longitude: -73.57938523006008 },
       { latitude: 45.49784751830836, longitude: -73.57931348089716 },
@@ -68,7 +68,7 @@ export const polygons = [
   {
     name: "EN Annex",
     address: "2070 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "EN Annex",
     boundaries: [
       { latitude: 45.49698630180552, longitude: -73.5797415843998 },
       { latitude: 45.496949169963464, longitude: -73.57966581200046 },
@@ -79,25 +79,25 @@ export const polygons = [
     ],
   },
   {
-    name: "ER Building",
-    address: "2155 Guy St, Montreal, QC H3H 2L9",
-    description: "To Be Filled",
-    boundaries: [
-      { latitude: 45.49642205927201, longitude: -73.5803519706359 },
-      { latitude: 45.49629705006199, longitude: -73.57985133782692 },
-      { latitude: 45.49623981850381, longitude: -73.57989216295483 },
-      { latitude: 45.4962533073332, longitude: -73.57993352358412 },
-      { latitude: 45.49616461020968, longitude: -73.57999580464889 },
-      { latitude: 45.49619856500288, longitude: -73.58008971906492 },
-      { latitude: 45.496176390712414, longitude: -73.5801065249803 },
-      { latitude: 45.49629072764227, longitude: -73.58044066318608 },
-      { latitude: 45.49642100187277, longitude: -73.58034971391501 },
-    ],
+    "name": "ER Building",
+    "address": "2155 Guy St, Montreal, QC H3H 2L9",
+    "description": "**ER Building Departments include:**\n- Applied AI Institute\n- Computer Science and Software Engineering\n- Department of Creative Arts Therapies\n- engAGE: Centre for Research on Aging\n- Next-Generation Cities Institute\n- Simone de Beauvoir Institute\n- Sustainability in the Digital Age\n- Urban Studies",
+    "boundaries": [
+      { "latitude": 45.49642205927201, "longitude": -73.5803519706359 },
+      { "latitude": 45.49629705006199, "longitude": -73.57985133782692 },
+      { "latitude": 45.49623981850381, "longitude": -73.57989216295483 },
+      { "latitude": 45.4962533073332, "longitude": -73.57993352358412 },
+      { "latitude": 45.49616461020968, "longitude": -73.57999580464889 },
+      { "latitude": 45.49619856500288, "longitude": -73.58008971906492 },
+      { "latitude": 45.496176390712414, "longitude": -73.5801065249803 },
+      { "latitude": 45.49629072764227, "longitude": -73.58044066318608 },
+      { "latitude": 45.49642100187277, "longitude": -73.58034971391501 }
+    ]
   },
-  {
+    {
     name: "EV Building",
     address: "1515 St Catherine St W., Montreal, QC H3G 2H7",
-    description: "To Be Filled",
+    description: "The EV Building is a two-tower research and teaching facility that brings together the Faculty of Fine Arts with the Gina Cody School of Engineering and Computer Science. The building is equipped with labs and spaces for research and creation. Our fitness facility, Le Gym, is also located here.",
     boundaries: [
       { latitude: 45.495864910655214, longitude: -73.5784949088164 },
       { latitude: 45.49544740149519, longitude: -73.57761297797327 },
@@ -114,7 +114,7 @@ export const polygons = [
   {
     name: "FA Annex",
     address: "2060 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "The FA Annex is the location of the Department of Religions and Cultures",
     boundaries: [
       { latitude: 45.496948005596415, longitude: -73.57966550307407 },
       { latitude: 45.496907520116025, longitude: -73.57957844786766 },
@@ -125,7 +125,7 @@ export const polygons = [
   {
     name: "FB Building",
     address: "1250 Guy St, Montreal, QC H3H 2T4",
-    description: "To Be Filled",
+    description: "The Faubourg Building houses the Office of the Registrar, Centre for Continuing Education, the Department of Education, the Department of Classics, Modern Languages and Linguistics and the Mel Hoppenheim School of Cinema. District 3, Concordia’s start-up incubator for aspiring entrepreneurs, is also located here.",
     boundaries: [
       { latitude: 45.494910829307685, longitude: -73.57778731254975 },
       { latitude: 45.494869794198756, longitude: -73.5777118267677 },
@@ -146,7 +146,7 @@ export const polygons = [
   {
     name: "FG Building",
     address: "1610 St Catherine St. W., Montreal, QC H3H 1L9",
-    description: "To Be Filled",
+    description: "The Faubourg Building houses the Office of the Registrar, Centre for Continuing Education, the Department of Education, the Department of Classics, Modern Languages and Linguistics and the Mel Hoppenheim School of Cinema. District 3, Concordia’s start-up incubator for aspiring entrepreneurs, is also located here.",
     boundaries: [
       { latitude: 45.49469528170287, longitude: -73.57803758887717 },
       { latitude: 45.49444362886454, longitude: -73.57760516680655 },
@@ -170,7 +170,7 @@ export const polygons = [
   {
     name: "Grey Nuns Building",
     address: "main entrance: 1190 Guy St, Montreal, QC H3H 2L4\n class entrance: 1175 St Mathieu St, Montreal, QC H3H 2L4",
-    description: "To Be Filled",
+    description: "Our gorgeous Grey Nuns student residence is full of character, with spacious rooms, high ceilings and lots of light. The converted chapel is an awe-inspiring Reading Room open to the whole University community. Comfortable, safe and close to class — students feel right at home on campus. Note: This space is not open for campus visitors.",
     boundaries: [
       { latitude: 45.49438634877265, longitude: -73.57705379340725 },
       { latitude: 45.49401699180863, longitude: -73.57628160350787 },
@@ -232,7 +232,7 @@ export const polygons = [
   {
     name: "Guy-de Maisonneuve",
     address: "1550 De Maisonneuve Blvd W., Montreal, QC H3H 2L5",
-    description: "To Be Filled",
+    description: "The GM building is home to several administrative offices as well as: the Access Centre for Students with Disabilities, the International Students Office, Health Services, Office of Rights and Responsibilities, the Financial Aid and Awards Office.",
     boundaries: [
       { latitude: 45.496127875902936, longitude: -73.57880793921294 },
       { latitude: 45.49594500840482, longitude: -73.57843483789237 },
@@ -245,7 +245,7 @@ export const polygons = [
   {
     name: "GS Building",
     address: "1538 Sherbrooke St W., Montreal, QC H3H 2L9",
-    description: "To Be Filled",
+    description: "GS Building",
     boundaries: [
       { latitude: 45.49675255522154, longitude: -73.58136675153412 },
       { latitude: 45.49674206620078, longitude: -73.58132373010108 },
@@ -262,7 +262,7 @@ export const polygons = [
   {
     name: "Hall Building",
     address: "1455 De Maisonneuve Blvd W., Montreal, QC H3G 1M8",
-    description: "To Be Filled",
+    description: "The Hall Building is where students take classes in Economics, Geography, Political Science, Sociology and Anthropology. Also located in the H Building: The Student Success Centre (for mentoring and other resources), the Otsenhákta Student Centre, the greenhouse (a leafy, sunny space to study!) and the D.B. Clarke Theatre.",
     boundaries: [
       { latitude: 45.49770855552633, longitude: -73.57903354341569 },
       { latitude: 45.497373319897925, longitude: -73.57833984117559 },
@@ -273,7 +273,7 @@ export const polygons = [
   {
     name: "K Annex",
     address: "2150 Bishop St, Montreal, QC H3G 2E9",
-    description: "To Be Filled",
+    description: "The K Annex is where the Concordia Coop Bookstore and the Concordia University Part-Time Faculty Association are located.",
     boundaries: [
       { latitude: 45.497741466457285, longitude: -73.57963574821775 },
       { latitude: 45.49773566772766, longitude: -73.57953026960946 },
@@ -284,7 +284,7 @@ export const polygons = [
   {
     name: "LB Building",
     address: "1400 De Maisonneuve Blvd W., Montreal, QC H3H 2N3",
-    description: "To Be Filled",
+    description: "The Library Building is home to the newly renovated library. The Departments of English, History, Études françaises and Mathematics and Statistics are also here. Other notable places include the Welcome Centre (for tours), the Birks Student Service Centre, the Leonard and Bina Ellen Gallery, the Art Supply Store and the Concordia Store.",
     boundaries: [
       { latitude: 45.49725839136548, longitude: -73.57805850161982 },
       { latitude: 45.49704004318071, longitude: -73.57759018965103 },
@@ -309,7 +309,7 @@ export const polygons = [
   {
     name: "LS Building",
     address: "1535 De Maisonneuve Blvd W., Montreal, QC H3G 1M9",
-    description: "To Be Filled",
+    description: "The learning square has classrooms as well as hosting IT services on both the first and second floors",
     boundaries: [
       { latitude: 45.49653374701379, longitude: -73.57956990256748 },
       { latitude: 45.49638147665505, longitude: -73.57923444889067 },
@@ -322,7 +322,7 @@ export const polygons = [
   {
     name: "M Annex",
     address: "2135 Mackay St, Montreal, QC H3G 2J2",
-    description: "To Be Filled",
+    description: "M Annex",
     boundaries: [
       { latitude: 45.49742664469608, longitude: -73.57975562224226 },
       { latitude: 45.49738763308881, longitude: -73.57968119104282 },
@@ -333,7 +333,7 @@ export const polygons = [
   {
     name: "MI Annex",
     address: "2130 Bishop St, Montreal, QC H3G 2E9",
-    description: "To Be Filled",
+    "description": "The MI Annex is the location of all Employee & labour relations offices",
     boundaries: [
       { latitude: 45.497145688060556, longitude: -73.58004258190762 },
       { latitude: 45.4971151308179, longitude: -73.5799775601368 },
@@ -344,7 +344,7 @@ export const polygons = [
   {
     name: "MU Annex",
     address: "2170 Bishop St, Montreal, QC H3G 2E9",
-    description: "To Be Filled",
+    description: "MU Annex",
     boundaries: [
       { latitude: 45.49796235489539, longitude: -73.57953690960254 },
       { latitude: 45.49792034354915, longitude: -73.57946198964135 },
@@ -355,7 +355,7 @@ export const polygons = [
   {
     name: "P Annex",
     address: "2020 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "P Annex",
     boundaries: [
       { latitude: 45.49679777025396, longitude: -73.57933313172266 },
       { latitude: 45.496784050678215, longitude: -73.57930307354754 },
@@ -366,7 +366,7 @@ export const polygons = [
   {
     name: "PR Annex",
     address: "2100 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "PR Annex",
     boundaries: [
       { latitude: 45.49697618368829, longitude: -73.57990716507766 },
       { latitude: 45.49700062485126, longitude: -73.57994069260441 },
@@ -377,7 +377,7 @@ export const polygons = [
   {
     name: "Q Annex",
     address: "2010 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "Q Annex",
     boundaries: [
       { latitude: 45.49667618698685, longitude: -73.57908077242534 },
       { latitude: 45.496645635316945, longitude: -73.57902444612301 },
@@ -388,7 +388,7 @@ export const polygons = [
   {
     name: "R Annex",
     address: "2050 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "The R Annex is the location of the Department of Religion and Cultures",
     boundaries: [
       { latitude: 45.496837546460505, longitude: -73.57942022786025 },
       { latitude: 45.49679994456985, longitude: -73.57934512594144 },
@@ -399,7 +399,7 @@ export const polygons = [
   {
     name: "RR Annex",
     address: "2040 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "The RR Annex is the location of the Department of the Liberal Arts College",
     boundaries: [
       { latitude: 45.496831906175686, longitude: -73.57944503832626 },
       { latitude: 45.49679054410886, longitude: -73.57935451368968 },
@@ -410,7 +410,7 @@ export const polygons = [
   {
     name: "S Annex",
     address: "2145 Mackay St, Montreal, QC H3G 2J2",
-    description: "To Be Filled",
+    description: "The S Annex is the location of the Department of Philosophy",
     boundaries: [
       { latitude: 45.49749068391561, longitude: -73.57981334272769 },
       { latitude: 45.49745919263725, longitude: -73.57975299305292 },
@@ -423,7 +423,7 @@ export const polygons = [
   {
     name: "Samuel Bronfman Building",
     address: "1590 Docteur Penfield Ave, Montreal, QC H3G 1C5",
-    description: "To Be Filled",
+    description: "The Samuel Bronfman Building is the location of the Arts and Science research groups services.",
     boundaries: [
       { latitude: 45.49668345633299, longitude: -73.58608699270188 },
       { latitude: 45.496652904603266, longitude: -73.58601390251683 },
@@ -436,7 +436,7 @@ export const polygons = [
   {
     name: "Toronto-Dominion Building",
     address: "1410 Guy St, Montreal, QC H3H 1L8",
-    description: "To Be Filled",
+    description: "Toronto-Dominion Building",
     boundaries: [
       { latitude: 45.49503798021289, longitude: -73.5783455966998 },
       { latitude: 45.495117886635555, longitude: -73.57848238914504 },
@@ -447,7 +447,7 @@ export const polygons = [
   {
     name: "V Annex",
     address: "2110 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "The V Annex is the location of the Centre 2110 and CUTV services.",
     boundaries: [
       { latitude: 45.497087190183805, longitude: -73.57991517059297 },
       { latitude: 45.4970481782724, longitude: -73.57983403377729 },
@@ -458,7 +458,7 @@ export const polygons = [
   {
     name: "Visual Arts Building",
     address: "1395 René-Lévesque Blvd W., Montreal, QC H3G 2M5",
-    description: "To Be Filled",
+    description: "Classes for the Departments of Studio Arts, Creative Art Therapies, Art History and Art Education are located here. You’ll also find the VAV Gallery, a student-run exhibition space.",
     boundaries: [
       { latitude: 45.49618526149293, longitude: -73.57379772657498 },
       { latitude: 45.49606642975251, longitude: -73.57356251091662 },
@@ -471,7 +471,7 @@ export const polygons = [
   {
     name: "X Annex",
     address: "2080 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "The K Annex is the location of the Concordia International services",
     boundaries: [
       { latitude: 45.49701825801721, longitude: -73.57982924145175 },
       { latitude: 45.49697830609942, longitude: -73.57975078691274 },
@@ -482,7 +482,7 @@ export const polygons = [
   {
     name: "Z Annex",
     address: "2090 Mackay St, Montreal, QC H3G 2J1",
-    description: "To Be Filled",
+    description: "The Z Annex is the location of the Multi-Faith and Spirituality Centre as well as the Sustainable Concordia services.",
     boundaries: [
       { latitude: 45.497087821235226, longitude: -73.57991574272076 },
       { latitude: 45.49704880941643, longitude: -73.57983460581892 },
@@ -493,7 +493,7 @@ export const polygons = [
   {
     name: "Administration Building",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The AD and CC Buildings house Health Services, the Loyola College for Diversity and Sustainability, Counselling and Development (for personal, educational and career counselling), the Access Centre for Students with Disabilities and the Multi-Faith and Spirituality Centre.",
     boundaries: [
       { latitude: 45.45800335055294, longitude: -73.6396736034014 },
       { latitude: 45.45802404580459, longitude: -73.63975138745974 },
@@ -517,7 +517,7 @@ export const polygons = [
   {
     name: "BB Annex",
     address: "3502 Belmore Ave, Montreal, QC H4B 2B9",
-    description: "To Be Filled",
+    description: "The BB Annex is home to the 'Les Pt'its Profs' daycare.",
     boundaries: [
       { latitude: 45.45969472027361, longitude: -73.63916844992578 },
       { latitude: 45.459726007683315, longitude: -73.6392434266539 },
@@ -528,7 +528,7 @@ export const polygons = [
   {
     name: "BH Annex",
     address: "3500 Belmore Ave, Montreal, QC H4B 2B9",
-    description: "To Be Filled",
+    description: "The BH Annex is home to the 'Les Pt'its Profs' daycare.",
     boundaries: [
       { latitude: 45.4596656895243, longitude: -73.63909275582184 },
       { latitude: 45.45969579081858, longitude: -73.63916584601458 },
@@ -539,7 +539,7 @@ export const polygons = [
   {
     name: "Central Building",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The AD and CC Buildings house Health Services, the Loyola College for Diversity and Sustainability, Counselling and Development (for personal, educational and career counselling), the Access Centre for Students with Disabilities and the Multi-Faith and Spirituality Centre.",
     boundaries: [
       { latitude: 45.4581042021557, longitude: -73.63995784322546 },
       { latitude: 45.45809537104427, longitude: -73.63996287928404 },
@@ -556,7 +556,7 @@ export const polygons = [
   {
     name: "Communication Studies and Journalism Building",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The CJ Building is where our Communication Studies and Journalism students take classes and make use of media labs, plus video production and editing suites. The Concordia Bookstore is also here.",
     boundaries: [
       { latitude: 45.45740882916023, longitude: -73.64020736298139 },
       { latitude: 45.45717741566173, longitude: -73.64039243539604 },
@@ -584,7 +584,7 @@ export const polygons = [
   {
     name: "Stinger Dome",
     address: "7200 Sherbrooke St W., Montreal, QC H4B 1R3",
-    description: "To Be Filled",
+    description: "The Stinger Dome, an air-supported structure, covers the field from November to April, so Concordians can join a game of soccer or Ultimate all year round.",
     boundaries: [
       { latitude: 45.45792374396299, longitude: -73.63524187780685 },
       { latitude: 45.45696046430309, longitude: -73.63636304113045 },
@@ -595,7 +595,7 @@ export const polygons = [
   {
     name: "F. C. Smith Building",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The Loyola Chapel is a beautiful, quiet place available to people of all faiths. Students use the F.C. Smith Auditorium for theatrical productions and workshops. Concerts and other events take place at The Cazalet Theatre.",
     boundaries: [
       { latitude: 45.45838268252303, longitude: -73.63904194723771 },
       { latitude: 45.45850801353835, longitude: -73.63942164268585 },
@@ -616,7 +616,7 @@ export const polygons = [
   {
     name: "Center for Structural and Functional Genomics",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The Research Centre for Structural and Functional Genomics Building is Concordia’s largest multidisciplinary research centre, bringing together biologists, chemists and bioinformaticians.",
     boundaries: [
       { latitude: 45.45679811634551, longitude: -73.64035333241623 },
       { latitude: 45.456896593505434, longitude: -73.64060858986035 },
@@ -631,7 +631,7 @@ export const polygons = [
   {
     name: "Hingston Hall, wing HA",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "Hingston Hall and the Jesuit Residence are home away from home for the hundreds of Concordians who live on campus. Note: This space is not open for campus visitors.",
     boundaries: [
       { latitude: 45.45925073011908, longitude: -73.64106265529762 },
       { latitude: 45.459283041472254, longitude: -73.64114162537777 },
@@ -646,7 +646,7 @@ export const polygons = [
   {
     name: "Hingston Hall, wing B",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "Hingston Hall and the Jesuit Residence are home away from home for the hundreds of Concordians who live on campus. Note: This space is not open for campus visitors.",
     boundaries: [
       { latitude: 45.4589717294752, longitude: -73.64181214555022 },
       { latitude: 45.45899583377771, longitude: -73.64187923916282 },
@@ -665,7 +665,7 @@ export const polygons = [
   {
     name: "Hingston Hall, wing HC",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "Hingston Hall and the Jesuit Residence are home away from home for the hundreds of Concordians who live on campus. Note: This space is not open for campus visitors.",
     boundaries: [
       { latitude: 45.459540431991925, longitude: -73.64201762469914 },
       { latitude: 45.45962697336985, longitude: -73.64224427135211 },
@@ -680,7 +680,7 @@ export const polygons = [
   {
     name: "Applied Science Hub",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The recently completed Applied Science Hub is Concordia’s home for interdisciplinary scientific research, with labs for aquatic biology, microscopy, cellular imaging, nanoscience, bioprocessing, and chemical and materials engineering. It also hosts the District 3 Innovation Hub, a start-up incubator, promoting industry scale-up and partnership opportunities on-site.",
     boundaries: [
       { latitude: 45.45829238873858, longitude: -73.64171908628015 },
       { latitude: 45.45844590809539, longitude: -73.64211875660926 },
@@ -691,7 +691,7 @@ export const polygons = [
   {
     name: "Jesuit Residence",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "Hingston Hall and the Jesuit Residence are home away from home for the hundreds of Concordians who live on campus. Note: This space is not open for campus visitors.",
     boundaries: [
       { latitude: 45.45846738431191, longitude: -73.64309715060635 },
       { latitude: 45.458396433612236, longitude: -73.6431539376945 },
@@ -716,7 +716,7 @@ export const polygons = [
   {
     name: "Perform Center",
     address: "7200 Sherbrooke St W., Montreal, QC H4B 2A4",
-    description: "To Be Filled",
+    description: "The PERFORM Centre is a clinical research facility focused on promoting healthy living through prevention. It includes: A gym furnished with the latest and best equipment; an athletic therapy clinic with specialized wellness programs including cooking workshops and exercise plans; and facilities for Athletic Therapy and Exercise Science students to undertake research.",
     boundaries: [
       { latitude: 45.4566832023212, longitude: -73.63698931998641 },
       { latitude: 45.45701184580415, longitude: -73.6378394869645 },
@@ -727,7 +727,7 @@ export const polygons = [
   {
     name: "Physical Services Building",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The Physical Services Building hosts the Environmental Health and Safety Office as well as the Facilities Management Department.",
     boundaries: [
       { latitude: 45.45929263659354, longitude: -73.63945158167996 },
       { latitude: 45.45934807931811, longitude: -73.63960088711397 },
@@ -749,7 +749,7 @@ export const polygons = [
   {
     name: "Oscar Peterson Concert Hall",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The Oscar Peterson Concert Hall was named in honour of one of the best jazz pianists of all time. Peterson, a Montreal native, was awarded an honorary doctorate and the Loyola medal, the University’s highest honour. The 570-seat performance venue hosts more than 200 shows a year, many with internationally-renowned artists. The Student Centre (SC) is home to a student-run café, a lounge and study spots.",
     boundaries: [
       { latitude: 45.45916334535203, longitude: -73.63878134145095 },
       { latitude: 45.459333969279335, longitude: -73.63922059274914 },
@@ -762,7 +762,7 @@ export const polygons = [
   {
     name: "Psychology Building",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The Psychology building is home to the Department of Psychology and the Centre for Clinical Research in Health",
     boundaries: [
       { latitude: 45.45868128971848, longitude: -73.64055340303679 },
       { latitude: 45.45876218832274, longitude: -73.64077066195541 },
@@ -787,7 +787,7 @@ export const polygons = [
   {
     name: "Quadrangle",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The Quad is an expansive green space where students relax between classes on warm days. Frosh activities, barbecues and outdoor concerts take place here.",
     boundaries: [
       { latitude: 45.45896436784346, longitude: -73.64001082041777 },
       { latitude: 45.45882860088644, longitude: -73.63969282910347 },
@@ -798,7 +798,7 @@ export const polygons = [
   {
     name: "Recreation and Athletics Complex",
     address: "7200 Sherbrooke St W., Montreal, QC H4B 2A4",
-    description: "To Be Filled",
+    description: "The Recreation and Athletics Complex contains a gymnasium, an arena and a dome for our varsity athletes — the Stingers — to compete in football, basketball, hockey, rugby, soccer and wrestling. The Stinger Dome, an air-supported structure, covers the field from November to April, so Concordians can join a game of soccer or Ultimate all year round. The Stingers hockey teams play at the Ed Meagher Arena.",
     boundaries: [
       { latitude: 45.45700879547161, longitude: -73.63805322213418 },
       { latitude: 45.4569671204416, longitude: -73.63793779050737 },
@@ -813,7 +813,7 @@ export const polygons = [
   {
     name: "Loyola Jesuit Hall and Conference Centre",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The Loyola Jesuit Hall and Conference Centre hosts conferences and Concordia conference services.",
     boundaries: [
       { latitude: 45.45880734336593, longitude: -73.64116267777592 },
       { latitude: 45.45880313929571, longitude: -73.64114619532359 },
@@ -846,7 +846,7 @@ export const polygons = [
   {
     name: "Student Center",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The Loyola Student Center is where the Loyola cafeteria, Campus Centre, Food Services, and student ran café are located.",
     boundaries: [
       { latitude: 45.45918653124292, longitude: -73.63935394855122 },
       { latitude: 45.45907882296455, longitude: -73.63905421166972 },
@@ -857,7 +857,7 @@ export const polygons = [
   {
     name: "Solar House",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "Concordia University’s Future Buildings Laboratory will support research to advance knowledge, best practices, and innovation in sustainable buildings and infrastructure now and for the future.",
     boundaries: [
       { latitude: 45.45933420269998, longitude: -73.64265845517272 },
       { latitude: 45.45933081688494, longitude: -73.64239744701572 },
@@ -868,7 +868,7 @@ export const polygons = [
   {
     name: "Saint Ignatius of Loyola Catholic Church",
     address: "4455 West Broadway, Montreal, QC H4B 2A7",
-    description: "To Be Filled",
+    description: "St. Ignatius Church is a Roman Catholic Parish church located on Loyola Campus.",
     boundaries: [
       { latitude: 45.45816640264312, longitude: -73.64252315784637 },
       { latitude: 45.45811784212762, longitude: -73.64240039852407 },
@@ -910,7 +910,7 @@ export const polygons = [
   {
     name: "Richard J Renaud Science Complex",
     address: "7141 Sherbrooke St W., Montreal, QC H4B 1R6",
-    description: "To Be Filled",
+    description: "The Richard J. Renaud Science Pavilion is the main building for students in biology, chemistry and biochemistry, physics, exercise science and psychology. It also houses the Science College, a specialized learning community dedicated to solving current problems through lab work and research.",
     boundaries: [
       { latitude: 45.458326098999855, longitude: -73.64141277416134 },
       { latitude: 45.45819394999942, longitude: -73.64104205802843 },
