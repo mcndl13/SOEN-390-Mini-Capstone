@@ -45,7 +45,6 @@ type GraphNode = {
 // 3) Define Graph Data per Floor per Building
 //--------------------------------------
 
-// (For brevity, only Hall Building floor 8 nodes are shown with dummy data.)
 
 const hallFloorGraphs: Record<number, Record<string, GraphNode>> = {
 
@@ -246,7 +245,6 @@ function findPathBFS(
   return path;
 }
 
-// Find the nearest node to a tap (using Euclidean distance)
 function findNearestNode(
   tapX: number,
   tapY: number,
@@ -267,7 +265,6 @@ function findNearestNode(
   return closestNodeId;
 }
 
-// Convert an array of node IDs into an array of coordinates
 function getPathCoordinates(
   graph: Record<string, GraphNode>,
   nodeIds: string[]
@@ -290,19 +287,13 @@ function computePathDistance(coords: { x: number; y: number }[]): number {
 // 6) COMPONENT
 //--------------------------------------
 export default function IndoorDirectionsScreen() {
-  // Building selection
   const [selectedBuilding, setSelectedBuilding] = useState<string>('Hall');
-  // Floor selection (for current building)
   const [selectedFloor, setSelectedFloor] = useState<number>(1);
-  // Container size for the image
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  // Start and end node IDs
   const [startNodeId, setStartNodeId] = useState<string | null>(null);
   const [endNodeId, setEndNodeId] = useState<string | null>(null);
-  // Computed path (list of node IDs)
   const [path, setPath] = useState<string[]>([]);
 
-  // Get current building and floor data
   const currentBuilding = buildingData[selectedBuilding];
   const currentFloorData = currentBuilding.floors[selectedFloor];
 
@@ -331,7 +322,6 @@ export default function IndoorDirectionsScreen() {
       setPath(newPath);
       return;
     }
-    // Reset: new start node
     setStartNodeId(tappedNodeId);
     setEndNodeId(null);
     setPath([]);
@@ -340,8 +330,7 @@ export default function IndoorDirectionsScreen() {
   const pathCoords = getPathCoordinates(currentFloorData.graph, path);
   const polylinePoints = pathCoords.map((p) => `${p.x},${p.y}`).join(' ');
 
-  // --- Distance Calculation ---
-// Assume a conversion factor: for a 1:1000 scale, suppose 1 drawing unit equals 0.01 meters
+
 const PIXEL_TO_METER = 0.1; 
   const drawingDistance = computePathDistance(pathCoords);
   const distanceInMeters = drawingDistance * PIXEL_TO_METER;
@@ -350,7 +339,7 @@ const PIXEL_TO_METER = 0.1;
     <View style={styles.container}>
       <Text style={styles.title}>Indoor Navigation</Text>
 
-      {/* Building Picker */}
+      {}
       <Picker
         selectedValue={selectedBuilding}
         style={styles.picker}
@@ -367,7 +356,7 @@ const PIXEL_TO_METER = 0.1;
         ))}
       </Picker>
 
-      {/* Floor Picker */}
+      {}
       <Picker
         selectedValue={selectedFloor}
         style={styles.picker}
@@ -383,7 +372,7 @@ const PIXEL_TO_METER = 0.1;
         ))}
       </Picker>
 
-      {/* Image Container */}
+      {}
       <View style={styles.imageContainer} onLayout={handleContainerLayout}>
         <TouchableWithoutFeedback onPress={handlePress}>
           <View style={styles.touchableArea}>
