@@ -12,8 +12,9 @@ import { Picker } from '@react-native-picker/picker';
 import Svg, { Polyline, Circle } from 'react-native-svg';
 
 //--------------------------------------
-// 1) Import Floor Plan Images
+//Import Floor Plan Images
 //--------------------------------------
+
 // SGW Campus - Hall Building
 import HallFloor1 from '../assets/floorplans/Hall-1.png';
 import HallFloor2 from '../assets/floorplans/Hall-2.png';
@@ -44,22 +45,14 @@ type GraphNode = {
 // 3) Define Graph Data per Floor per Building
 //--------------------------------------
 
-// Dummy graph for Hall Building – replace with your actual data
 const hallFloorGraphs: Record<number, Record<string, GraphNode>> = {
+
+  //HALL BUILDING NODES
   1: {
-    room101: { x: 50,  y: 120, neighbors: ['hallA'] },
-    room102: { x: 160, y: 120, neighbors: ['hallA'] },
-    hallA:   { x: 105, y: 120, neighbors: ['room101', 'room102', 'H110'] },
-    H110:    { x: 105, y: 220, neighbors: ['hallA', 'room201', 'room202'] },
-    room201: { x: 50,  y: 220, neighbors: ['H110'] },
-    room202: { x: 160, y: 220, neighbors: ['H110'] },
-    entrance:{ x:125, y:320, neighbors:['H110'] },
+    
   },
   2: {
-    // Dummy data for Hall Building floor 2
-    room201: { x: 60,  y: 130, neighbors: ['hallB'] },
-    hallB:   { x: 120, y: 130, neighbors: ['room201', 'room202'] },
-    room202: { x: 180, y: 130, neighbors: ['hallB'] },
+   
   },
   8: {
     //hallway intersections
@@ -129,58 +122,43 @@ const hallFloorGraphs: Record<number, Record<string, GraphNode>> = {
 
   },
   9: {
-    // Define Hall Building floor 9 graph here
   },
 };
 
-// Dummy graph for CC Building – one floor only
+// CC BUILDING NODES
 const ccFloorGraphs: Record<number, Record<string, GraphNode>> = {
   1: {
-    cc101: { x: 100, y: 100, neighbors: ['ccHall'] },
-    ccHall: { x: 150, y: 100, neighbors: ['cc101', 'cc102'] },
-    cc102: { x: 200, y: 100, neighbors: ['ccHall'] },
+    
   },
 };
 
-// Dummy graph for John Molson Building – two floors (using floor 1 and “S2” for second floor)
+// JOHN MOLSON BUILDING NODES
 const jmFloorGraphs: Record<number, Record<string, GraphNode>> = {
   1: {
-    jm101: { x: 80, y: 110, neighbors: ['jmHall'] },
-    jmHall: { x: 130, y: 110, neighbors: ['jm101', 'jm102'] },
-    jm102: { x: 180, y: 110, neighbors: ['jmHall'] },
+    
   },
   2: {
-    jm201: { x: 90, y: 120, neighbors: ['jmHall2'] },
-    jmHall2: { x: 140, y: 120, neighbors: ['jm201', 'jm202'] },
-    jm202: { x: 190, y: 120, neighbors: ['jmHall2'] },
+    
   },
 };
 
-// Dummy graph for Vanier Extension Building – two floors
+// VANIER EXTENSION BUILDING NDOES
 const veFloorGraphs: Record<number, Record<string, GraphNode>> = {
   1: {
-    ve101: { x: 60, y: 80, neighbors: ['veHall'] },
-    veHall: { x: 110, y: 80, neighbors: ['ve101', 've102'] },
-    ve102: { x: 160, y: 80, neighbors: ['veHall'] },
+    
   },
   2: {
-    ve201: { x: 60, y: 90, neighbors: ['veHall2'] },
-    veHall2: { x: 110, y: 90, neighbors: ['ve201', 've202'] },
-    ve202: { x: 160, y: 90, neighbors: ['veHall2'] },
+    
   },
 };
 
-// Dummy graph for Vanier Library Building – two floors
+// VANIER LIBRARY BUILDING NODES
 const vlFloorGraphs: Record<number, Record<string, GraphNode>> = {
   1: {
-    vl101: { x: 70, y: 70, neighbors: ['vlHall'] },
-    vlHall: { x: 120, y: 70, neighbors: ['vl101', 'vl102'] },
-    vl102: { x: 170, y: 70, neighbors: ['vlHall'] },
+   
   },
   2: {
-    vl201: { x: 70, y: 80, neighbors: ['vlHall2'] },
-    vlHall2: { x: 120, y: 80, neighbors: ['vl201', 'vl202'] },
-    vl202: { x: 170, y: 80, neighbors: ['vlHall2'] },
+    
   },
 };
 
@@ -294,19 +272,13 @@ function getPathCoordinates(
 // 6) COMPONENT
 //--------------------------------------
 export default function IndoorDirectionsScreen() {
-  // Building selection
   const [selectedBuilding, setSelectedBuilding] = useState<string>('Hall');
-  // Floor selection (for current building)
   const [selectedFloor, setSelectedFloor] = useState<number>(1);
-  // Container size for the image
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  // Start and end node IDs
   const [startNodeId, setStartNodeId] = useState<string | null>(null);
   const [endNodeId, setEndNodeId] = useState<string | null>(null);
-  // Computed path (list of node IDs)
   const [path, setPath] = useState<string[]>([]);
 
-  // Get current building and floor data
   const currentBuilding = buildingData[selectedBuilding];
   const currentFloorData = currentBuilding.floors[selectedFloor];
 
@@ -335,7 +307,6 @@ export default function IndoorDirectionsScreen() {
       setPath(newPath);
       return;
     }
-    // Reset: new start node
     setStartNodeId(tappedNodeId);
     setEndNodeId(null);
     setPath([]);
@@ -348,13 +319,13 @@ export default function IndoorDirectionsScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Indoor Navigation</Text>
 
-      {/* Building Picker */}
+      {}
       <Picker
         selectedValue={selectedBuilding}
         style={styles.picker}
         onValueChange={(itemValue) => {
           setSelectedBuilding(itemValue);
-          // Reset floor and nodes when switching buildings
+      
           setSelectedFloor(1);
           setStartNodeId(null);
           setEndNodeId(null);
@@ -366,7 +337,7 @@ export default function IndoorDirectionsScreen() {
         ))}
       </Picker>
 
-      {/* Floor Picker */}
+      {}
       <Picker
         selectedValue={selectedFloor}
         style={styles.picker}
@@ -382,7 +353,7 @@ export default function IndoorDirectionsScreen() {
         ))}
       </Picker>
 
-      {/* Image Container */}
+      {}
       <View style={styles.imageContainer} onLayout={handleContainerLayout}>
         <TouchableWithoutFeedback onPress={handlePress}>
           <View style={styles.touchableArea}>
