@@ -339,11 +339,7 @@ export default function DirectionsScreen() {
               {/* Custom marker for station icon */}
               <View style={styles.stationMarker}>
                 <Image
-                  source={
-                    station.ID === 'GPLoyola'
-                      ? require('../assets/images/busStation.png')
-                      : require('../assets/images/busStation.png')
-                  }
+                  source={require('../assets/images/busStation.png')}
                   style={styles.stationIcon}
                   resizeMode="contain"
                 />
