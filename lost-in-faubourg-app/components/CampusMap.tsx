@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import MapView, { Marker, Polygon, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { polygons } from './polygonCoordinates';
+import { fetchShuttlePositions, startShuttleTracking, ShuttleData, ShuttlePoint } from '../services/shuttleService';
 
 interface LocationCoords {
   latitude: number;
@@ -22,6 +23,8 @@ const CampusMap: React.FC = () => {
   const [region, setRegion] = useState<Region | null>(null);
   const [selectedCampus, setSelectedCampus] = useState<string | null>(null);
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
+  const [showShuttles, setShowShuttles] = useState<boolean>(true);
 
   // SGW and Loyola Campus Coordinates
   const SGW_COORDS: LocationCoords = { latitude: 45.4953534, longitude: -73.578549 };
@@ -68,6 +71,19 @@ const CampusMap: React.FC = () => {
     })();
   }, []);
 
+  // Initialize shuttle tracking
+  useEffect(() => {
+    // Start tracking the shuttles
+    const stopTracking = startShuttleTracking((data) => {
+      setShuttleData(data);
+    }, 15000); // Update every 15 seconds
+
+    // Cleanup function to stop tracking when component unmounts
+    return () => {
+      stopTracking();
+    };
+  }, []);
+
   const switchToCampus = (campusCoords: LocationCoords, campusName: string) => {
     setRegion({
       latitude: campusCoords.latitude,
@@ -79,13 +95,19 @@ const CampusMap: React.FC = () => {
     setSelectedBuilding(null);
   };
 
+  const toggleShuttles = () => {
+    setShowShuttles(!showShuttles);
+  };
+
   return (
     <View style={styles.container}>
       {region ? (
-        <MapView style={styles.map} 
-        region={region}
-        testID="mapView"
+        <MapView 
+          style={styles.map} 
+          region={region}
+          testID="mapView"
         >
+          {/* User's current location marker */}
           {location && (
             <Marker
               coordinate={{
@@ -97,6 +119,8 @@ const CampusMap: React.FC = () => {
               testID="marker-current-location"
             />
           )}
+
+          {/* Building markers */}
           {buildings.map((building) => (
             <Marker
               key={building.id}
@@ -109,7 +133,8 @@ const CampusMap: React.FC = () => {
               testID={`marker-${building.id}`}
             />
           ))}
-          {/* Polygon Highlight */}
+
+          {/* Building polygons */}
           {polygons.map((polygon, index) => (
             <Polygon
               key={index}
@@ -119,11 +144,60 @@ const CampusMap: React.FC = () => {
               strokeWidth={1}
             />
           ))}
+
+          {/* Shuttle bus markers */}
+          {showShuttles && shuttleData && shuttleData.buses.map((bus) => (
+            <Marker
+              key={bus.ID}
+              coordinate={{
+                latitude: bus.Latitude,
+                longitude: bus.Longitude,
+              }}
+              title={`Shuttle ${bus.ID}`}
+              testID={`marker-${bus.ID}`}
+            >
+              {/* Custom marker for bus icon */}
+              <View style={styles.busMarker}>
+                <Image 
+                  source={require('../assets/images/busIcon.png')} //bus icon
+                  style={styles.busIcon}
+                  resizeMode="contain"
+                />
+              </View>
+            </Marker>
+          ))}
+
+          {/* Shuttle station markers */}
+          {showShuttles && shuttleData && shuttleData.stations.map((station) => (
+            <Marker
+              key={station.ID}
+              coordinate={{
+                latitude: station.Latitude,
+                longitude: station.Longitude,
+              }}
+              title={station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'}
+              testID={`marker-${station.ID}`}
+            >
+              {/* Custom marker for station icon */}
+              <View style={styles.stationMarker}>
+                <Image 
+                  source={
+                    station.ID === 'GPLoyola' 
+                      ? require('../assets/images/busStation.png') //loyola icon
+                      : require('../assets/images/busStation.png') //sgw icon
+                  } 
+                  style={styles.stationIcon}
+                  resizeMode="contain"
+                />
+              </View>
+            </Marker>
+          ))}
         </MapView>
       ) : (
         <Text>Loading Map...</Text>
       )}
 
+      {/* Selected building info */}
       {selectedBuilding && (
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>Building: {selectedBuilding.name}</Text>
@@ -131,6 +205,7 @@ const CampusMap: React.FC = () => {
         </View>
       )}
 
+      {/* Campus selection buttons */}
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={[
@@ -148,6 +223,7 @@ const CampusMap: React.FC = () => {
             SGW Campus
           </Text>
         </TouchableOpacity>
+        
         <TouchableOpacity
           style={[
             styles.circularButton,
@@ -165,13 +241,28 @@ const CampusMap: React.FC = () => {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Toggle shuttle visibility button */}
+      <TouchableOpacity
+        style={styles.shuttleToggleButton}
+        onPress={toggleShuttles}
+      >
+        <Text style={styles.shuttleToggleText}>
+          {showShuttles ? 'Hide Shuttles' : 'Show Shuttles'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { width: '100%', height: '100%' },
+  container: { 
+    flex: 1 
+  },
+  map: { 
+    width: '100%', 
+    height: '100%' 
+  },
   infoContainer: {
     position: 'absolute',
     bottom: 140,
@@ -221,6 +312,43 @@ const styles = StyleSheet.create({
   selectedButtonText: {
     color: 'white',
   },
+  shuttleToggleButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: '#912338',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  shuttleToggleText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  busMarker: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  busIcon: {
+    width: 40,
+    height: 40,
+  },
+  stationMarker: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stationIcon: {
+    width: 40,
+    height: 40,
+  }
 });
 
 export default CampusMap;

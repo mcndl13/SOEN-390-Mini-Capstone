@@ -6,6 +6,7 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from 'react-native';
 import MapView, { Marker, Polygon, PROVIDER_DEFAULT } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -16,9 +17,12 @@ import MapViewDirections, {
 import * as Location from 'expo-location';
 import 'react-native-get-random-values';
 import { GOOGLE_MAPS_API_KEY } from '@env';
-
-// Import the polygons array from your coordinates file
 import { polygons } from './polygonCoordinates';
+import {
+  fetchShuttlePositions,
+  startShuttleTracking,
+  ShuttleData,
+} from '../services/shuttleService';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -55,14 +59,16 @@ function InputAutocomplete({
       backgroundColor: 'transparent',
       borderTopWidth: 0,
       borderBottomWidth: 0,
+      paddingTop: 5,
+      paddingBottom: 10,
     },
     textInput: {
       height: 40,
       color: '#5d5d5d',
       fontSize: 16,
-      borderWidth: 1,
-      borderColor: '#888',
-      borderRadius: 5,
+      borderWidth: 0.5,
+      borderColor: '#912338',
+      borderRadius: 15,
       paddingHorizontal: 10,
     },
     listView: {},
@@ -115,6 +121,10 @@ export default function DirectionsScreen() {
   const [travelMode, setTravelMode] =
     useState<MapViewDirectionsMode>('DRIVING');
 
+  // Shuttle states
+  const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
+  const [showShuttles, setShowShuttles] = useState<boolean>(true);
+
   const mapRef = useRef<MapView>(null);
 
   // Request location permission & get user location on mount (optional)
@@ -132,6 +142,19 @@ export default function DirectionsScreen() {
         longitude: coords.longitude,
       });
     })();
+  }, []);
+
+  // Initialize shuttle tracking
+  useEffect(() => {
+    // Start tracking the shuttles
+    const stopTracking = startShuttleTracking((data) => {
+      setShuttleData(data);
+    }, 15000); // Update every 15 seconds
+
+    // Cleanup function to stop tracking when component unmounts
+    return () => {
+      stopTracking();
+    };
   }, []);
 
   // Helper to animate camera
@@ -237,6 +260,11 @@ export default function DirectionsScreen() {
     moveTo(campusCoords);
   };
 
+  // Toggle shuttle visibility
+  const toggleShuttles = () => {
+    setShowShuttles(!showShuttles);
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -271,6 +299,58 @@ export default function DirectionsScreen() {
           <Marker coordinate={destination} title="Destination" pinColor="red" />
         )}
 
+        {/* Shuttle bus markers */}
+        {showShuttles &&
+          shuttleData &&
+          shuttleData.buses.map((bus) => (
+            <Marker
+              key={bus.ID}
+              coordinate={{
+                latitude: bus.Latitude,
+                longitude: bus.Longitude,
+              }}
+              title={`Shuttle ${bus.ID}`}
+              testID={`marker-${bus.ID}`}
+            >
+              {/* Custom marker for bus icon */}
+              <View style={styles.busMarker}>
+                <Image
+                  source={require('../assets/images/busIcon.png')} //bus icon
+                  style={styles.busIcon}
+                  resizeMode="contain"
+                />
+              </View>
+            </Marker>
+          ))}
+
+        {/* Shuttle station markers */}
+        {showShuttles &&
+          shuttleData &&
+          shuttleData.stations.map((station) => (
+            <Marker
+              key={station.ID}
+              coordinate={{
+                latitude: station.Latitude,
+                longitude: station.Longitude,
+              }}
+              title={station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'}
+              testID={`marker-${station.ID}`}
+            >
+              {/* Custom marker for station icon */}
+              <View style={styles.stationMarker}>
+                <Image
+                  source={
+                    station.ID === 'GPLoyola'
+                      ? require('../assets/images/busStation.png')
+                      : require('../assets/images/busStation.png')
+                  }
+                  style={styles.stationIcon}
+                  resizeMode="contain"
+                />
+              </View>
+            </Marker>
+          ))}
+
         {/* Directions Line */}
         {showDirections && origin && destination && (
           <MapViewDirections
@@ -287,6 +367,16 @@ export default function DirectionsScreen() {
           />
         )}
       </MapView>
+
+      {/* Shuttle Toggle Button */}
+      <TouchableOpacity
+        style={styles.shuttleToggleButton}
+        onPress={toggleShuttles}
+      >
+        <Text style={styles.shuttleToggleText}>
+          {showShuttles ? 'Hide Shuttles' : 'Show Shuttles'}
+        </Text>
+      </TouchableOpacity>
 
       {/* Conditionally Render the Search Bar */}
       {!showDirections && (
@@ -434,7 +524,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 4,
     elevation: 4,
-    padding: 8,
+    padding: 20,
     borderRadius: 8,
     top: Constants.statusBarHeight,
   },
@@ -445,11 +535,14 @@ const styles = StyleSheet.create({
   },
   campusButton: {
     flex: 1,
-    backgroundColor: '#ddd',
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    marginLeft: 8,
     marginRight: 8,
-    borderRadius: 4,
     paddingVertical: 10,
     alignItems: 'center',
+    borderWidth: 0.5,
+    borderColor: '#912338',
   },
   campusButtonText: {
     color: '#333',
@@ -462,14 +555,16 @@ const styles = StyleSheet.create({
   },
   modeButton: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#fff',
     marginRight: 8,
-    borderRadius: 4,
+    borderRadius: 15,
+    borderWidth: 0.5,
+    borderColor: '#912338',
     paddingVertical: 10,
     alignItems: 'center',
   },
   activeModeButton: {
-    backgroundColor: '#4444ff',
+    backgroundColor: '#912338',
   },
   modeButtonText: {
     color: '#333',
@@ -480,10 +575,12 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   traceButton: {
-    backgroundColor: '#bbb',
+    backgroundColor: '#fff',
     paddingVertical: 12,
     marginTop: 16,
-    borderRadius: 4,
+    borderRadius: 15,
+    borderWidth: 0.5,
+    borderColor: '#912338',
   },
   buttonText: {
     textAlign: 'center',
@@ -505,5 +602,45 @@ const styles = StyleSheet.create({
   },
   stepText: {
     marginBottom: 4,
+  },
+  // Shuttle styles
+  shuttleToggleButton: {
+    position: 'absolute',
+    top: 10,
+    right: 20,
+    backgroundColor: '#912338',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    zIndex: 999,
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  shuttleToggleText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  busMarker: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  busIcon: {
+    width: 60,
+    height: 60,
+  },
+  stationMarker: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stationIcon: {
+    width: 40,
+    height: 40,
   },
 });
