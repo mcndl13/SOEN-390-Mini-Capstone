@@ -4,6 +4,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { makeRedirectUri } from "expo-auth-session";
 import { getCalendarEvents } from "../services/calendarService";
+import { AccessibilityContext } from './AccessibilitySettings';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -14,6 +15,7 @@ interface CalendarEvent {
 }
 
 export default function CalendarIntegrationScreen() {
+  const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [userInfo, setUserInfo] = useState<{ name: string } | null>(null);
 
@@ -84,16 +86,44 @@ export default function CalendarIntegrationScreen() {
 
       {events.length > 0 ? (
         events.map((event, index) => (
-          <View key={index} style={styles.eventContainer}>
-            <Text style={styles.eventTitle}>{event.summary}</Text>
-            <Text style={styles.eventDetails}>{`Start: ${event.start}`}</Text>
-            <Text style={styles.eventDetails}>{`Location: ${
-              event.location || "N/A"
-            }`}</Text>
+          <View 
+            key={index} 
+            style={[
+              styles.eventContainer,
+              isBlackAndWhite && styles.blackAndWhiteEventContainer
+            ]}
+          >
+            <Text style={[
+              styles.eventTitle,
+              isLargeText && styles.largeText,
+              isBlackAndWhite && styles.blackAndWhiteText
+            ]}>
+              {event.summary}
+            </Text>
+            <Text style={[
+              styles.eventDetails,
+              isLargeText && styles.largeEventDetails,
+              isBlackAndWhite && styles.blackAndWhiteText
+            ]}>
+              {`Start: ${event.start}`}
+            </Text>
+            <Text style={[
+              styles.eventDetails,
+              isLargeText && styles.largeEventDetails,
+              isBlackAndWhite && styles.blackAndWhiteText
+            ]}>
+              {`Location: ${event.location || "N/A"}`}
+            </Text>
           </View>
         ))
       ) : (
-        <Text style={styles.noEvents}>No events found.</Text>
+        <Text style={[
+          styles.noEvents,
+          isLargeText && styles.largeText,
+          isBlackAndWhite && styles.blackAndWhiteText
+        ]}>
+          No events found.
+        </Text>
       )}
     </ScrollView>
   );
@@ -103,6 +133,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#fff',
   },
   welcomeText: {
     fontSize: 18,

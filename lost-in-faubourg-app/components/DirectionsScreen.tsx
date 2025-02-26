@@ -22,6 +22,7 @@ import { useRoute, RouteProp } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import 'react-native-get-random-values';
 import { GOOGLE_MAPS_API_KEY } from '@env';
+import { AccessibilityContext } from './AccessibilitySettings';
 
 import { AccessibilityContext } from './AccessibilitySettings';
 import { polygons } from '../components/polygonCoordinates';
@@ -864,7 +865,13 @@ export default function DirectionsScreen() {
               ]}
               onPress={() => setCampusPoint(SGW_COORDS, "SGW Campus")}
             >
-              <Text style={styles.campusButtonText}>SGW Campus</Text>
+              <Text style={[
+                styles.campusButtonText,
+                isLargeText && styles.largeText,
+                isBlackAndWhite && styles.blackAndWhiteText
+              ]}>
+                SGW Campus
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
@@ -874,7 +881,13 @@ export default function DirectionsScreen() {
               ]}
               onPress={() => setCampusPoint(LOYOLA_COORDS, "Loyola Campus")}
             >
-              <Text style={styles.campusButtonText}>Loyola Campus</Text>
+              <Text style={[
+                styles.campusButtonText,
+                isLargeText && styles.largeText,
+                isBlackAndWhite && styles.blackAndWhiteText
+              ]}>
+                Loyola Campus
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -1386,7 +1399,6 @@ const styles = StyleSheet.create({
     color: '#666',
     marginBottom: 4,
   },
-
   largeText: {
     fontSize: 18, // Increase base font size
   },

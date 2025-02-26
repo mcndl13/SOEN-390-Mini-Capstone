@@ -40,8 +40,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome</Text>
+    <View style={[styles.container, isBlackAndWhite && styles.blackAndWhite]}>
+      <Text style={[styles.title, isLargeText && styles.largeText]}>Welcome</Text>
       <ScrollView>
         <TouchableOpacity
           style={styles.button}
@@ -53,28 +53,28 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
             }
           }}
         >
-          <Text style={styles.buttonText}>Explore Campus Map</Text>
+          <Text style={[styles.buttonText, isLargeText && styles.largeText]}>Explore Campus Map</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, isBlackAndWhite && styles.blackAndWhiteButton]}
           onPress={() => navigation.navigate("Directions")}
         >
-          <Text style={styles.buttonText}>Get Directions</Text>
+          <Text style={[styles.buttonText, isLargeText && styles.largeText]}>Get Directions</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, isBlackAndWhite && styles.blackAndWhiteButton]}
           onPress={() => navigation.navigate("CalendarIntegration")}
         >
-          <Text style={styles.buttonText}>Connect to Google Calendar</Text>
+          <Text style={[styles.buttonText, isLargeText && styles.largeText]}>Connect to Google Calendar</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, isBlackAndWhite && styles.blackAndWhiteButton]}
           onPress={() => navigation.navigate("IndoorDirections")}
         >
-          <Text style={styles.buttonText}>Indoor Navigation</Text>
+          <Text style={[styles.buttonText, isLargeText && styles.largeText]}>Indoor Navigation</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.button}
+          style={[styles.button, isBlackAndWhite && styles.blackAndWhiteButton]}
           onPress={() => navigation.navigate("PointsOfInterest")}
         >
           <Text style={styles.buttonText}>Find Points of Interest</Text>
@@ -85,6 +85,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         >
           <Text style={styles.buttonText}>Shuttle Schedule</Text>
         </TouchableOpacity>
+        
       </ScrollView>
     </View>
   );
@@ -113,6 +114,15 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontSize: 18,
+  },
+  blackAndWhite: {
+    backgroundColor: '#fff',
+  },
+  blackAndWhiteButton: {
+    backgroundColor: '#000',
+  },
+  largeText: {
+    fontSize: 24,
   },
 });
 
