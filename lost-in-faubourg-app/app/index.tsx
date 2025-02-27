@@ -56,12 +56,6 @@ export default function MainNavigator() {
           component={PointsOfInterestScreen}
           options={{ headerTitle: "Points of Interest" }}
         />
-
-        <Stack.Screen
-          name="Settings"
-          component={AccessibilitySettings}
-          options={{ headerTitle: "Settings/Accessibilities" }}
-        />
       </Stack.Navigator>
       
     </AccessibilityProvider>
