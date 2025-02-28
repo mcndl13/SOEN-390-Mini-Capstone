@@ -159,7 +159,7 @@ const CampusMap: React.FC = () => {
               {/* Custom marker for bus icon */}
               <View style={styles.busMarker}>
                 <Image 
-                  source={require('../assets/images/busIcon.png')} //bus icon
+                  source={require('../assets/images/transportModes/busBlack.png')} //bus icon
                   style={styles.busIcon}
                   resizeMode="contain"
                 />
@@ -181,7 +181,7 @@ const CampusMap: React.FC = () => {
               {/* Custom marker for station icon */}
               <View style={styles.stationMarker}>
                 <Image 
-                  source={require('../assets/images/busStation.png')}
+                  source={require('../assets/images/transportModes/busStation.png')}
                   style={styles.stationIcon}
                   resizeMode="contain"
                 />
@@ -332,8 +332,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   busIcon: {
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
   },
   stationMarker: {
     width: 40,
@@ -342,8 +342,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   stationIcon: {
-    width: 40,
-    height: 40,
+    width: 25,
+    height: 25,
   }
 });
 
