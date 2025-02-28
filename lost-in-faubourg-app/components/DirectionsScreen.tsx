@@ -278,8 +278,8 @@ export default function DirectionsScreen() {
           <Polygon
             key={idx}
             coordinates={polygon.boundaries}
-            fillColor="#91233855" // semi-transparent fill
-            strokeColor="#912338" // outline color
+            fillColor="#912338cc"
+            strokeColor="#912338cc"
             strokeWidth={2}
           />
         ))}
