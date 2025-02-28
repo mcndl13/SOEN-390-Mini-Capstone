@@ -26,13 +26,17 @@ jobs:
       - name: Install dependencies
         run: cd lost-in-faubourg-app && npm ci
 
+      - name: Create .env file
+        run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > lost-in-faubourg-app/.env
+
+
       - name: Run Linter
         run: cd lost-in-faubourg-app && npm run lint
 
       - name: Run Test Suite with Coverage and Generate JUnit Report
         env:
           CI: true
-        run: cd lost-in-faubourg-app && npm test -- --coverage
+        run: cd lost-in-faubourg-app && npm test -- --watchAll=false --coverage
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -51,17 +55,7 @@ jobs:
 
       - name: Set Environment Variables
         run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> $GITHUB_ENV
-
-      - name: SonarQube Analysis
-        uses: sonarsource/sonarcloud-github-action@v2
-        with:
-          projectBaseDir: lost-in-faubourg-app
-          args: >
-            -Dsonar.projectKey=my_project_key
-            -Dsonar.organization=my_organization
-            -Dsonar.host.url=https://sonarcloud.io
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
+      
       - name: Build the Project (iOS)
         run: cd lost-in-faubourg-app && npx expo export --platform ios
 
