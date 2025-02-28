@@ -1169,12 +1169,14 @@ const styles = StyleSheet.create({
   },
   modeButton: {
     flex: 1,
+
     backgroundColor: '#fff',
     marginRight: 8,
     borderRadius: 15,
     borderWidth: 0.5,
     borderColor: '#912338',
     paddingVertical: 10,
+
     alignItems: 'center',
   },
   activeModeButton: {
