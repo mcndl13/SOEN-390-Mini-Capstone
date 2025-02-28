@@ -415,6 +415,14 @@ export default function DirectionsScreen() {
               ]}
               onPress={() => setTravelMode('DRIVING')}
             >
+              <Image
+                source={
+                  travelMode === 'DRIVING'
+                    ? require('../assets/images/transportModes/carWhite.png')
+                    : require('../assets/images/transportModes/carBlack.png')
+                }
+                style={styles.modeButtonIcon}
+              />{' '}
               <Text
                 style={[
                   styles.modeButtonText,
@@ -431,6 +439,14 @@ export default function DirectionsScreen() {
               ]}
               onPress={() => setTravelMode('WALKING')}
             >
+              <Image
+                source={
+                  travelMode === 'WALKING'
+                    ? require('../assets/images/transportModes/walkWhite.png')
+                    : require('../assets/images/transportModes/walkBlack.png')
+                }
+                style={styles.modeButtonIcon}
+              />
               <Text
                 style={[
                   styles.modeButtonText,
@@ -447,6 +463,14 @@ export default function DirectionsScreen() {
               ]}
               onPress={() => setTravelMode('BICYCLING')}
             >
+              <Image
+                source={
+                  travelMode === 'BICYCLING'
+                    ? require('../assets/images/transportModes/bikeWhite.png')
+                    : require('../assets/images/transportModes/bikeBlack.png')
+                }
+                style={styles.modeButtonIcon}
+              />
               <Text
                 style={[
                   styles.modeButtonText,
@@ -463,6 +487,14 @@ export default function DirectionsScreen() {
               ]}
               onPress={() => setTravelMode('TRANSIT')}
             >
+              <Image
+                source={
+                  travelMode === 'TRANSIT'
+                    ? require('../assets/images/transportModes/busWhite.png')
+                    : require('../assets/images/transportModes/busBlack.png')
+                }
+                style={styles.modeButtonIcon}
+              />
               <Text
                 style={[
                   styles.modeButtonText,
@@ -551,16 +583,22 @@ const styles = StyleSheet.create({
   },
   modeButton: {
     flex: 1,
+
     backgroundColor: '#fff',
     marginRight: 8,
     borderRadius: 15,
     borderWidth: 0.5,
     borderColor: '#912338',
     paddingVertical: 10,
+
     alignItems: 'center',
   },
   activeModeButton: {
     backgroundColor: '#912338',
+  },
+  modeButtonIcon: {
+    width: 32,
+    height: 25,
   },
   modeButtonText: {
     color: '#333',
