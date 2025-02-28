@@ -15,6 +15,7 @@ interface Building {
   latitude: number;
   longitude: number;
   address: string;
+  description: string | undefined;
 }
 
 const CampusMap: React.FC = () => {
@@ -46,7 +47,8 @@ const CampusMap: React.FC = () => {
     name: polygon.name,
     latitude: getPolygonCenter(polygon.boundaries).latitude,
     longitude: getPolygonCenter(polygon.boundaries).longitude,
-    address: `${polygon.name} - Concordia University`,
+    address: `${polygon.address} - Concordia University`,
+    description: polygon.description,
   }));
 
   useEffect(() => {
@@ -126,8 +128,11 @@ const CampusMap: React.FC = () => {
 
       {selectedBuilding && (
         <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>Building: {selectedBuilding.name}</Text>
-          <Text style={styles.infoText}>Address: {selectedBuilding.address}</Text>
+          <Text style={styles.buildingName}>{selectedBuilding.name}</Text>
+          <Text style={styles.description}>{selectedBuilding.address}</Text>
+          <View style={styles.horizontalRule} />
+          <Text style={styles.infoText}>Description</Text>
+          <Text style={styles.description}>{selectedBuilding.description}</Text>
         </View>
       )}
 
@@ -189,6 +194,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  description: {
+    fontSize: 16,
+  },
+  buildingName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   buttonContainer: {
     position: 'absolute',
     bottom: 80,
@@ -220,6 +232,11 @@ const styles = StyleSheet.create({
   },
   selectedButtonText: {
     color: 'white',
+  },
+  horizontalRule: {
+    borderBottomColor: '#912338',
+    borderBottomWidth: 1,
+    marginVertical: 10,
   },
 });
 
