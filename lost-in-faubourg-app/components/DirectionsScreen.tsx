@@ -51,10 +51,12 @@ function InputAutocomplete({
   label,
   placeholder,
   onPlaceSelected,
+  currentValue,
 }: {
   label: string;
   placeholder: string;
   onPlaceSelected: (details: any) => void;
+  currentValue?: string;
 }) {
   // Minimal custom styling for Google Autocomplete
   const googleAutocompleteStyles = {
@@ -84,22 +86,31 @@ function InputAutocomplete({
   return (
     <>
       <Text>{label}</Text>
-      <GooglePlacesAutocomplete
-        placeholder={placeholder || 'Type here...'}
-        fetchDetails={true}
-        onPress={(data, details = null) => {
-          onPlaceSelected && onPlaceSelected(details);
-        }}
-        query={{
-          key: GOOGLE_MAPS_API_KEY,
-          language: 'en',
-          components: 'country:ca', // Limit to Canada for better results
-        }}
-        styles={googleAutocompleteStyles}
-        enablePoweredByContainer={false}
-        minLength={2}
-        debounce={300}
-      />
+      {currentValue ? (
+        <View style={[
+          googleAutocompleteStyles.textInput, 
+          { justifyContent: 'center', paddingHorizontal: 10 }
+        ]}>
+          <Text>{currentValue}</Text>
+        </View>
+      ) : (
+        <GooglePlacesAutocomplete
+          placeholder={placeholder || 'Type here...'}
+          fetchDetails={true}
+          onPress={(data, details = null) => {
+            onPlaceSelected && onPlaceSelected(details);
+          }}
+          query={{
+            key: GOOGLE_MAPS_API_KEY,
+            language: 'en',
+            components: 'country:ca', // Limit to Canada for better results
+          }}
+          styles={googleAutocompleteStyles}
+          enablePoweredByContainer={false}
+          minLength={2}
+          debounce={300}
+        />
+      )}
     </>
   );
 }
@@ -142,6 +153,9 @@ export default function DirectionsScreen() {
   const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
   const [zoomLevel, setZoomLevel] = useState(15); // Default zoom level
+  
+  // Toast message state for user feedback
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const mapRef = useRef<MapView>(null);
   
@@ -189,6 +203,17 @@ export default function DirectionsScreen() {
       },
     })
   ).current;
+
+  // Toast message timeout effect
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => {
+        setToastMessage(null);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   // Update tab selection when shuttle becomes available
   useEffect(() => {
@@ -263,29 +288,55 @@ export default function DirectionsScreen() {
     return null;
   };
 
-  // Use this function to potentially set the origin to the building the user is in
-  const setCurrentLocationAsOrigin = () => {
-    // First check if user is in a building
-    const buildingCenter = checkUserInBuilding();
+  // State to track whether next point should be origin or destination
+  const [nextPointIsOrigin, setNextPointIsOrigin] = useState<boolean>(true);
+
+  // Updated smart location setter with alternating logic
+  const setSmartLocation = (position: { latitude: number; longitude: number }, label: string) => {
+    // Snap the location to nearest building if appropriate
+    const snappedPosition = snapToNearestBuilding(position);
     
-    if (buildingCenter) {
-      // If user is in a building, use the building center as origin for better accuracy
-      setOrigin(buildingCenter);
-      
-      // Optionally show a message to the user
-      Alert.alert(
-        "Building Detected",
-        "We've detected you're inside a Concordia building and have set your starting point accordingly."
-      );
-    } else if (userLocation) {
-      // Just use regular user location if not in a building
-      setOrigin(userLocation);
+    // Determine where to set the position using alternating logic
+    if (nextPointIsOrigin) {
+      setOrigin(snappedPosition);
+      setToastMessage(`${label} set as origin`);
+      setNextPointIsOrigin(false); // Next one will be destination
     } else {
-      // Handle case where location is not available
+      setDestination(snappedPosition);
+      setToastMessage(`${label} set as destination`);
+      setNextPointIsOrigin(true); // Next one will be origin
+    }
+    
+    // Move the map to the location
+    moveTo(snappedPosition);
+  };
+
+  // Update this to use our smart location setter
+  const setCurrentLocationAsPoint = () => {
+    // First check if user location is available
+    if (!userLocation) {
       Alert.alert(
         "Location Not Available",
         "Please enable location services or manually set your starting point."
       );
+      return;
+    }
+    
+    // Check if user is in a building
+    const buildingCenter = checkUserInBuilding();
+    
+    if (buildingCenter) {
+      // If user is in a building, use the building center for better accuracy
+      setSmartLocation(buildingCenter, "Building location");
+      
+      // Optionally show additional info in alert
+      Alert.alert(
+        "Building Detected",
+        "We've detected you're inside a Concordia building and have set your point accordingly."
+      );
+    } else {
+      // Use regular user location
+      setSmartLocation(userLocation, "Your location");
     }
   };
 
@@ -296,7 +347,30 @@ export default function DirectionsScreen() {
     return isUserInBuilding(point) || point;
   };
 
-  // Helper to calculate distance between two coordinates in km
+  // Helper function to format location names
+  const formatLocationName = (location: { latitude: number; longitude: number }) => {
+    // Check if it's one of the campuses
+    if (Math.abs(location.latitude - SGW_COORDS.latitude) < 0.001 && 
+        Math.abs(location.longitude - SGW_COORDS.longitude) < 0.001) {
+      return "SGW Campus";
+    }
+    
+    if (Math.abs(location.latitude - LOYOLA_COORDS.latitude) < 0.001 && 
+        Math.abs(location.longitude - LOYOLA_COORDS.longitude) < 0.001) {
+      return "Loyola Campus";
+    }
+    
+    // Check if it's the user's current location
+    if (userLocation && 
+        Math.abs(location.latitude - userLocation.latitude) < 0.0001 && 
+        Math.abs(location.longitude - userLocation.longitude) < 0.0001) {
+      return "My Current Location";
+    }
+    
+    // Otherwise show coordinates
+    return `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
+  };
+
   interface Coordinates {
     latitude: number;
     longitude: number;
@@ -399,12 +473,12 @@ export default function DirectionsScreen() {
     console.log('Tracing route with:', { origin, destination });
     
     if (!origin) {
-      console.error('No origin set');
+      setToastMessage('Please set an origin point');
       return;
     }
     
     if (!destination) {
-      console.error('No destination set');
+      setToastMessage('Please set a destination point');
       return;
     }
     
@@ -444,8 +518,12 @@ export default function DirectionsScreen() {
     
     if (flag === 'origin') {
       setOrigin(snappedPosition);
+      setToastMessage('Origin set');
+      // If this was manually selected, don't change the alternating state
     } else {
       setDestination(snappedPosition);
+      setToastMessage('Destination set');
+      // If this was manually selected, don't change the alternating state
     }
     
     moveTo(snappedPosition);
@@ -458,18 +536,35 @@ export default function DirectionsScreen() {
     return html.replace(/<[^>]*>?/gm, ''); // Use a regex to strip tags
   };
 
-  // Button handlers to set origin to SGW or Loyola
-  const setCampusOrigin = (campusCoords: {
+  // UPDATED: Set campus location as either origin or destination based on what's already filled
+  const setCampusPoint = (campusCoords: {
     latitude: number;
     longitude: number;
-  }) => {
-    setOrigin(campusCoords);
-    moveTo(campusCoords);
+  }, campusName: string) => {
+    setSmartLocation(campusCoords, campusName);
   };
 
   // Toggle shuttle visibility
   const toggleShuttles = () => {
     setShowShuttles(!showShuttles);
+  };
+  // Reset origin and destination with a visual reset too
+  const resetOriginAndDestination = () => {
+    setOrigin(null);
+    setDestination(null);
+    setNextPointIsOrigin(true);
+  }; 
+
+  // Clear all points and reset the map
+  const clearPoints = () => {
+    resetOriginAndDestination();
+    setShowDirections(false);
+    setShowShuttleRoute(false);
+    setSteps([]);
+    setToastMessage('Points cleared');
+    
+    // Reset map view
+    mapRef.current?.animateToRegion(INITIAL_POSITION, 1000);
   };
 
   // Test directions with hardcoded values (for debugging)
@@ -495,6 +590,13 @@ export default function DirectionsScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Toast Message */}
+      {toastMessage && (
+        <View style={styles.toastContainer}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      )}
+      
       {/* Building Detection Badge */}
       {userLocation && checkUserInBuilding() && (
         <View style={styles.buildingInfoBadge}>
@@ -621,6 +723,7 @@ export default function DirectionsScreen() {
             label="Origin"
             placeholder="Enter origin"
             onPlaceSelected={(details) => onPlaceSelected(details, 'origin')}
+            currentValue={origin ? `${formatLocationName(origin)}` : undefined}
           />
           <InputAutocomplete
             label="Destination"
@@ -628,27 +731,37 @@ export default function DirectionsScreen() {
             onPlaceSelected={(details) =>
               onPlaceSelected(details, 'destination')
             }
+            currentValue={destination ? `${formatLocationName(destination)}` : undefined}
           />
 
-          {/* Use My Location Button */}
-          <TouchableOpacity
-            style={styles.useLocationButton}
-            onPress={setCurrentLocationAsOrigin}
-          >
-            <Text style={styles.useLocationButtonText}>Use My Location</Text>
-          </TouchableOpacity>
+          {/* Location Buttons Row */}
+          <View style={styles.locationButtonsRow}>
+            <TouchableOpacity
+              style={styles.useLocationButton}
+              onPress={setCurrentLocationAsPoint}
+            >
+              <Text style={styles.useLocationButtonText}>Use My Location</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={clearPoints}
+            >
+              <Text style={styles.clearButtonText}>Clear Points</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Campus Buttons */}
           <View style={styles.campusButtonsContainer}>
             <TouchableOpacity
               style={styles.campusButton}
-              onPress={() => setCampusOrigin(SGW_COORDS)}
+              onPress={() => setCampusPoint(SGW_COORDS, "SGW Campus")}
             >
               <Text style={styles.campusButtonText}>SGW Campus</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.campusButton}
-              onPress={() => setCampusOrigin(LOYOLA_COORDS)}
+              onPress={() => setCampusPoint(LOYOLA_COORDS, "Loyola Campus")}
             >
               <Text style={styles.campusButtonText}>Loyola Campus</Text>
             </TouchableOpacity>
@@ -758,6 +871,22 @@ export default function DirectionsScreen() {
             <Text style={styles.buttonText}>Trace route</Text>
           </TouchableOpacity>
         </View>
+      )}
+
+      {/* Back Button when directions are showing */}
+      {showDirections && (
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => {
+            setShowDirections(false);
+            setShowShuttleRoute(false);
+            setSteps([]);
+            resetOriginAndDestination(); // Clear all points when going back to search
+            setToastMessage('Returned to search view');
+          }}
+        >
+          <Text style={styles.backButtonText}>Back to Search</Text>
+        </TouchableOpacity>
       )}
 
       {/* Directions */}
@@ -1175,17 +1304,53 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   // Geometry integration styles
+  locationButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
   useLocationButton: {
-    backgroundColor: '#3498db',
+    backgroundColor: '#0088ff',
     paddingVertical: 12,
-    marginTop: 8,
+    paddingHorizontal: 10,
     borderRadius: 15,
+    flex: 1,
+    marginRight: 5,
     alignItems: 'center',
   },
   useLocationButtonText: {
     color: 'white',
     fontWeight: '600',
     fontSize: 14,
+  },
+  clearButton: {
+    backgroundColor: '#912338',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 15,
+    flex: 1,
+    marginLeft: 5,
+    alignItems: 'center',
+  },
+  clearButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  // Back button for directions view
+  backButton: {
+    position: 'absolute',
+    top: Constants.statusBarHeight + 10,
+    left: 20,
+    backgroundColor: '#912338',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    zIndex: 1000,
+  },
+  backButtonText: {
+    color: 'white',
+    fontWeight: '600',
   },
   buildingInfoBadge: {
     position: 'absolute',
@@ -1206,5 +1371,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#333',
+  },
+  // Toast message styles
+  toastContainer: {
+    position: 'absolute',
+    bottom: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    zIndex: 9999,
+    alignItems: 'center',
+  },
+  toastText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
   },
 });
