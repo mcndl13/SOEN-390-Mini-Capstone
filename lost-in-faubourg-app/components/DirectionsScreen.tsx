@@ -321,6 +321,7 @@ export default function DirectionsScreen() {
         ]}>
           <Text style={[styles.label, isLargeText && styles.largeText]}>Origin</Text>
           <GooglePlacesAutocomplete
+            fetchDetails={true}
             placeholder="Enter origin"
             styles={{
               textInput: [
@@ -338,6 +339,7 @@ export default function DirectionsScreen() {
           
           <Text style={[styles.label, isLargeText && styles.largeText]}>Destination</Text>
           <GooglePlacesAutocomplete
+            fetchDetails={true}
             placeholder="Enter destination"
             styles={{
               textInput: [
