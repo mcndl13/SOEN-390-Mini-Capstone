@@ -18,6 +18,7 @@ import Constants from 'expo-constants';
 import MapViewDirections, {
   MapViewDirectionsMode,
 } from 'react-native-maps-directions';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import 'react-native-get-random-values';
 import { GOOGLE_MAPS_API_KEY } from '@env';
@@ -40,6 +41,17 @@ const INITIAL_POSITION = {
   longitude: -73.578549,
   latitudeDelta: LATITUDE_DELTA,
   longitudeDelta: LONGITUDE_DELTA,
+};
+
+type DirectionsParams = {
+  origin?: {
+    latitude: number;
+    longitude: number;
+  };
+  destination?: {
+    latitude: number;
+    longitude: number;
+  };
 };
 
 // Coordinates for the two campuses
@@ -132,6 +144,7 @@ export default function DirectionsScreen() {
     longitude: number;
   } | null>(null);
 
+  const route = useRoute<RouteProp<Record<string, DirectionsParams>, string>>();
   const [showDirections, setShowDirections] = useState(false);
   const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -203,6 +216,43 @@ export default function DirectionsScreen() {
       },
     })
   ).current;
+
+  // Handle navigation parameters
+  useEffect(() => {
+    // Only proceed if we have both origin and destination in params
+    if (route.params?.origin && route.params?.destination) {
+      // Set both values first
+      setOrigin(route.params.origin);
+      setDestination(route.params.destination);
+      
+      // Then use setTimeout to ensure state updates have been processed
+      setTimeout(() => {
+        // Now it's safe to trace the route
+        if (mapRef.current) {
+          // Skip the traceRoute function entirely and do its work directly
+          // This avoids the alert checks in the original function
+          const finalOrigin = snapToNearestBuilding(route.params.origin!);
+          const finalDestination = snapToNearestBuilding(route.params.destination!);
+          
+          setShowDirections(true);
+          
+          // Check if shuttle route applies
+          const shuttleApplicable = isShuttleRouteApplicable();
+          setShowShuttleRoute(shuttleApplicable);
+          
+          // Fit map to show both points
+          mapRef.current.fitToCoordinates([finalOrigin, finalDestination], {
+            edgePadding,
+            animated: true,
+          });
+        }
+      }, 500);
+    } else if (route.params?.origin) {
+      setOrigin(route.params.origin);
+    } else if (route.params?.destination) {
+      setDestination(route.params.destination);
+    }
+  }, [route.params]);
 
   // Toast message timeout effect
   useEffect(() => {

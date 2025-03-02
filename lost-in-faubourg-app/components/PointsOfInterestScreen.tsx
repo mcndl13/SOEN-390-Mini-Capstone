@@ -5,11 +5,9 @@ import {
   Dimensions,
   Text,
   TouchableOpacity,
-  ScrollView,
-  FlatList,
   TextInput,
   ActivityIndicator,
-  Linking,
+  Keyboard,
 } from 'react-native';
 import MapView, { 
   Marker, 
@@ -23,10 +21,11 @@ import * as Location from 'expo-location';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 import { polygons } from '../components/polygonCoordinates';
 import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
-const LATITUDE_DELTA = 0.02;
+const LATITUDE_DELTA = 0.005; // Smaller delta for closer zoom
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 // Default map region near SGW
@@ -43,12 +42,6 @@ interface Coordinates {
   longitude: number;
 }
 
-interface POIType {
-  id: string;
-  name: string;
-  icon: string;
-}
-
 interface POI {
   id: string;
   name: string;
@@ -60,35 +53,40 @@ interface POI {
   place_id: string;
 }
 
-// Define POI types and their emoji icons
-const POI_TYPES: POIType[] = [
-  { id: 'library', name: 'Libraries', icon: '📚' },
-  { id: 'restaurant', name: 'Restaurants', icon: '🍽️' },
-  { id: 'cafe', name: 'Cafes', icon: '☕' },
-  { id: 'gym', name: 'Gyms', icon: '💪' },
-  { id: 'bookstore', name: 'Bookstores', icon: '📖' },
-  { id: 'all', name: 'All', icon: '🔍' },
+// Quick search options
+interface QuickSearchOption {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+// Define quick search options
+const QUICK_SEARCH_OPTIONS: QuickSearchOption[] = [
+  { id: 'library', name: 'Library', icon: '📚' },
+  { id: 'restaurant', name: 'Restaurant', icon: '🍽️' },
+  { id: 'cafe', name: 'Cafe', icon: '☕' },
 ];
 
-// Places API type mappings
-const PLACE_TYPE_MAPPING: Record<string, string> = {
-  'library': 'library',
-  'restaurant': 'restaurant',
-  'cafe': 'cafe',
-  'gym': 'gym',
-  'bookstore': 'book_store',
-  'all': ''
+// POI type mapping for icons
+const POI_TYPE_ICONS: Record<string, string> = {
+  'library': '📚',
+  'restaurant': '🍽️',
+  'cafe': '☕',
+  'gym': '💪',
+  'bookstore': '📖',
+  'default': '📍'
 };
 
 export default function POIScreen() {
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
-  const [selectedPOIType, setSelectedPOIType] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [pois, setPOIs] = useState<POI[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const mapRef = useRef<MapView | null>(null);
+  const searchInputRef = useRef<TextInput | null>(null);
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   
   // Message timeout effect
@@ -122,9 +120,9 @@ export default function POIScreen() {
         
         setUserLocation(userLoc);
         
-        // Fetch POIs near user location
+        // Fetch default POIs near user location (e.g., popular places)
         if (userLoc) {
-          await fetchPOIsNearby(userLoc, selectedPOIType);
+          await fetchPOIsNearby(userLoc, 'restaurant'); // Start with restaurants as default
         }
         
       } catch (error) {
@@ -136,26 +134,26 @@ export default function POIScreen() {
     })();
   }, []);
 
-  // Fetch POIs when POI type changes
-  useEffect(() => {
-    if (userLocation) {
-      fetchPOIsNearby(userLocation, selectedPOIType);
-    }
-  }, [selectedPOIType]);
-
   // Fetch POIs from Google Places API
-  const fetchPOIsNearby = async (location: Coordinates, poiType: string) => {
+  const fetchPOIsNearby = async (location: Coordinates, query: string) => {
     try {
       setIsLoading(true);
       
-      const googleType = PLACE_TYPE_MAPPING[poiType] || '';
-      const radius = 1500; // 1.5km radius
+      const radius = 300; // 300m radius
       
-      const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
+      let url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?` +
         `location=${location.latitude},${location.longitude}&` +
         `radius=${radius}&` +
-        (googleType ? `type=${googleType}&` : '') +
         `key=${GOOGLE_MAPS_API_KEY}`;
+      
+      // If we have a search query, use the text search API instead
+      if (query && query.trim() !== '') {
+        url = `https://maps.googleapis.com/maps/api/place/textsearch/json?` +
+          `query=${encodeURIComponent(query)}&` +
+          `location=${location.latitude},${location.longitude}&` +
+          `radius=${radius}&` +
+          `key=${GOOGLE_MAPS_API_KEY}`;
+      }
       
       const response = await fetch(url);
       const data = await response.json();
@@ -176,8 +174,8 @@ export default function POIScreen() {
           latitude: place.geometry.location.lat,
           longitude: place.geometry.location.lng
         },
-        description: place.vicinity || '',
-        address: place.vicinity || '',
+        description: place.vicinity || place.formatted_address || '',
+        address: place.vicinity || place.formatted_address || '',
         rating: place.rating || 'N/A',
         place_id: place.place_id
       }));
@@ -185,9 +183,9 @@ export default function POIScreen() {
       setPOIs(mappedPOIs);
       
       if (mappedPOIs.length === 0) {
-        setMessage('No places found nearby');
+        setMessage('No places found');
       } else {
-        setMessage(`Found ${mappedPOIs.length} places nearby`);
+        setMessage(`Found ${mappedPOIs.length} places`);
         
         // Fit map to show all markers
         if (mappedPOIs.length > 0) {
@@ -200,14 +198,36 @@ export default function POIScreen() {
       }
     } catch (error) {
       console.error('Error fetching POIs:', error);
-      setMessage('Failed to fetch nearby places');
+      setMessage('Failed to fetch places');
     } finally {
       setIsLoading(false);
     }
   };
   
+  // Handle search submission
+  const handleSearch = () => {
+    if (userLocation) {
+      fetchPOIsNearby(userLocation, searchQuery);
+      Keyboard.dismiss();
+    } else {
+      setMessage('Location not available');
+    }
+  };
+  
+  // Handle quick search option selection
+  const handleQuickSearch = (searchType: string) => {
+    setSearchQuery(searchType);
+    if (userLocation) {
+      fetchPOIsNearby(userLocation, searchType);
+    } else {
+      setMessage('Location not available');
+    }
+  };
+  
   // Helper to determine POI type from Google Places types
   const determinePoiType = (types: string[]): string => {
+    if (!types || types.length === 0) return 'default';
+    
     for (const type of types) {
       if (type === 'library') return 'library';
       if (type === 'book_store') return 'bookstore';
@@ -215,7 +235,7 @@ export default function POIScreen() {
       if (type === 'cafe' || type === 'bar') return 'cafe';
       if (type === 'gym') return 'gym';
     }
-    return 'all';
+    return 'default';
   };
   
   // Fit map to show all markers
@@ -230,13 +250,27 @@ export default function POIScreen() {
   
   // Navigate to directions
   const getDirections = (poi: POI) => {
+    if (!userLocation) {
+      setMessage('Your location is not available');
+      return;
+    }
+    
+    // Looking at the DirectionsScreen, it expects a direct latitude/longitude object
     navigation.navigate('Directions', {
+      origin: {
+        latitude: userLocation.latitude,
+        longitude: userLocation.longitude
+      },
       destination: {
         latitude: poi.coordinates.latitude,
-        longitude: poi.coordinates.longitude,
-        name: poi.name
+        longitude: poi.coordinates.longitude
       }
     });
+    
+    // After navigation, show a message to help the user
+    setTimeout(() => {
+      setMessage('Tap "Trace route" to see directions');
+    }, 500);
   };
 
   return (
@@ -279,17 +313,20 @@ export default function POIScreen() {
           >
             <View style={styles.markerContainer}>
               <Text style={styles.markerIcon}>
-                {POI_TYPES.find(type => type.id === poi.type || type.id === 'all')?.icon || '📍'}
+                {POI_TYPE_ICONS[poi.type] || POI_TYPE_ICONS.default}
               </Text>
             </View>
-            <Callout onPress={() => getDirections(poi)}>
+            <Callout tooltip onPress={() => getDirections(poi)}>
               <View style={styles.calloutContainer}>
                 <Text style={styles.calloutTitle}>{poi.name}</Text>
                 <Text style={styles.calloutAddress}>{poi.address}</Text>
                 {poi.rating !== 'N/A' && (
                   <Text style={styles.calloutRating}>Rating: {poi.rating} ⭐</Text>
                 )}
-                <Text style={styles.directionsText}>Tap for directions</Text>
+                <View style={styles.directionsButton}>
+                  <Ionicons name="navigate" size={16} color="white" style={styles.directionsIcon} />
+                  <Text style={styles.directionsText}>Get Directions</Text>
+                </View>
               </View>
             </Callout>
           </Marker>
@@ -304,41 +341,41 @@ export default function POIScreen() {
         </View>
       )}
       
-      {/* POI Type Selection */}
-      <View style={styles.poiTypesContainer}>
-        <FlatList
-          data={POI_TYPES}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <TouchableOpacity 
-              style={[
-                styles.poiTypeButton, 
-                selectedPOIType === item.id && styles.activePoiTypeButton
-              ]}
-              onPress={() => setSelectedPOIType(item.id)}
-              disabled={isLoading}
-            >
-              <Text 
-                style={[
-                  styles.poiTypeIcon,
-                  selectedPOIType === item.id && styles.activePoiTypeIcon
-                ]}
-              >
-                {item.icon}
-              </Text>
-              <Text 
-                style={[
-                  styles.poiTypeText,
-                  selectedPOIType === item.id && styles.activePoiTypeText
-                ]}
-              >
-                {item.name}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBarWrapper}>
+          <TextInput
+            ref={searchInputRef}
+            style={styles.searchInput}
+            placeholder="Search for places..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onSubmitEditing={handleSearch}
+            returnKeyType="search"
+          />
+          <TouchableOpacity 
+            style={styles.searchButton}
+            onPress={handleSearch}
+            disabled={isLoading}
+          >
+            <Ionicons name="search" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+      
+      {/* Quick Search Buttons */}
+      <View style={styles.quickSearchContainer}>
+        {QUICK_SEARCH_OPTIONS.map((option) => (
+          <TouchableOpacity
+            key={option.id}
+            style={styles.quickSearchButton}
+            onPress={() => handleQuickSearch(option.id)}
+            disabled={isLoading}
+          >
+            <Text style={styles.quickSearchIcon}>{option.icon}</Text>
+            <Text style={styles.quickSearchText}>{option.name}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
       
       {/* Current Location Button */}
@@ -355,7 +392,7 @@ export default function POIScreen() {
             }
           }}
         >
-          <Text style={styles.myLocationButtonText}>My Location</Text>
+          <Ionicons name="locate" size={22} color="white" />
         </TouchableOpacity>
       )}
     </View>
@@ -407,48 +444,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  // POI type selection
-  poiTypesContainer: {
+  // Search bar
+  searchContainer: {
     position: 'absolute',
-    bottom: 20,
+    top: Constants.statusBarHeight + 10,
     left: 0,
     right: 0,
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
+    zIndex: 150,
   },
-  poiTypeButton: {
+  searchBarWrapper: {
+    flexDirection: 'row',
     backgroundColor: 'white',
-    padding: 10,
     borderRadius: 8,
-    marginHorizontal: 5,
-    alignItems: 'center',
     shadowColor: 'black',
-    shadowOffset: { width: 1, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-    width: 85,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  activePoiTypeButton: {
-    backgroundColor: '#912338',
-  },
-  poiTypeIcon: {
-    fontSize: 24,
-    marginBottom: 5,
-    textAlign: 'center',
-    height: 30,
-    lineHeight: 30,
-  },
-  activePoiTypeIcon: {
-    color: 'white',
-  },
-  poiTypeText: {
-    fontSize: 12,
-    fontWeight: '500',
+  searchInput: {
+    flex: 1,
+    height: 50,
+    paddingHorizontal: 15,
+    fontSize: 16,
     color: '#333',
-    textAlign: 'center',
   },
-  activePoiTypeText: {
-    color: 'white',
+  searchButton: {
+    backgroundColor: '#912338',
+    width: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
   },
   // Marker styles
   markerContainer: {
@@ -463,30 +491,82 @@ const styles = StyleSheet.create({
   },
   // Callout styles
   calloutContainer: {
-    width: 200,
-    padding: 8,
+    width: 220,
+    padding: 12,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   calloutTitle: {
     fontWeight: 'bold',
     fontSize: 14,
-    marginBottom: 3,
+    marginBottom: 5,
   },
   calloutAddress: {
     fontSize: 12,
-    marginBottom: 3,
+    marginBottom: 5,
     color: '#555',
   },
   calloutRating: {
     fontSize: 12,
     fontWeight: '500',
     color: '#666',
-    marginBottom: 5,
+    marginBottom: 8,
+  },
+  directionsButton: {
+    backgroundColor: '#912338',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginTop: 5,
+  },
+  directionsIcon: {
+    marginRight: 5,
   },
   directionsText: {
     fontSize: 12,
-    color: '#0066cc',
-    textAlign: 'center',
-    marginTop: 5,
+    color: 'white',
+    fontWeight: '600',
+  },
+  // Quick search options
+  quickSearchContainer: {
+    position: 'absolute',
+    bottom: 30,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+  },
+  quickSearchButton: {
+    backgroundColor: 'white',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    marginHorizontal: 5,
+    alignItems: 'center',
+    flexDirection: 'row',
+    shadowColor: 'black',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  quickSearchIcon: {
+    fontSize: 18,
+    marginRight: 5,
+  },
+  quickSearchText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
   },
   // My location button
   myLocationButton: {
@@ -494,18 +574,15 @@ const styles = StyleSheet.create({
     bottom: 90,
     right: 20,
     backgroundColor: '#912338',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 8,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
     shadowColor: 'black',
-    shadowOffset: { width: 1, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-  myLocationButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
+    shadowRadius: 3,
+    elevation: 4,
   },
 });
