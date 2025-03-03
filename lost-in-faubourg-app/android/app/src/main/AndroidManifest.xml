@@ -28,6 +28,7 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="myapp"/>
         <data android:scheme="com.valentin514.lostinfaubourgapp"/>
+        <data android:scheme="com.valentin514.lostinfaubourgapp"/>
       </intent-filter>
     </activity>
   </application>

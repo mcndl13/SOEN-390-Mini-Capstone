@@ -22,9 +22,16 @@ export default function CalendarIntegrationScreen() {
 
   // Google Sign-In request
   const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: "876949776030-1f99gjv4qddpjnl1lre0j3ci7gs4sg7r.apps.googleusercontent.com",
-    webClientId: "876949776030-1f99gjv4qddpjnl1lre0j3ci7gs4sg7r.apps.googleusercontent.com",
-    scopes: ["email", "profile"], 
+    androidClientId: "876949776030-i8f75o4us24vdeavtfv4q4rnjfpfg00b.apps.googleusercontent.com",
+    webClientId: "876949776030-i8f75o4us24vdeavtfv4q4rnjfpfg00b.apps.googleusercontent.com",
+    scopes: [
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/calendar.readonly", 
+      "https://www.googleapis.com/auth/calendar.events",
+      "https://www.googleapis.com/auth/calendar"
+    ],
+    
     redirectUri, //redirect URI
   });
 

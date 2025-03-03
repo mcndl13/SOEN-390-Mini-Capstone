@@ -1,4 +1,3 @@
-// services/calendarService.ts
 export async function getCalendarEvents(token: string) {
   try {
     const res = await fetch(
@@ -9,12 +8,25 @@ export async function getCalendarEvents(token: string) {
         },
       }
     );
+
     const data = await res.json();
-    return data.items.map((event: any) => ({
-      summary: event.summary,
-      start: event.start.dateTime || event.start.date,
-      location: event.location,
-    }));
+    console.log("Full Calendar API Response:", data);
+
+    if (data.error) {
+      console.error("Google Calendar API Error:", data.error);
+      return [];
+    }
+
+    if (data.items && Array.isArray(data.items)) {
+      return data.items.map((event: any) => ({
+        summary: event.summary,
+        start: event.start?.dateTime || event.start?.date,
+        location: event.location || "N/A",
+      }));
+    } else {
+      console.warn("No events found in the calendar.");
+      return [];
+    }
   } catch (error) {
     console.error("Error fetching calendar events:", error);
     return [];
