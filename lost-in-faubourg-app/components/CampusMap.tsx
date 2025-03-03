@@ -16,6 +16,7 @@ interface Building {
   latitude: number;
   longitude: number;
   address: string;
+  description: string | undefined;
 }
 
 const CampusMap: React.FC = () => {
@@ -48,7 +49,8 @@ const CampusMap: React.FC = () => {
     name: polygon.name,
     latitude: getPolygonCenter(polygon.boundaries).latitude,
     longitude: getPolygonCenter(polygon.boundaries).longitude,
-    address: `${polygon.name} - Concordia University`,
+    address: `${polygon.address} - Concordia University`,
+    description: polygon.description,
   }));
 
   const mapStyle: MapStyleElement[] = isBlackAndWhite ? [
@@ -145,13 +147,13 @@ const CampusMap: React.FC = () => {
       )}
 
       {selectedBuilding && (
-        <View style={[styles.infoContainer, isBlackAndWhite && styles.blackAndWhiteContainer]}>
-          <Text style={[styles.infoText, isLargeText && styles.largeText]}>
-            Building: {selectedBuilding.name}
-          </Text>
-          <Text style={[styles.infoText, isLargeText && styles.largeText]}>
-            Address: {selectedBuilding.address}
-          </Text>
+         <View style={[styles.infoContainer, isBlackAndWhite && styles.blackAndWhiteContainer]}>
+          <Text style={[styles.buildingName, isLargeText && styles.largeText]}>{selectedBuilding.name}</Text>
+          <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.address}</Text>
+          <View style={styles.horizontalRule} />
+            <Text style={[styles.infoText, isLargeText && styles.largeText]}>Description</Text>
+            <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.description}</Text>
+          </View>
         </View>
       )}
 
@@ -219,6 +221,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  description: {
+    fontSize: 16,
+  },
+  buildingName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   buttonContainer: {
     position: 'absolute',
     bottom: 80,
@@ -266,6 +275,12 @@ const styles = StyleSheet.create({
   },
   blackAndWhiteText: {
     color: '#000000',
+  },
+  horizontalRule: {
+    borderBottomColor: '#912338',
+    borderBottomWidth: 1,
+    marginVertical: 10,
+  },
   },
 });
 
