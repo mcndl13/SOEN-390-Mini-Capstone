@@ -1,4 +1,3 @@
-// HomeScreen.js
 import React from "react";
 import {
   View,
@@ -6,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Linking,
 } from "react-native";
 
 import { NavigationProp } from '@react-navigation/native';
@@ -15,6 +15,18 @@ type HomeScreenProps = {
 };
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+  // Function to open the shuttle schedule webpage
+  const openShuttleSchedule = async () => {
+    const url = "https://www.concordia.ca/maps/shuttle-bus.html#depart";
+    const supported = await Linking.canOpenURL(url);
+    
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      console.error("Cannot open URL: " + url);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome</Text>
@@ -48,6 +60,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           onPress={() => navigation.navigate("PointsOfInterest")}
         >
           <Text style={styles.buttonText}>Find Points of Interest</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={openShuttleSchedule}
+        >
+          <Text style={styles.buttonText}>Shuttle Schedule</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
