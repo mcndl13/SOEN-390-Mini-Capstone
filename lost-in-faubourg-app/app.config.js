@@ -26,7 +26,7 @@ export default {
       },
       config: {
         googleMaps: {
-          apiKey: "youAIzaSyDfv2-YoXgh3gE2ck-LhfNj9njU8Hj9LxU", 
+          apiKey: process.env.GOOGLE_MAPS_API_KEY, 
         },
       },
     },
@@ -55,7 +55,7 @@ export default {
         projectId: "cd18a56b-e538-4a0d-a45e-52b84e993aa0",
       },
       androidClientId: "876949776030-i8f75o4us24vdeavtfv4q4rnjfpfg00b.apps.googleusercontent.com",
-      googleMapsApiKey: "youAIzaSyDfv2-YoXgh3gE2ck-LhfNj9njU8Hj9LxU",
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
     },
   },
 };
