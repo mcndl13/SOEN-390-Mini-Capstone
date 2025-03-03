@@ -38,5 +38,5 @@ yarn-error.*
 
 app-example
 
-# Ignore AndroidManifest.xml
-android/app/src/main/AndroidManifest.xml
+# android
+android
