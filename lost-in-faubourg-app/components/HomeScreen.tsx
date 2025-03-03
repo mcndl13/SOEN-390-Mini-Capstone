@@ -1,19 +1,45 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native";
+import * as Location from "expo-location";
 import { NavigationProp } from "@react-navigation/native";
 
 type HomeScreenProps = {
   navigation: NavigationProp<any>;
 };
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+const HomeScreen = ({ navigation }: HomeScreenProps) => {
+  const [hasPermission, setHasPermission] = useState(false);
+
+  const requestLocationPermission = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Denied", "Allow location access to use maps.");
+      return false;
+    }
+    return true;
+  };
+
+  useEffect(() => {
+    const getPermission = async () => {
+      const permission = await requestLocationPermission();
+      setHasPermission(permission);
+    };
+    getPermission();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome</Text>
       <ScrollView>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("CampusMap")}
+          onPress={() => {
+            if (hasPermission) {
+              navigation.navigate("CampusMap");
+            } else {
+              Alert.alert("Permission Needed", "You need to allow location access.");
+            }
+          }}
         >
           <Text style={styles.buttonText}>Explore Campus Map</Text>
         </TouchableOpacity>
@@ -44,7 +70,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       </ScrollView>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -71,3 +97,5 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
+
+export default HomeScreen;
