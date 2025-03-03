@@ -147,13 +147,12 @@ const CampusMap: React.FC = () => {
       )}
 
       {selectedBuilding && (
-         <View style={[styles.infoContainer, isBlackAndWhite && styles.blackAndWhiteContainer]}>
+        <View style={[styles.infoContainer, isBlackAndWhite && styles.blackAndWhiteContainer]}>
           <Text style={[styles.buildingName, isLargeText && styles.largeText]}>{selectedBuilding.name}</Text>
           <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.address}</Text>
           <View style={styles.horizontalRule} />
-            <Text style={[styles.infoText, isLargeText && styles.largeText]}>Description</Text>
-            <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.description}</Text>
-          </View>
+          <Text style={[styles.infoText, isLargeText && styles.largeText]}>Description</Text>
+          <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.description}</Text>
         </View>
       )}
 
@@ -280,7 +279,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#912338',
     borderBottomWidth: 1,
     marginVertical: 10,
-  },
   },
 });
 
