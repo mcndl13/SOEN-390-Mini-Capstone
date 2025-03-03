@@ -37,3 +37,6 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Ignore AndroidManifest.xml
+android/app/src/main/AndroidManifest.xml
