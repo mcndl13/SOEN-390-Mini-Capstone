@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   LayoutChangeEvent,
   GestureResponderEvent,
   TouchableWithoutFeedback,
+  TouchableOpacity,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Svg, { Polyline, Circle } from 'react-native-svg';
@@ -39,6 +40,13 @@ type GraphNode = {
   x: number;
   y: number;
   neighbors: string[];
+};
+
+type FloorData = {
+  image: any;
+  graph: Record<string, GraphNode>;
+  // These dimensions represent the coordinate system in which your nodes were defined.
+  originalDimensions: { width: number; height: number };
 };
 
 //--------------------------------------
@@ -123,6 +131,13 @@ const hallFloorGraphs: Record<number, Record<string, GraphNode>> = {
 
   },
   9: {
+    //Hallway Nodes
+    hallwayLowerLeftCorner: { x: 73,  y: 289, neighbors: ['hallwayMiddleLower', 'hallwayMiddleLeftCorner' ] },
+    hallwayMiddleLeftCorner: { x: 73,  y: 140, neighbors: ['hallwayLowerLeftCorner','hallwayHigherLeftCorner' ] },
+    hallwayHigherLeftCorner: { x: 73,  y: 66, neighbors: ['hallwayMiddleLeftCorner'  ] },
+    hallwayMiddleLower: { x: 178,  y: 289, neighbors: ['hallwayLowerLeftCorner', 'hallwayLowerRightCorner',] },
+    hallwayLowerRightCorner: { x: 305,  y: 289, neighbors: ['hallwayMiddleLower',  ] },
+  
   },
 };
 
@@ -163,47 +178,44 @@ const vlFloorGraphs: Record<number, Record<string, GraphNode>> = {
   },
 };
 
-
 //--------------------------------------
 // 4) Create Centralized Building Data
 //--------------------------------------
 const buildingData: Record<
   string,
   {
-    floors: Record<number, { image: any; graph: Record<string, GraphNode> }>;
+    floors: Record<number, FloorData>;
   }
 > = {
-  // SGW Campus
   Hall: {
     floors: {
-      1: { image: HallFloor1, graph: hallFloorGraphs[1] },
-      2: { image: HallFloor2, graph: hallFloorGraphs[2] },
-      8: { image: HallFloor8, graph: hallFloorGraphs[8] },
-      9: { image: HallFloor9, graph: hallFloorGraphs[9] },
+      1: { image: HallFloor1, graph: hallFloorGraphs[1], originalDimensions: { width: 370, height:370 } },
+      2: { image: HallFloor2, graph: hallFloorGraphs[2], originalDimensions: { width: 370, height:370 } },
+      8: { image: HallFloor8, graph: hallFloorGraphs[8], originalDimensions: { width: 370, height:370 } },
+      9: { image: HallFloor9, graph: hallFloorGraphs[9], originalDimensions: { width: 370, height:370 } },
     },
   },
   CC: {
     floors: {
-      1: { image: CCFloor1, graph: ccFloorGraphs[1] },
+      1: { image: CCFloor1 , graph: ccFloorGraphs[1], originalDimensions: { width: 370, height:370 } },
     },
   },
   'John Molson': {
     floors: {
-      1: { image: JMFloor1, graph: jmFloorGraphs[1] },
-      2: { image: JMFloor2, graph: jmFloorGraphs[2] },
+      1: { image: JMFloor1, graph: jmFloorGraphs[1], originalDimensions: { width: 370, height: 370 } },
+      2: { image: JMFloor2, graph: jmFloorGraphs[2], originalDimensions: { width: 370, height: 370 } },
     },
   },
-  // Loyola Campus
   'Vanier Extension': {
     floors: {
-      1: { image: VEFloor1, graph: veFloorGraphs[1] },
-      2: { image: VEFloor2, graph: veFloorGraphs[2] },
+      1: { image: VEFloor1, graph: veFloorGraphs[1], originalDimensions: { width: 370, height: 370 } },
+      2: { image: VEFloor2, graph: veFloorGraphs[2], originalDimensions: { width: 370, height: 370 } },
     },
   },
   'Vanier Library': {
     floors: {
-      1: { image: VLFloor1, graph: vlFloorGraphs[1] },
-      2: { image: VLFloor2, graph: vlFloorGraphs[2] },
+      1: { image: VLFloor1, graph: vlFloorGraphs[1], originalDimensions: { width: 370, height: 370 } },
+      2: { image: VLFloor2, graph: vlFloorGraphs[2], originalDimensions: { width: 370, height: 370 } },
     },
   },
 };
@@ -212,18 +224,46 @@ const buildingData: Record<
 // 5) Helper Functions
 //--------------------------------------
 
-// Compute BFS path from start to end (returns an array of node IDs)
+// Scale node coordinates from the original image dimensions to the displayed container size
+function scaleCoordinates(
+  coord: { x: number; y: number },
+  original: { width: number; height: number },
+  container: { width: number; height: number }
+): { x: number; y: number } {
+  const scaleX = container.width / original.width;
+  const scaleY = container.height / original.height;
+  return { x: coord.x * scaleX, y: coord.y * scaleY };
+}
+
+// Convert an array of node IDs into an array of scaled coordinates
+function getPathCoordinates(
+  graph: Record<string, GraphNode>,
+  nodeIds: string[],
+  original: { width: number; height: number },
+  container: { width: number; height: number }
+): { x: number; y: number }[] {
+  return nodeIds.map((id) => scaleCoordinates({ x: graph[id].x, y: graph[id].y }, original, container));
+}
+
+function computePathDistance(coords: { x: number; y: number }[]): number {
+  let total = 0;
+  for (let i = 1; i < coords.length; i++) {
+    const dx = coords[i].x - coords[i - 1].x;
+    const dy = coords[i].y - coords[i - 1].y;
+    total += Math.sqrt(dx * dx + dy * dy);
+  }
+  return total;
+}
+
 function findPathBFS(
   graph: Record<string, GraphNode>,
   startId: string,
   endId: string
 ): string[] {
   if (startId === endId) return [startId];
-
   const queue = [startId];
   const visited = new Set<string>([startId]);
   const cameFrom: Record<string, string | null> = { [startId]: null };
-
   while (queue.length > 0) {
     const current = queue.shift()!;
     if (current === endId) break;
@@ -265,24 +305,6 @@ function findNearestNode(
   return closestNodeId;
 }
 
-function getPathCoordinates(
-  graph: Record<string, GraphNode>,
-  nodeIds: string[]
-): { x: number; y: number }[] {
-  return nodeIds.map((id) => ({ x: graph[id].x, y: graph[id].y }));
-}
-
-// Compute total distance along a path (in drawing units)
-function computePathDistance(coords: { x: number; y: number }[]): number {
-  let total = 0;
-  for (let i = 1; i < coords.length; i++) {
-    const dx = coords[i].x - coords[i - 1].x;
-    const dy = coords[i].y - coords[i - 1].y;
-    total += Math.sqrt(dx * dx + dy * dy);
-  }
-  return total;
-}
-
 //--------------------------------------
 // 6) COMPONENT
 //--------------------------------------
@@ -293,6 +315,7 @@ export default function IndoorDirectionsScreen() {
   const [startNodeId, setStartNodeId] = useState<string | null>(null);
   const [endNodeId, setEndNodeId] = useState<string | null>(null);
   const [path, setPath] = useState<string[]>([]);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
   const currentBuilding = buildingData[selectedBuilding];
   const currentFloorData = currentBuilding.floors[selectedFloor];
@@ -327,19 +350,25 @@ export default function IndoorDirectionsScreen() {
     setPath([]);
   };
 
-  const pathCoords = getPathCoordinates(currentFloorData.graph, path);
-  const polylinePoints = pathCoords.map((p) => `${p.x},${p.y}`).join(' ');
+  // Scale the path coordinates from original image dimensions to container dimensions
+  const scaledPathCoords = getPathCoordinates(
+    currentFloorData.graph,
+    path,
+    currentFloorData.originalDimensions,
+    containerSize
+  );
+  const polylinePoints = scaledPathCoords.map((p) => `${p.x},${p.y}`).join(' ');
 
-
-const PIXEL_TO_METER = 0.1; 
-  const drawingDistance = computePathDistance(pathCoords);
+  // Conversion factor (1 drawing unit = 0.1 meters for a 1:1000 scale)
+  const PIXEL_TO_METER = 0.1;
+  const drawingDistance = computePathDistance(scaledPathCoords);
   const distanceInMeters = drawingDistance * PIXEL_TO_METER;
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Indoor Navigation</Text>
 
-      {}
+      {/* Building Picker */}
       <Picker
         selectedValue={selectedBuilding}
         style={styles.picker}
@@ -356,7 +385,7 @@ const PIXEL_TO_METER = 0.1;
         ))}
       </Picker>
 
-      {}
+      {/* Floor Picker */}
       <Picker
         selectedValue={selectedFloor}
         style={styles.picker}
@@ -372,8 +401,21 @@ const PIXEL_TO_METER = 0.1;
         ))}
       </Picker>
 
-      {}
-      <View style={styles.imageContainer} onLayout={handleContainerLayout}>
+      {/* Full Screen Toggle Button */}
+      <TouchableOpacity
+        style={styles.fullscreenButton}
+        onPress={() => setIsFullScreen(!isFullScreen)}
+      >
+        <Text style={styles.fullscreenButtonText}>
+          {isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Map Container */}
+      <View
+        style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
+        onLayout={handleContainerLayout}
+      >
         <TouchableWithoutFeedback onPress={handlePress}>
           <View style={styles.touchableArea}>
             <Image
@@ -395,18 +437,34 @@ const PIXEL_TO_METER = 0.1;
               )}
               {startNodeId && currentFloorData.graph[startNodeId] && (
                 <Circle
-                  cx={currentFloorData.graph[startNodeId].x}
-                  cy={currentFloorData.graph[startNodeId].y}
+                  cx={scaleCoordinates(
+                    { x: currentFloorData.graph[startNodeId].x, y: currentFloorData.graph[startNodeId].y },
+                    currentFloorData.originalDimensions,
+                    containerSize
+                  ).x}
+                  cy={scaleCoordinates(
+                    { x: currentFloorData.graph[startNodeId].x, y: currentFloorData.graph[startNodeId].y },
+                    currentFloorData.originalDimensions,
+                    containerSize
+                  ).y}
                   r="5"
-                  fill="green"
+                  fill="blue"
                 />
               )}
               {endNodeId && currentFloorData.graph[endNodeId] && (
                 <Circle
-                  cx={currentFloorData.graph[endNodeId].x}
-                  cy={currentFloorData.graph[endNodeId].y}
+                  cx={scaleCoordinates(
+                    { x: currentFloorData.graph[endNodeId].x, y: currentFloorData.graph[endNodeId].y },
+                    currentFloorData.originalDimensions,
+                    containerSize
+                  ).x}
+                  cy={scaleCoordinates(
+                    { x: currentFloorData.graph[endNodeId].x, y: currentFloorData.graph[endNodeId].y },
+                    currentFloorData.originalDimensions,
+                    containerSize
+                  ).y}
                   r="5"
-                  fill="red"
+                  fill="green"
                 />
               )}
             </Svg>
@@ -446,6 +504,20 @@ const styles = StyleSheet.create({
     height: 50,
     width: 200,
   },
+  fullscreenButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 10,
+    backgroundColor: '#000',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 5,
+  },
+  fullscreenButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
   imageContainer: {
     width: '90%',
     aspectRatio: 1,
@@ -453,6 +525,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     position: 'relative',
+  },
+  fullScreenImageContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#fff',
+    zIndex: 5,
   },
   touchableArea: {
     flex: 1,
