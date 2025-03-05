@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   GestureResponderEvent,
   TouchableWithoutFeedback,
   TouchableOpacity,
+  TextInput,
+  ScrollView,
+  Switch,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import Svg, { Polyline, Circle } from 'react-native-svg';
@@ -42,6 +45,13 @@ type GraphNode = {
   neighbors: string[];
 };
 
+// Updated Destination now includes building info.
+type Destination = {
+  building: string;
+  node: string;
+  floor: number;
+};
+
 type FloorData = {
   image: any;
   graph: Record<string, GraphNode>;
@@ -58,7 +68,13 @@ const hallFloorGraphs: Record<number, Record<string, GraphNode>> = {
 
   //HALL BUILDING NODES
   1: {
-    
+    Hall_Entrance: { x: 110,  y: 360, neighbors: ['Main_walway', 'Hall_1st_Basement_Escalator'] },
+    Main_walway: { x: 110,  y: 292, neighbors: ['Hall_Entrance','Hallway'] },
+    Hallway: { x: 265,  y: 292, neighbors: ['Main_walway', 'Hall_1st_Elevator'] },
+    Hall_1st_Elevator: { x: 265,  y: 302, neighbors: ['Hallway'] },
+
+    Hall_1st_Basement_Escalator: { x: 275,  y: 360, neighbors: ['Hall_Entrance'] },
+
   },
   2: {
    
@@ -134,10 +150,16 @@ const hallFloorGraphs: Record<number, Record<string, GraphNode>> = {
     //Hallway Nodes
     hallwayLowerLeftCorner: { x: 73,  y: 289, neighbors: ['hallwayMiddleLower', 'hallwayMiddleLeftCorner' ] },
     hallwayMiddleLeftCorner: { x: 73,  y: 140, neighbors: ['hallwayLowerLeftCorner','hallwayHigherLeftCorner' ] },
-    hallwayHigherLeftCorner: { x: 73,  y: 66, neighbors: ['hallwayMiddleLeftCorner'  ] },
-    hallwayMiddleLower: { x: 178,  y: 289, neighbors: ['hallwayLowerLeftCorner', 'hallwayLowerRightCorner',] },
+    hallwayHigherLeftCorner: { x: 73,  y: 66, neighbors: ['hallwayMiddleLeftCorner' ,'h929' ] },
+    hallwayMiddleLower: { x: 178,  y: 289, neighbors: ['hallwayLowerLeftCorner', 'hallwayLowerRightCorner','womensBathroom'] },
     hallwayLowerRightCorner: { x: 305,  y: 289, neighbors: ['hallwayMiddleLower',  ] },
-  
+    
+    h929: { x: 53,  y: 66, neighbors: ['hallwayHigherLeftCorner',  ] },
+    womensBathroom: { x: 228,  y: 275, neighbors: ['hallwayMiddleLower',  ] },
+    Elevator9th: { x: 241,  y: 235, neighbors: ['h962',  ] },
+    h962: { x: 235,  y: 205, neighbors: ['Elevator9th',  ] },
+
+
   },
 };
 
@@ -154,7 +176,11 @@ const jmFloorGraphs: Record<number, Record<string, GraphNode>> = {
     
   },
   2: {
-    
+    Tunnel: { x: 53,  y: 176, neighbors: [ 'hallway' ] },
+    hallway: { x: 168,  y: 166, neighbors: [ 'Tunnel','s2101' ] },
+    s2101: { x: 168,  y: 60, neighbors: [ 'hallway' ] },
+
+
   },
 };
 
@@ -177,7 +203,6 @@ const vlFloorGraphs: Record<number, Record<string, GraphNode>> = {
     
   },
 };
-
 //--------------------------------------
 // 4) Create Centralized Building Data
 //--------------------------------------
@@ -189,15 +214,15 @@ const buildingData: Record<
 > = {
   Hall: {
     floors: {
-      1: { image: HallFloor1, graph: hallFloorGraphs[1], originalDimensions: { width: 370, height:370 } },
-      2: { image: HallFloor2, graph: hallFloorGraphs[2], originalDimensions: { width: 370, height:370 } },
-      8: { image: HallFloor8, graph: hallFloorGraphs[8], originalDimensions: { width: 370, height:370 } },
-      9: { image: HallFloor9, graph: hallFloorGraphs[9], originalDimensions: { width: 370, height:370 } },
+      1: { image: HallFloor1, graph: hallFloorGraphs[1], originalDimensions: { width: 370, height: 370 } },
+      2: { image: HallFloor2, graph: hallFloorGraphs[2], originalDimensions: { width: 370, height: 370 } },
+      8: { image: HallFloor8, graph: hallFloorGraphs[8], originalDimensions: { width: 370, height: 370 } },
+      9: { image: HallFloor9, graph: hallFloorGraphs[9], originalDimensions: { width: 370, height: 370 } },
     },
   },
   CC: {
     floors: {
-      1: { image: CCFloor1 , graph: ccFloorGraphs[1], originalDimensions: { width: 370, height:370 } },
+      1: { image: CCFloor1, graph: ccFloorGraphs[1], originalDimensions: { width: 370, height: 370 } },
     },
   },
   'John Molson': {
@@ -223,8 +248,7 @@ const buildingData: Record<
 //--------------------------------------
 // 5) Helper Functions
 //--------------------------------------
-
-// Scale node coordinates from the original image dimensions to the displayed container size
+// Scale node coordinates from original dimensions to container dimensions
 function scaleCoordinates(
   coord: { x: number; y: number },
   original: { width: number; height: number },
@@ -235,14 +259,16 @@ function scaleCoordinates(
   return { x: coord.x * scaleX, y: coord.y * scaleY };
 }
 
-// Convert an array of node IDs into an array of scaled coordinates
+// Get scaled coordinates for an array of node IDs
 function getPathCoordinates(
   graph: Record<string, GraphNode>,
   nodeIds: string[],
   original: { width: number; height: number },
   container: { width: number; height: number }
 ): { x: number; y: number }[] {
-  return nodeIds.map((id) => scaleCoordinates({ x: graph[id].x, y: graph[id].y }, original, container));
+  return nodeIds.map((id) =>
+    scaleCoordinates({ x: graph[id].x, y: graph[id].y }, original, container)
+  );
 }
 
 function computePathDistance(coords: { x: number; y: number }[]): number {
@@ -305,20 +331,77 @@ function findNearestNode(
   return closestNodeId;
 }
 
+// Get all nodes from all floors in all buildings
+function getAllNodes(): Array<{ building: string; node: string; floor: number }> {
+  const nodes: Array<{ building: string; node: string; floor: number }> = [];
+  Object.keys(buildingData).forEach((b) => {
+    Object.keys(buildingData[b].floors).forEach((floorStr) => {
+      const floor = parseInt(floorStr, 10);
+      const graph = buildingData[b].floors[floor].graph;
+      Object.keys(graph).forEach((node) => {
+        nodes.push({ building: b, node, floor });
+      });
+    });
+  });
+  return nodes;
+}
+
+// Formats a raw node name by replacing underscores with spaces and capitalizing each word.
+function formatNodeName(node: string): string {
+  return node
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+// Generates step-by-step directions from a path of node IDs.
+function generateDirections(path: string[]): string[] {
+  if (!path || path.length === 0) return [];
+  const directions = [];
+  directions.push(`Start at ${formatNodeName(path[0])}.`);
+  for (let i = 1; i < path.length - 1; i++) {
+    directions.push(`Then, take a turn at ${formatNodeName(path[i])}.`);
+  }
+  if (path.length > 1) {
+    directions.push(`Finally, arrive at ${formatNodeName(path[path.length - 1])}.`);
+  }
+  return directions;
+}
+
 //--------------------------------------
 // 6) COMPONENT
 //--------------------------------------
 export default function IndoorDirectionsScreen() {
+  // Search state for destinations
+  const [startSearch, setStartSearch] = useState<string>('');
+  const [endSearch, setEndSearch] = useState<string>('');
+  // Selected destinations now include building info.
+  const [startDest, setStartDest] = useState<Destination | null>(null);
+  const [endDest, setEndDest] = useState<Destination | null>(null);
+  // Also keep building and floor (for current view) for non–cross–building navigation
   const [selectedBuilding, setSelectedBuilding] = useState<string>('Hall');
   const [selectedFloor, setSelectedFloor] = useState<number>(1);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  const [startNodeId, setStartNodeId] = useState<string | null>(null);
-  const [endNodeId, setEndNodeId] = useState<string | null>(null);
+  // For same-floor routing (when using map tap)
   const [path, setPath] = useState<string[]>([]);
+  // Full screen toggle
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
+  // Elevator Only check box (currently does nothing)
+  const [elevatorOnly, setElevatorOnly] = useState<boolean>(false);
 
+  // When no search destination is chosen, we use the currently selected building/floor view.
   const currentBuilding = buildingData[selectedBuilding];
   const currentFloorData = currentBuilding.floors[selectedFloor];
+
+  // Get all nodes across all buildings for search suggestions
+  const allNodes = getAllNodes();
+
+  const filteredStartNodes = allNodes.filter((item) =>
+    item.node.toLowerCase().includes(startSearch.toLowerCase())
+  );
+  const filteredEndNodes = allNodes.filter((item) =>
+    item.node.toLowerCase().includes(endSearch.toLowerCase())
+  );
 
   const handleContainerLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
@@ -327,161 +410,587 @@ export default function IndoorDirectionsScreen() {
 
   const handlePress = (event: GestureResponderEvent) => {
     const { locationX, locationY } = event.nativeEvent;
+    // Use current floor's graph for tap (for same–floor selection)
     const graph = currentFloorData.graph;
     if (!graph) {
       console.warn('No graph data for', selectedBuilding, 'floor', selectedFloor);
       return;
     }
     const tappedNodeId = findNearestNode(locationX, locationY, graph);
-    if (!startNodeId) {
-      setStartNodeId(tappedNodeId);
-      setEndNodeId(null);
+    // Clear search fields when tapping
+    setStartSearch('');
+    setEndSearch('');
+    // For map tap, use the currently selected building and floor.
+    if (!startDest) {
+      setStartDest({ building: selectedBuilding, node: tappedNodeId, floor: selectedFloor });
+      setEndDest(null);
       setPath([]);
       return;
     }
-    if (!endNodeId) {
-      setEndNodeId(tappedNodeId);
-      const newPath = findPathBFS(graph, startNodeId, tappedNodeId);
-      setPath(newPath);
+    if (!endDest) {
+      setEndDest({ building: selectedBuilding, node: tappedNodeId, floor: selectedFloor });
+      // If same building and floor, compute same–floor path.
+      if (selectedBuilding === startDest.building && startDest.floor === selectedFloor) {
+        const newPath = findPathBFS(graph, startDest.node, tappedNodeId);
+        setPath(newPath);
+      }
       return;
     }
-    setStartNodeId(tappedNodeId);
-    setEndNodeId(null);
+    // Otherwise, reset start with new tap on current floor.
+    setStartDest({ building: selectedBuilding, node: tappedNodeId, floor: selectedFloor });
+    setEndDest(null);
     setPath([]);
   };
 
-  // Scale the path coordinates from original image dimensions to container dimensions
-  const scaledPathCoords = getPathCoordinates(
-    currentFloorData.graph,
-    path,
-    currentFloorData.originalDimensions,
-    containerSize
-  );
-  const polylinePoints = scaledPathCoords.map((p) => `${p.x},${p.y}`).join(' ');
+  // Determine routing based on destination selection:
+  // We distinguish three cases:
+  // 1) Same building, same floor (sameFloor)
+  // 2) Same building, different floors (only implemented for Hall)
+  // 3) Cross-building routing (for simplicity, only implemented for Hall -> John Molson)
+  let sameFloor = false;
+  let startFloorPath: string[] = [];
+  let endFloorPath: string[] = [];
+  if (startDest && endDest) {
+    if (startDest.building === endDest.building) {
+      if (startDest.floor === endDest.floor) {
+        sameFloor = true;
+        const graph = buildingData[startDest.building].floors[startDest.floor].graph;
+        startFloorPath = findPathBFS(graph, startDest.node, endDest.node);
+      } else if (startDest.building === 'Hall') {
+        // Cross–floor within Hall building (using elevator logic)
+        const startGraph = buildingData['Hall'].floors[startDest.floor].graph;
+        const endGraph = buildingData['Hall'].floors[endDest.floor].graph;
+        startFloorPath = findPathBFS(startGraph, startDest.node, "Hall_1st_Elevator");
+        endFloorPath = findPathBFS(endGraph, "Elevator9th", endDest.node);
+      }
+    } else if (startDest.building === 'Hall' && endDest.building === 'John Molson') {
+      // Cross–building routing: from Hall (start) to John Molson (end)
+      const startGraph = buildingData['Hall'].floors[startDest.floor].graph;
+      const endGraph = buildingData['John Molson'].floors[endDest.floor].graph;
+      startFloorPath = findPathBFS(startGraph, startDest.node, "Hall_1st_Basement_Escalator");
+      endFloorPath = findPathBFS(endGraph, "Tunnel", endDest.node);
+    }
+  }
 
-  // Conversion factor (1 drawing unit = 0.1 meters for a 1:1000 scale)
+  // For same–floor view, scale path coordinates from the current floor's original dimensions
+  const scaledPathCoords = sameFloor
+    ? getPathCoordinates(
+        buildingData[startDest?.building || selectedBuilding].floors[startDest?.floor || selectedFloor].graph,
+        startFloorPath,
+        buildingData[startDest?.building || selectedBuilding].floors[startDest?.floor || selectedFloor].originalDimensions,
+        containerSize
+      )
+    : [];
+  const polylinePoints = scaledPathCoords.map((p) => `${p.x},${p.y}`).join(' ');
   const PIXEL_TO_METER = 0.1;
-  const drawingDistance = computePathDistance(scaledPathCoords);
+  const drawingDistance = sameFloor ? computePathDistance(scaledPathCoords) : 0;
   const distanceInMeters = drawingDistance * PIXEL_TO_METER;
 
+  // Reset handler to clear destinations and path
+  const handleReset = () => {
+    setStartDest(null);
+    setEndDest(null);
+    setPath([]);
+    setStartSearch('');
+    setEndSearch('');
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Indoor Navigation</Text>
-
-      {/* Building Picker */}
-      <Picker
-        selectedValue={selectedBuilding}
-        style={styles.picker}
-        onValueChange={(itemValue) => {
-          setSelectedBuilding(itemValue);
-          setSelectedFloor(1);
-          setStartNodeId(null);
-          setEndNodeId(null);
-          setPath([]);
-        }}
-      >
-        {Object.keys(buildingData).map((b) => (
-          <Picker.Item key={b} label={b} value={b} />
-        ))}
-      </Picker>
-
-      {/* Floor Picker */}
-      <Picker
-        selectedValue={selectedFloor}
-        style={styles.picker}
-        onValueChange={(itemValue) => {
-          setSelectedFloor(itemValue);
-          setStartNodeId(null);
-          setEndNodeId(null);
-          setPath([]);
-        }}
-      >
-        {Object.keys(currentBuilding.floors).map((floor) => (
-          <Picker.Item key={floor} label={`Floor ${floor}`} value={parseInt(floor, 10)} />
-        ))}
-      </Picker>
-
-      {/* Full Screen Toggle Button */}
-      <TouchableOpacity
-        style={styles.fullscreenButton}
-        onPress={() => setIsFullScreen(!isFullScreen)}
-      >
-        <Text style={styles.fullscreenButtonText}>
-          {isFullScreen ? 'Exit Full Screen' : 'Full Screen'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Map Container */}
-      <View
-        style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
-        onLayout={handleContainerLayout}
-      >
-        <TouchableWithoutFeedback onPress={handlePress}>
-          <View style={styles.touchableArea}>
-            <Image
-              source={currentFloorData.image}
-              style={styles.floorImage}
-              resizeMode="contain"
-            />
-            <Svg
-              style={StyleSheet.absoluteFill}
-              viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
-            >
-              {path.length > 1 && (
-                <Polyline
-                  points={polylinePoints}
-                  fill="none"
-                  stroke="blue"
-                  strokeWidth="3"
-                />
-              )}
-              {startNodeId && currentFloorData.graph[startNodeId] && (
-                <Circle
-                  cx={scaleCoordinates(
-                    { x: currentFloorData.graph[startNodeId].x, y: currentFloorData.graph[startNodeId].y },
-                    currentFloorData.originalDimensions,
-                    containerSize
-                  ).x}
-                  cy={scaleCoordinates(
-                    { x: currentFloorData.graph[startNodeId].x, y: currentFloorData.graph[startNodeId].y },
-                    currentFloorData.originalDimensions,
-                    containerSize
-                  ).y}
-                  r="5"
-                  fill="blue"
-                />
-              )}
-              {endNodeId && currentFloorData.graph[endNodeId] && (
-                <Circle
-                  cx={scaleCoordinates(
-                    { x: currentFloorData.graph[endNodeId].x, y: currentFloorData.graph[endNodeId].y },
-                    currentFloorData.originalDimensions,
-                    containerSize
-                  ).x}
-                  cy={scaleCoordinates(
-                    { x: currentFloorData.graph[endNodeId].x, y: currentFloorData.graph[endNodeId].y },
-                    currentFloorData.originalDimensions,
-                    containerSize
-                  ).y}
-                  r="5"
-                  fill="green"
-                />
-              )}
-            </Svg>
-          </View>
-        </TouchableWithoutFeedback>
-      </View>
-
-      {path.length > 1 && (
-        <View style={styles.pathInfo}>
-          <Text style={{ fontWeight: 'bold' }}>Path Nodes:</Text>
-          <Text>{path.join(' -> ')}</Text>
-          <Text style={{ marginTop: 5 }}>
-            Distance: {distanceInMeters.toFixed(2)} m
-          </Text>
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Indoor Navigation</Text>
+        {/* Search Bar for Start Destination */}
+        <View style={styles.searchContainer}>
+          <Text style={styles.searchLabel}>Start Destination:</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Type start destination"
+            value={startSearch}
+            onChangeText={setStartSearch}
+          />
+          {startSearch.length > 0 && (
+            <ScrollView style={styles.suggestionList} nestedScrollEnabled={true}>
+              {filteredStartNodes.map((item) => (
+                <TouchableOpacity key={item.building + "_" + item.node + "_" + item.floor} onPress={() => {
+                  setStartDest(item);
+                  setStartSearch('');
+                }}>
+                  <Text style={styles.suggestionItem}>
+                    {item.node} (Building: {item.building}, Floor {item.floor})
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
         </View>
-      )}
-    </View>
+        {/* Search Bar for End Destination */}
+        <View style={styles.searchContainer}>
+          <Text style={styles.searchLabel}>End Destination:</Text>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Type end destination"
+            value={endSearch}
+            onChangeText={setEndSearch}
+          />
+          {endSearch.length > 0 && (
+            <ScrollView style={styles.suggestionList} nestedScrollEnabled={true}>
+              {filteredEndNodes.map((item) => (
+                <TouchableOpacity key={item.building + "_" + item.node + "_" + item.floor} onPress={() => {
+                  setEndDest(item);
+                  setEndSearch('');
+                }}>
+                  <Text style={styles.suggestionItem}>
+                    {item.node} (Building: {item.building}, Floor {item.floor})
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
+        </View>
+        {/* Display chosen destinations */}
+        {(startDest || endDest) && (
+          <View style={styles.destinationInfo}>
+            {startDest && (
+              <Text style={styles.destinationText}>Start: {startDest.node} (Building: {startDest.building}, Floor {startDest.floor})</Text>
+            )}
+            {endDest && (
+              <Text style={styles.destinationText}>End: {endDest.node} (Building: {endDest.building}, Floor {endDest.floor})</Text>
+            )}
+          </View>
+        )}
+        {/* Reset Button */}
+        <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
+          <Text style={styles.resetButtonText}>Reset</Text>
+        </TouchableOpacity>
+        {/* Elevator Only Checkbox (Switch) */}
+        <View style={styles.switchContainer}>
+          <Text style={styles.switchLabel}>Elevator Only Routing:</Text>
+          <Switch value={elevatorOnly} onValueChange={setElevatorOnly} />
+        </View>
+        {/* Building Picker & Floor Picker are used for map tap selection when no search destination is chosen */}
+        {(!startDest || !endDest) && (
+          <>
+            <Picker
+              selectedValue={selectedBuilding}
+              style={styles.picker}
+              onValueChange={(itemValue) => {
+                setSelectedBuilding(itemValue);
+                setSelectedFloor(1);
+                setStartDest(null);
+                setEndDest(null);
+                setPath([]);
+                setStartSearch('');
+                setEndSearch('');
+              }}
+            >
+              {Object.keys(buildingData).map((b) => (
+                <Picker.Item key={b} label={b} value={b} />
+              ))}
+            </Picker>
+            <Picker
+              selectedValue={selectedFloor}
+              style={styles.picker}
+              onValueChange={(itemValue) => {
+                setSelectedFloor(itemValue);
+                setStartDest(null);
+                setEndDest(null);
+                setPath([]);
+                setStartSearch('');
+                setEndSearch('');
+              }}
+            >
+              {Object.keys(buildingData[selectedBuilding].floors).map((floor) => (
+                <Picker.Item key={floor} label={`Floor ${floor}`} value={parseInt(floor, 10)} />
+              ))}
+            </Picker>
+          </>
+        )}
+        {/* Default Map View if no destinations are selected */}
+        {(!startDest || !endDest) && (
+          <View
+            style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
+            onLayout={handleContainerLayout}
+          >
+            <TouchableWithoutFeedback onPress={handlePress}>
+              <View style={styles.touchableArea}>
+                <Image
+                  source={buildingData[selectedBuilding].floors[selectedFloor].image}
+                  style={styles.floorImage}
+                  resizeMode="contain"
+                />
+                <Svg
+                  style={StyleSheet.absoluteFill}
+                  viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        )}
+        {/* Same-building, same-floor view */}
+        {startDest && endDest && startDest.building === endDest.building && startDest.floor === endDest.floor && (
+          <View
+            style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
+            onLayout={handleContainerLayout}
+          >
+            <TouchableWithoutFeedback onPress={handlePress}>
+              <View style={styles.touchableArea}>
+                <Image
+                  source={buildingData[startDest.building].floors[startDest.floor].image}
+                  style={styles.floorImage}
+                  resizeMode="contain"
+                />
+                <Svg
+                  style={StyleSheet.absoluteFill}
+                  viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+                >
+                  {startFloorPath.length > 1 && (
+                    <Polyline
+                      points={polylinePoints}
+                      fill="none"
+                      stroke="blue"
+                      strokeWidth="3"
+                    />
+                  )}
+                  {startDest && buildingData[startDest.building].floors[startDest.floor].graph[startDest.node] && (
+                    <Circle
+                      cx={scaleCoordinates(
+                        { x: buildingData[startDest.building].floors[startDest.floor].graph[startDest.node].x, y: buildingData[startDest.building].floors[startDest.floor].graph[startDest.node].y },
+                        buildingData[startDest.building].floors[startDest.floor].originalDimensions,
+                        containerSize
+                      ).x}
+                      cy={scaleCoordinates(
+                        { x: buildingData[startDest.building].floors[startDest.floor].graph[startDest.node].x, y: buildingData[startDest.building].floors[startDest.floor].graph[startDest.node].y },
+                        buildingData[startDest.building].floors[startDest.floor].originalDimensions,
+                        containerSize
+                      ).y}
+                      r="5"
+                      fill="blue"
+                    />
+                  )}
+                  {endDest && buildingData[endDest.building].floors[endDest.floor].graph[endDest.node] && (
+                    <Circle
+                      cx={scaleCoordinates(
+                        { x: buildingData[endDest.building].floors[endDest.floor].graph[endDest.node].x, y: buildingData[endDest.building].floors[endDest.floor].graph[endDest.node].y },
+                        buildingData[endDest.building].floors[endDest.floor].originalDimensions,
+                        containerSize
+                      ).x}
+                      cy={scaleCoordinates(
+                        { x: buildingData[endDest.building].floors[endDest.floor].graph[endDest.node].x, y: buildingData[endDest.building].floors[endDest.floor].graph[endDest.node].y },
+                        buildingData[endDest.building].floors[endDest.floor].originalDimensions,
+                        containerSize
+                      ).y}
+                      r="5"
+                      fill="green"
+                    />
+                  )}
+                </Svg>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        )}
+        {/* Same-building, cross–floor view (implemented for Hall building) */}
+        {startDest && endDest && startDest.building === endDest.building && startDest.floor !== endDest.floor && startDest.building === 'Hall' && (
+          <View style={styles.crossFloorContainer}>
+            {/* Map for start floor */}
+            <View
+              style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
+              onLayout={handleContainerLayout}
+            >
+              <Text style={styles.mapLabel}>Floor {startDest.floor}</Text>
+              <TouchableWithoutFeedback onPress={handlePress}>
+                <View style={styles.touchableArea}>
+                  <Image
+                    source={buildingData['Hall'].floors[startDest.floor].image}
+                    style={styles.floorImage}
+                    resizeMode="contain"
+                  />
+                  <Svg
+                    style={StyleSheet.absoluteFill}
+                    viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+                  >
+                    {(() => {
+                      const graph = buildingData['Hall'].floors[startDest.floor].graph;
+                      const path1 = startFloorPath;
+                      const scaledPath1 = getPathCoordinates(
+                        graph,
+                        path1,
+                        buildingData['Hall'].floors[startDest.floor].originalDimensions,
+                        containerSize
+                      );
+                      const polyPoints1 = scaledPath1.map(p => `${p.x},${p.y}`).join(' ');
+                      return (
+                        <>
+                          {path1.length > 1 && (
+                            <Polyline
+                              points={polyPoints1}
+                              fill="none"
+                              stroke="blue"
+                              strokeWidth="3"
+                            />
+                          )}
+                          <Circle
+                            cx={scaleCoordinates(
+                              { x: graph[startDest.node].x, y: graph[startDest.node].y },
+                              buildingData['Hall'].floors[startDest.floor].originalDimensions,
+                              containerSize
+                            ).x}
+                            cy={scaleCoordinates(
+                              { x: graph[startDest.node].x, y: graph[startDest.node].y },
+                              buildingData['Hall'].floors[startDest.floor].originalDimensions,
+                              containerSize
+                            ).y}
+                            r="5"
+                            fill="blue"
+                          />
+                        </>
+                      );
+                    })()}
+                  </Svg>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+            {/* Map for destination floor */}
+            <View
+              style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
+              onLayout={handleContainerLayout}
+            >
+              <Text style={styles.mapLabel}>Floor {endDest.floor}</Text>
+              <TouchableWithoutFeedback onPress={handlePress}>
+                <View style={styles.touchableArea}>
+                  <Image
+                    source={buildingData['Hall'].floors[endDest.floor].image}
+                    style={styles.floorImage}
+                    resizeMode="contain"
+                  />
+                  <Svg
+                    style={StyleSheet.absoluteFill}
+                    viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+                  >
+                    {(() => {
+                      const graph = buildingData['Hall'].floors[endDest.floor].graph;
+                      const path2 = endFloorPath;
+                      const scaledPath2 = getPathCoordinates(
+                        graph,
+                        path2,
+                        buildingData['Hall'].floors[endDest.floor].originalDimensions,
+                        containerSize
+                      );
+                      const polyPoints2 = scaledPath2.map(p => `${p.x},${p.y}`).join(' ');
+                      return (
+                        <>
+                          {path2.length > 1 && (
+                            <Polyline
+                              points={polyPoints2}
+                              fill="none"
+                              stroke="blue"
+                              strokeWidth="3"
+                            />
+                          )}
+                          <Circle
+                            cx={scaleCoordinates(
+                              { x: graph[endDest.node].x, y: graph[endDest.node].y },
+                              buildingData['Hall'].floors[endDest.floor].originalDimensions,
+                              containerSize
+                            ).x}
+                            cy={scaleCoordinates(
+                              { x: graph[endDest.node].x, y: graph[endDest.node].y },
+                              buildingData['Hall'].floors[endDest.floor].originalDimensions,
+                              containerSize
+                            ).y}
+                            r="5"
+                            fill="green"
+                          />
+                        </>
+                      );
+                    })()}
+                  </Svg>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          </View>
+        )}
+        {/* Cross-building view: For now, only Hall -> John Molson routing is implemented */}
+        {startDest && endDest && startDest.building !== endDest.building && (
+          <View style={styles.crossFloorContainer}>
+            {startDest.building === 'Hall' && endDest.building === 'John Molson' ? (
+              <>
+                {/* Map for Hall building (start) */}
+                <View
+                  style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
+                  onLayout={handleContainerLayout}
+                >
+                  <Text style={styles.mapLabel}>{startDest.building} Floor {startDest.floor}</Text>
+                  <TouchableWithoutFeedback onPress={handlePress}>
+                    <View style={styles.touchableArea}>
+                      <Image
+                        source={buildingData['Hall'].floors[startDest.floor].image}
+                        style={styles.floorImage}
+                        resizeMode="contain"
+                      />
+                      <Svg
+                        style={StyleSheet.absoluteFill}
+                        viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+                      >
+                        {(() => {
+                          const graph = buildingData['Hall'].floors[startDest.floor].graph;
+                          const path1 = startFloorPath;
+                          const scaledPath1 = getPathCoordinates(
+                            graph,
+                            path1,
+                            buildingData['Hall'].floors[startDest.floor].originalDimensions,
+                            containerSize
+                          );
+                          const polyPoints1 = scaledPath1.map(p => `${p.x},${p.y}`).join(' ');
+                          return (
+                            <>
+                              {path1.length > 1 && (
+                                <Polyline
+                                  points={polyPoints1}
+                                  fill="none"
+                                  stroke="blue"
+                                  strokeWidth="3"
+                                />
+                              )}
+                              <Circle
+                                cx={scaleCoordinates(
+                                  { x: graph[startDest.node].x, y: graph[startDest.node].y },
+                                  buildingData['Hall'].floors[startDest.floor].originalDimensions,
+                                  containerSize
+                                ).x}
+                                cy={scaleCoordinates(
+                                  { x: graph[startDest.node].x, y: graph[startDest.node].y },
+                                  buildingData['Hall'].floors[startDest.floor].originalDimensions,
+                                  containerSize
+                                ).y}
+                                r="5"
+                                fill="blue"
+                              />
+                            </>
+                          );
+                        })()}
+                      </Svg>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+                {/* Map for John Molson building (destination) */}
+                <View
+                  style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
+                  onLayout={handleContainerLayout}
+                >
+                  <Text style={styles.mapLabel}>{endDest.building} Floor {endDest.floor}</Text>
+                  <TouchableWithoutFeedback onPress={handlePress}>
+                    <View style={styles.touchableArea}>
+                      <Image
+                        source={buildingData['John Molson'].floors[endDest.floor].image}
+                        style={styles.floorImage}
+                        resizeMode="contain"
+                      />
+                      <Svg
+                        style={StyleSheet.absoluteFill}
+                        viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+                      >
+                        {(() => {
+                          const graph = buildingData['John Molson'].floors[endDest.floor].graph;
+                          const path2 = endFloorPath;
+                          const scaledPath2 = getPathCoordinates(
+                            graph,
+                            path2,
+                            buildingData['John Molson'].floors[endDest.floor].originalDimensions,
+                            containerSize
+                          );
+                          const polyPoints2 = scaledPath2.map(p => `${p.x},${p.y}`).join(' ');
+                          return (
+                            <>
+                              {path2.length > 1 && (
+                                <Polyline
+                                  points={polyPoints2}
+                                  fill="none"
+                                  stroke="blue"
+                                  strokeWidth="3"
+                                />
+                              )}
+                              <Circle
+                                cx={scaleCoordinates(
+                                  { x: graph[endDest.node].x, y: graph[endDest.node].y },
+                                  buildingData['John Molson'].floors[endDest.floor].originalDimensions,
+                                  containerSize
+                                ).x}
+                                cy={scaleCoordinates(
+                                  { x: graph[endDest.node].x, y: graph[endDest.node].y },
+                                  buildingData['John Molson'].floors[endDest.floor].originalDimensions,
+                                  containerSize
+                                ).y}
+                                r="5"
+                                fill="green"
+                              />
+                            </>
+                          );
+                        })()}
+                      </Svg>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </>
+            ) : (
+              <Text>Routing between {startDest.building} and {endDest.building} is not implemented.</Text>
+            )}
+          </View>
+        )}
+        {/* For same–floor view, show path info */}
+        {startDest && endDest && startDest.building === endDest.building && startDest.floor === endDest.floor && path.length > 1 && (
+          <View style={styles.pathInfo}>
+            <Text style={{ fontWeight: 'bold' }}>Directions:</Text>
+            {generateDirections(path).map((step, index) => (
+              <Text key={index}>{step}</Text>
+            ))}
+            <Text style={{ marginTop: 5 }}>
+              Distance: {(computePathDistance(scaledPathCoords) * PIXEL_TO_METER).toFixed(2)} m
+            </Text>
+          </View>
+        )}
+        {/* For cross–floor view within the same building (Hall) */}
+        {startDest && endDest && startDest.building === endDest.building && startDest.floor !== endDest.floor && startDest.building === 'Hall' && (
+          <View style={styles.pathInfo}>
+          <Text style={{ fontWeight: 'bold' }}>Start Floor Path (Floor {startDest.floor}):</Text>
+          {generateDirections(
+            findPathBFS(buildingData['Hall'].floors[startDest.floor].graph, startDest.node, "Hall_1st_Elevator")
+          ).map((step, index) => (
+            <Text key={index}>{step}</Text>
+          ))}
+          <Text style={{ fontWeight: 'bold', marginTop: 5 }}>
+            End Floor Path (Floor {endDest.floor}):
+          </Text>
+          {generateDirections(
+            findPathBFS(buildingData['Hall'].floors[endDest.floor].graph, "Elevator9th", endDest.node)
+          ).map((step, index) => (
+            <Text key={index}>{step}</Text>
+          ))}
+        </View>
+        
+        )}
+        {/* For cross–building view (Hall -> John Molson) show routing info */}
+        {startDest && endDest && startDest.building !== endDest.building && startDest.building === 'Hall' && endDest.building === 'John Molson' && (
+          <View style={styles.pathInfo}>
+          <Text style={{ fontWeight: 'bold' }}>Hall Building Path (Floor {startDest.floor}):</Text>
+          {generateDirections(
+            findPathBFS(buildingData['Hall'].floors[startDest.floor].graph, startDest.node, "Hall_1st_Basement_Escalator")
+          ).map((step, index) => (
+            <Text key={index}>{step}</Text>
+          ))}
+          <Text>Take the Tunnel until JMSB</Text>
+          <Text style={{ fontWeight: 'bold', marginTop: 5 }}>
+            John Molson Building Path (Floor {endDest.floor}):
+          </Text>
+          {generateDirections(
+            findPathBFS(buildingData['John Molson'].floors[endDest.floor].graph, "Tunnel", endDest.node)
+          ).map((step, index) => (
+            <Text key={index}>{step}</Text>
+          ))}
+        </View>
+        
+        )}
+      </View>
+    </ScrollView>
   );
 }
 
@@ -489,6 +998,14 @@ export default function IndoorDirectionsScreen() {
 // STYLES
 //--------------------------------------
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollViewContent: {
+    alignItems: 'center',
+    paddingBottom: 20,
+  },
   container: {
     flex: 1,
     paddingTop: 40,
@@ -497,26 +1014,66 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    marginBottom: 20,
+    marginBottom: 10,
     fontWeight: 'bold',
   },
   picker: {
     height: 50,
     width: 200,
   },
-  fullscreenButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 10,
-    backgroundColor: '#000',
+  searchContainer: {
+    width: '90%',
+    marginVertical: 5,
+  },
+  searchLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 5,
+    marginTop: 5,
+    borderRadius: 4,
+  },
+  suggestionList: {
+    maxHeight: 100,
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginTop: 2,
+  },
+  suggestionItem: {
+    padding: 5,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+  },
+  destinationInfo: {
+    width: '90%',
+    marginVertical: 10,
+  },
+  destinationText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  resetButton: {
+    backgroundColor: '#d9534f',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 5,
+    marginVertical: 10,
   },
-  fullscreenButtonText: {
+  resetButtonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  fullScreenImageContainer: {
+    width: '90%',
+    aspectRatio: 1,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    position: 'relative',
   },
   imageContainer: {
     width: '90%',
@@ -525,15 +1082,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     position: 'relative',
-  },
-  fullScreenImageContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: '#fff',
-    zIndex: 5,
   },
   touchableArea: {
     flex: 1,
@@ -546,5 +1094,29 @@ const styles = StyleSheet.create({
   pathInfo: {
     marginTop: 10,
     alignItems: 'center',
+  },
+  crossFloorContainer: {
+    width: '90%',
+    marginTop: 20,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  mapLabel: {
+    position: 'absolute',
+    top: 5,
+    left: 5,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+    padding: 2,
+    fontSize: 12,
+  },
+  switchContainer: {
+    width: '90%',
+    marginVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  switchLabel: {
+    fontSize: 16,
+    marginRight: 10,
   },
 });
