@@ -14,6 +14,8 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.valentin514.lostinfaubourgapp",
+      iosUrlScheme: "com.googleusercontent.apps.876949776030-uot2pvtbrfq8ushvtgn1rp54f70i9b2h",
+      iosClientId: "876949776030-uot2pvtbrfq8ushvtgn1rp54f70i9b2h.apps.googleusercontent.com",
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
@@ -55,7 +57,8 @@ export default {
         projectId: "cd18a56b-e538-4a0d-a45e-52b84e993aa0",
       },
       androidClientId: "876949776030-i8f75o4us24vdeavtfv4q4rnjfpfg00b.apps.googleusercontent.com",
-      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      iosClientId: "876949776030-uot2pvtbrfq8ushvtgn1rp54f70i9b2h.apps.googleusercontent.com",
+      googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
     },
   },
 };

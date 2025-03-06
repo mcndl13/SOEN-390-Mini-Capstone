@@ -24,6 +24,7 @@ export default function CalendarIntegrationScreen() {
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: "876949776030-i8f75o4us24vdeavtfv4q4rnjfpfg00b.apps.googleusercontent.com",
     webClientId: "876949776030-i8f75o4us24vdeavtfv4q4rnjfpfg00b.apps.googleusercontent.com",
+    iosClientId : "876949776030-uot2pvtbrfq8ushvtgn1rp54f70i9b2h.apps.googleusercontent.com",
     scopes: [
       "email",
       "profile",
