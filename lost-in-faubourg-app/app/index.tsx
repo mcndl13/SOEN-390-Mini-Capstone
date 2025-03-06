@@ -1,6 +1,7 @@
 // App.js
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
+import { AccessibilityProvider } from "../components/AccessibilitySettings";
 
 // Import all your screens
 import HomeScreen from "../components/HomeScreen";
@@ -9,12 +10,15 @@ import DirectionsScreen from "../components/DirectionsScreen";
 import CalendarIntegrationScreen from "../components/CalendarIntegrationScreen";
 import IndoorDirectionsScreen from "../components/IndoorDirectionsScreen";
 import PointsOfInterestScreen from "../components/PointsOfInterestScreen";
+import AccessibilitySettings from "../components/AccessibilitySettings";
 
 const Stack = createStackNavigator();
 
 export default function MainNavigator() {
+
   return (
-    <>
+    <AccessibilityProvider>
+      <AccessibilitySettings />
       <Stack.Navigator initialRouteName="Home">
         {/* Make HomeScreen the first screen */}
         <Stack.Screen
@@ -53,6 +57,7 @@ export default function MainNavigator() {
           options={{ headerTitle: "Points of Interest" }}
         />
       </Stack.Navigator>
-    </>
+      
+    </AccessibilityProvider>
   );
 }
