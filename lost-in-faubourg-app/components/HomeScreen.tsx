@@ -1,4 +1,3 @@
-// HomeScreen.js
 import React from "react";
 import {
   View,
@@ -6,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Linking,
 } from "react-native";
 
 import { NavigationProp } from '@react-navigation/native';
@@ -16,7 +16,20 @@ type HomeScreenProps = {
 };
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+
   const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
+  // Function to open the shuttle schedule webpage
+  const openShuttleSchedule = async () => {
+    const url = "https://www.concordia.ca/maps/shuttle-bus.html#depart";
+    const supported = await Linking.canOpenURL(url);
+    
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      console.error("Cannot open URL: " + url);
+    }
+  };
+
 
   return (
     <View style={[styles.container, isBlackAndWhite && styles.blackAndWhite]}>
@@ -52,7 +65,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         >
           <Text style={[styles.buttonText, isLargeText && styles.largeText]}>Find Points of Interest</Text>
         </TouchableOpacity>
-        
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={openShuttleSchedule}
+        >
+          <Text style={styles.buttonText}>Shuttle Schedule</Text>
+        </TouchableOpacity>
+
       </ScrollView>
     </View>
   );
@@ -82,6 +102,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
   },
+
   blackAndWhite: {
     backgroundColor: '#fff',
   },
