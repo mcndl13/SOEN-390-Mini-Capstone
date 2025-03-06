@@ -12,7 +12,7 @@ import {
   Animated,
   Alert,
 } from 'react-native';
-import MapView, { Marker, Polygon, PROVIDER_DEFAULT } from 'react-native-maps';
+import MapView, { Marker, Polygon, PROVIDER_DEFAULT, MapStyleElement } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Constants from 'expo-constants';
 import MapViewDirections, {
@@ -21,6 +21,8 @@ import MapViewDirections, {
 import * as Location from 'expo-location';
 import 'react-native-get-random-values';
 import { GOOGLE_MAPS_API_KEY } from '@env';
+
+import { AccessibilityContext } from './AccessibilitySettings';
 import { polygons } from '../components/polygonCoordinates';
 import {
   fetchShuttlePositions,
@@ -116,6 +118,7 @@ function InputAutocomplete({
 }
 
 export default function DirectionsScreen() {
+  const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
   const [origin, setOrigin] = useState<{
     latitude: number;
     longitude: number;
@@ -588,6 +591,22 @@ export default function DirectionsScreen() {
     }, 500);
   };
 
+  // Add map style for black and white mode
+  const mapStyle: MapStyleElement[] = isBlackAndWhite ? [
+    {
+      "elementType": "geometry",
+      "stylers": [{ "saturation": -100 }]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [{ "saturation": -100 }]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [{ "saturation": -100 }]
+    }
+  ] : [];
+
   return (
     <View style={styles.container}>
       {/* Toast Message */}
@@ -611,32 +630,45 @@ export default function DirectionsScreen() {
         style={styles.map}
         provider={PROVIDER_DEFAULT}
         initialRegion={INITIAL_POSITION}
+        customMapStyle={mapStyle}
         onRegionChangeComplete={onRegionChange}
+
       >
         {/* Polygons for Concordia buildings */}
         {polygons.map((polygon, idx) => (
           <Polygon
             key={idx}
             coordinates={polygon.boundaries}
+            fillColor={isBlackAndWhite ? "#000000aa" : "#91233855"}
+            strokeColor={isBlackAndWhite ? "#000000" : "#912338"}
+            strokeWidth={isBlackAndWhite ? 2 : 1}
             fillColor="#912338cc"
             strokeColor="#912338cc"
             strokeWidth={2}
           />
         ))}
 
-        {/* Markers */}
+        {/* Markers with adjusted colors */}
         {userLocation && (
           <Marker
             coordinate={userLocation}
             title="My Location"
-            pinColor="blue"
+            pinColor={isBlackAndWhite ? "black" : "blue"}
           />
         )}
         {origin && (
-          <Marker coordinate={origin} title="Origin" pinColor="green" />
+          <Marker 
+            coordinate={origin} 
+            title="Origin" 
+            pinColor={isBlackAndWhite ? "black" : "green"} 
+          />
         )}
         {destination && (
-          <Marker coordinate={destination} title="Destination" pinColor="red" />
+          <Marker 
+            coordinate={destination} 
+            title="Destination" 
+            pinColor={isBlackAndWhite ? "black" : "red"} 
+          />
         )}
 
         {/* Shuttle bus markers */}
@@ -695,13 +727,11 @@ export default function DirectionsScreen() {
             origin={origin}
             destination={destination}
             apikey={GOOGLE_MAPS_API_KEY}
-            strokeColor="#6644ff"
-            strokeWidth={4}
+            strokeColor={isBlackAndWhite ? "#000000" : "#6644ff"}
+            strokeWidth={isBlackAndWhite ? 4 : 3}
             mode={travelMode}
             onReady={traceRouteOnReady}
-            onError={(errorMsg) =>
-              console.log('MapViewDirections ERROR:', errorMsg)
-            }
+            onError={(errorMsg) => console.log('MapViewDirections ERROR:', errorMsg)}
           />
         )}
       </MapView>
@@ -717,17 +747,49 @@ export default function DirectionsScreen() {
       </TouchableOpacity>
 
       {/* Conditionally Render the Search Bar */}
+
+       {/* Search Container with accessibility styles */}
       {!showDirections && (
-        <View style={styles.searchContainer}>
-          <InputAutocomplete
-            label="Origin"
+        <View style={[
+          styles.searchContainer,
+          isBlackAndWhite && styles.blackAndWhiteContainer
+        ]}>
+          <Text style={[styles.label, isLargeText && styles.largeText]}>Origin</Text>
+          <GooglePlacesAutocomplete
+            fetchDetails={true}
             placeholder="Enter origin"
+            styles={{
+              textInput: [
+                styles.textInput,
+                isLargeText && styles.largeText,
+                isBlackAndWhite && styles.blackAndWhiteInput
+              ]
+            }}
+            onPress={(data, details = null) => onPlaceSelected(details, 'origin')}
+            query={{
+              key: GOOGLE_MAPS_API_KEY,
+              language: 'en'
+            }}
             onPlaceSelected={(details) => onPlaceSelected(details, 'origin')}
             currentValue={origin ? `${formatLocationName(origin)}` : undefined}
           />
-          <InputAutocomplete
-            label="Destination"
+          
+          <Text style={[styles.label, isLargeText && styles.largeText]}>Destination</Text>
+          <GooglePlacesAutocomplete
+            fetchDetails={true}
             placeholder="Enter destination"
+            styles={{
+              textInput: [
+                styles.textInput,
+                isLargeText && styles.largeText,
+                isBlackAndWhite && styles.blackAndWhiteInput
+              ]
+            }}
+            onPress={(data, details = null) => onPlaceSelected(details, 'destination')}
+            query={{
+              key: GOOGLE_MAPS_API_KEY,
+              language: 'en'
+            }}
             onPlaceSelected={(details) =>
               onPlaceSelected(details, 'destination')
             }
@@ -754,13 +816,15 @@ export default function DirectionsScreen() {
           {/* Campus Buttons */}
           <View style={styles.campusButtonsContainer}>
             <TouchableOpacity
-              style={styles.campusButton}
+              style={[styles.campusButton, isLargeText && styles.largeText,
+                isBlackAndWhite && styles.blackAndWhiteText]}
               onPress={() => setCampusPoint(SGW_COORDS, "SGW Campus")}
             >
               <Text style={styles.campusButtonText}>SGW Campus</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={styles.campusButton}
+              style={[styles.campusButton, isLargeText && styles.largeText,
+                isBlackAndWhite && styles.blackAndWhiteText]}
               onPress={() => setCampusPoint(LOYOLA_COORDS, "Loyola Campus")}
             >
               <Text style={styles.campusButtonText}>Loyola Campus</Text>
@@ -771,10 +835,10 @@ export default function DirectionsScreen() {
           <View style={styles.modeContainer}>
             <TouchableOpacity
               style={[
-                styles.modeButton,
-                travelMode === 'DRIVING' && styles.activeModeButton,
+                styles.campusButton,
+                isBlackAndWhite && styles.blackAndWhiteButton
               ]}
-              onPress={() => setTravelMode('DRIVING')}
+              onPress={() => setCampusOrigin(SGW_COORDS)}
             >
               <Image
                 source={
@@ -795,11 +859,18 @@ export default function DirectionsScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={[
-                styles.modeButton,
-                travelMode === 'WALKING' && styles.activeModeButton,
+                styles.campusButton,
+                isBlackAndWhite && styles.blackAndWhiteButton
               ]}
-              onPress={() => setTravelMode('WALKING')}
+              onPress={() => setCampusOrigin(LOYOLA_COORDS)}
             >
+
+
+          {/* Travel Mode Buttons */}
+          <View style={styles.modeContainer}>
+            {['DRIVING', 'WALKING', 'BICYCLING', 'TRANSIT'].map(mode => (
+              <TouchableOpacity
+                key={mode}
               <Image
                 source={
                   travelMode === 'WALKING'
@@ -834,9 +905,12 @@ export default function DirectionsScreen() {
               />
               <Text
                 style={[
-                  styles.modeButtonText,
-                  travelMode === 'BICYCLING' && styles.activeModeButtonText,
+                  styles.modeButton,
+                  travelMode === mode && styles.activeModeButton,
+                  isBlackAndWhite && styles.blackAndWhiteButton,
+                  travelMode === mode && isBlackAndWhite && styles.blackAndWhiteActiveButton
                 ]}
+                onPress={() => setTravelMode(mode as MapViewDirectionsMode)}
               >
                 Bicycling
               </Text>
@@ -859,24 +933,39 @@ export default function DirectionsScreen() {
               <Text
                 style={[
                   styles.modeButtonText,
-                  travelMode === 'TRANSIT' && styles.activeModeButtonText,
-                ]}
-              >
-                Transit
-              </Text>
-            </TouchableOpacity>
+                  travelMode === mode && styles.activeModeButtonText,
+                  isLargeText && styles.largeText,
+                  isBlackAndWhite && styles.blackAndWhiteText
+                ]}>
+                  {mode.charAt(0) + mode.slice(1).toLowerCase()}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
-          <TouchableOpacity style={styles.traceButton} onPress={traceRoute}>
-            <Text style={styles.buttonText}>Trace route</Text>
+          <TouchableOpacity 
+            style={[
+              styles.traceButton,
+              isBlackAndWhite && styles.blackAndWhiteButton
+            ]} 
+            onPress={traceRoute}
+          >
+            <Text style={[
+              styles.buttonText,
+              isLargeText && styles.largeText,
+              isBlackAndWhite && styles.blackAndWhiteText
+            ]}>
+              Trace route
+            </Text>
           </TouchableOpacity>
         </View>
       )}
 
+
       {/* Back Button when directions are showing */}
       {showDirections && (
         <TouchableOpacity 
-          style={styles.backButton}
+          style={[styles.backButton, isBlackAndWhite && styles.blackAndWhiteContainer]}
           onPress={() => {
             setShowDirections(false);
             setShowShuttleRoute(false);
@@ -885,32 +974,37 @@ export default function DirectionsScreen() {
             setToastMessage('Returned to search view');
           }}
         >
-          <Text style={styles.backButtonText}>Back to Search</Text>
+          <Text style={[styles.backButtonText, isLargeText && styles.largeText,
+            isBlackAndWhite && styles.blackAndWhiteText]}>Back to Search</Text>
         </TouchableOpacity>
       )}
 
       {/* Directions */}
       {steps.length > 0 && (
-        <View style={[styles.directionsContainer, { height: directionsHeight }]}>
+        <View style={[styles.directionsContainer, { height: directionsHeight },  isBlackAndWhite && styles.blackAndWhiteText]}>
           {/* Handle for expanding/collapsing with PanResponder for swipe gestures */}
           <Animated.View 
-            style={[styles.dragHandleContainer, { transform: [{ translateY: panY }] }]}
+            style={[styles.dragHandleContainer, { transform: [{ translateY: panY }], isLargeText && styles.largeText,
+            isBlackAndWhite && styles.blackAndWhiteText }]}
             {...panResponder.panHandlers}
           >
-            <View style={styles.dragIndicator} />
+            <View style={[styles.dragIndicator], isBlackAndWhite && styles.blackAndWhiteText} />
           </Animated.View>
           
-          <View style={styles.directionsHeaderRow}>
-            <Text style={styles.directionsHeader}>Directions</Text>
+          <View style={[styles.directionsHeaderRow, isBlackAndWhite && styles.blackAndWhiteText]}>
+            <Text style={[styles.directionsHeader, isLargeText && styles.largeText,
+            isBlackAndWhite && styles.blackAndWhiteText]}>Directions</Text>
             <TouchableOpacity 
-              style={styles.expandButton}
+              style={[styles.expandButton, isLargeText && styles.largeText,
+            isBlackAndWhite && styles.blackAndWhiteText]}
               onPress={() => {
                 setExpandedDirections(!expandedDirections);
                 setDirectionsHeight(expandedDirections ? 150 : height * 0.6);
               }} 
             >
-              <Text style={styles.expandButtonText}>
-                {expandedDirections ? 'Collapse' : 'Expand'}
+              <Text style={[styles.expandButtonText, isLargeText && styles.largeText,
+            isBlackAndWhite && styles.blackAndWhiteText]}>
+                {expandedDirections ? 'Collapse' : 'Expand
               </Text>
             </TouchableOpacity>
           </View>
@@ -1279,6 +1373,37 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     marginBottom: 4,
+  },
+
+  largeText: {
+    fontSize: 18, // Increase base font size
+  },
+  blackAndWhiteContainer: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#000000',
+  },
+  blackAndWhiteButton: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#000000',
+    borderWidth: 1,
+  },
+  blackAndWhiteActiveButton: {
+    backgroundColor: '#000000',
+  },
+  blackAndWhiteText: {
+    color: '#000000',
+  },
+  blackAndWhiteInput: {
+    backgroundColor: '#FFFFFF',
+    color: '#000000',
+    borderColor: '#000000',
+  },
+  label: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  textInput: {
+    fontSize: 16,
   },
   shuttleDetailValue: {
     fontSize: 14,

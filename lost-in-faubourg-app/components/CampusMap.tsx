@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import MapView, { Marker, Polygon, Region } from 'react-native-maps';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
+import MapView, { Marker, Polygon, Region,  MapStyleElement } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { polygons } from './polygonCoordinates';
+import { AccessibilityContext } from './AccessibilitySettings';
 import { fetchShuttlePositions, startShuttleTracking, ShuttleData, ShuttlePoint } from '../services/shuttleService';
+
 
 interface LocationCoords {
   latitude: number;
@@ -20,6 +22,7 @@ interface Building {
 }
 
 const CampusMap: React.FC = () => {
+  const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
   const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
   const [region, setRegion] = useState<Region | null>(null);
   const [selectedCampus, setSelectedCampus] = useState<string | null>(null);
@@ -53,6 +56,21 @@ const CampusMap: React.FC = () => {
     address: `${polygon.address} - Concordia University`,
     description: polygon.description,
   }));
+
+  const mapStyle: MapStyleElement[] = isBlackAndWhite ? [
+    {
+      "elementType": "geometry",
+      "stylers": [{ "saturation": -100 }]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [{ "saturation": -100 }]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [{ "saturation": -100 }]
+    }
+  ] : [];
 
   useEffect(() => {
     (async () => {
@@ -102,12 +120,12 @@ const CampusMap: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isBlackAndWhite && { filter: 'grayscale(100%)' }]}>
       {region ? (
-        <MapView 
-          style={styles.map} 
-          region={region}
-          testID="mapView"
+        <MapView style={styles.map} 
+        region={region}
+        testID="mapView"
+        customMapStyle={mapStyle}
         >
           {/* User's current location marker */}
           {location && (
@@ -117,7 +135,7 @@ const CampusMap: React.FC = () => {
                 longitude: location.longitude,
               }}
               title="You are here"
-              pinColor="blue"
+              pinColor={isBlackAndWhite ? "black" : "blue"}
               testID="marker-current-location"
             />
           )}
@@ -130,7 +148,7 @@ const CampusMap: React.FC = () => {
                 latitude: building.latitude,
                 longitude: building.longitude,
               }}
-              pinColor="red"
+              pinColor={isBlackAndWhite ? "black" : "red"}
               onPress={() => setSelectedBuilding(building)}
               testID={`marker-${building.id}`}
             />
@@ -141,9 +159,9 @@ const CampusMap: React.FC = () => {
             <Polygon
               key={index}
               coordinates={polygon.boundaries}
-              fillColor="#912338cc"
-              strokeColor="#912338cc"
-              strokeWidth={1}
+              fillColor={isBlackAndWhite ? "#000000cc" : "#912338cc"}
+              strokeColor={isBlackAndWhite ? "#000000" : "#912338cc"}
+              strokeWidth={isBlackAndWhite ? 2 : 1}
             />
           ))}
 
@@ -192,17 +210,19 @@ const CampusMap: React.FC = () => {
           ))}
         </MapView>
       ) : (
-        <Text>Loading Map...</Text>
+        <Text style={[styles.infoText, isLargeText && styles.largeText]}>
+          Loading Map...
+        </Text>
       )}
 
       {/* Selected building info */}
       {selectedBuilding && (
-        <View style={styles.infoContainer}>
-          <Text style={styles.buildingName}>{selectedBuilding.name}</Text>
-          <Text style={styles.description}>{selectedBuilding.address}</Text>
+        <View style={[styles.infoContainer, isBlackAndWhite && styles.blackAndWhiteContainer]}>
+          <Text style={[styles.buildingName, isLargeText && styles.largeText]}>{selectedBuilding.name}</Text>
+          <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.address}</Text>
           <View style={styles.horizontalRule} />
-          <Text style={styles.infoText}>Description</Text>
-          <Text style={styles.description}>{selectedBuilding.description}</Text>
+          <Text style={[styles.infoText, isLargeText && styles.largeText]}>Description</Text>
+          <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.description}</Text>
         </View>
       )}
 
@@ -212,6 +232,7 @@ const CampusMap: React.FC = () => {
           style={[
             styles.circularButton,
             selectedCampus === 'SGW' && styles.selectedButton,
+            isBlackAndWhite && styles.blackAndWhiteButton,
           ]}
           onPress={() => switchToCampus(SGW_COORDS, 'SGW')}
         >
@@ -219,6 +240,8 @@ const CampusMap: React.FC = () => {
             style={[
               styles.buttonText,
               selectedCampus === 'SGW' && styles.selectedButtonText,
+              isLargeText && styles.largeText,
+              isBlackAndWhite && styles.blackAndWhiteText,
             ]}
           >
             SGW Campus
@@ -229,6 +252,7 @@ const CampusMap: React.FC = () => {
           style={[
             styles.circularButton,
             selectedCampus === 'Loyola' && styles.selectedButton,
+            isBlackAndWhite && styles.blackAndWhiteButton,
           ]}
           onPress={() => switchToCampus(LOYOLA_COORDS, 'Loyola')}
         >
@@ -236,6 +260,8 @@ const CampusMap: React.FC = () => {
             style={[
               styles.buttonText,
               selectedCampus === 'Loyola' && styles.selectedButtonText,
+              isLargeText && styles.largeText,
+              isBlackAndWhite && styles.blackAndWhiteText,
             ]}
           >
             Loyola Campus
@@ -319,6 +345,22 @@ const styles = StyleSheet.create({
   },
   selectedButtonText: {
     color: 'white',
+  },
+  largeText: {
+    fontSize: 20,
+  },
+  blackAndWhiteContainer: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#000000',
+    borderWidth: 1,
+  },
+  blackAndWhiteButton: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#000000',
+    borderWidth: 1,
+  },
+  blackAndWhiteText: {
+    color: '#000000',
   },
   shuttleToggleButton: {
     position: 'absolute',
