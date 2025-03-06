@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { Linking, View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native";
 import * as Location from "expo-location";
 import { NavigationProp } from "@react-navigation/native";
 
@@ -26,6 +26,18 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     };
     getPermission();
   }, []);
+
+  // Function to open the shuttle schedule webpage
+  const openShuttleSchedule = async () => {
+    const url = "https://www.concordia.ca/maps/shuttle-bus.html#depart";
+    const supported = await Linking.canOpenURL(url);
+    
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      console.error("Cannot open URL: " + url);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -66,6 +78,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           onPress={() => navigation.navigate("PointsOfInterest")}
         >
           <Text style={styles.buttonText}>Find Points of Interest</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={openShuttleSchedule}
+        >
+          <Text style={styles.buttonText}>Shuttle Schedule</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
