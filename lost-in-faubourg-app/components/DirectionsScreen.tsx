@@ -632,19 +632,15 @@ export default function DirectionsScreen() {
         initialRegion={INITIAL_POSITION}
         customMapStyle={mapStyle}
         onRegionChangeComplete={onRegionChange}
-
       >
         {/* Polygons for Concordia buildings */}
         {polygons.map((polygon, idx) => (
           <Polygon
             key={idx}
             coordinates={polygon.boundaries}
-            fillColor={isBlackAndWhite ? "#000000aa" : "#91233855"}
-            strokeColor={isBlackAndWhite ? "#000000" : "#912338"}
-            strokeWidth={isBlackAndWhite ? 2 : 1}
-            fillColor="#912338cc"
-            strokeColor="#912338cc"
-            strokeWidth={2}
+            fillColor={isBlackAndWhite ? "#000000aa" : "#912338cc"}
+            strokeColor={isBlackAndWhite ? "#000000" : "#912338cc"}
+            strokeWidth={isBlackAndWhite ? 2 : 2}
           />
         ))}
 
@@ -747,8 +743,7 @@ export default function DirectionsScreen() {
       </TouchableOpacity>
 
       {/* Conditionally Render the Search Bar */}
-
-       {/* Search Container with accessibility styles */}
+      {/* Search Container with accessibility styles */}
       {!showDirections && (
         <View style={[
           styles.searchContainer,
@@ -770,7 +765,6 @@ export default function DirectionsScreen() {
               key: GOOGLE_MAPS_API_KEY,
               language: 'en'
             }}
-            onPlaceSelected={(details) => onPlaceSelected(details, 'origin')}
             currentValue={origin ? `${formatLocationName(origin)}` : undefined}
           />
           
@@ -790,9 +784,6 @@ export default function DirectionsScreen() {
               key: GOOGLE_MAPS_API_KEY,
               language: 'en'
             }}
-            onPlaceSelected={(details) =>
-              onPlaceSelected(details, 'destination')
-            }
             currentValue={destination ? `${formatLocationName(destination)}` : undefined}
           />
 
@@ -816,15 +807,21 @@ export default function DirectionsScreen() {
           {/* Campus Buttons */}
           <View style={styles.campusButtonsContainer}>
             <TouchableOpacity
-              style={[styles.campusButton, isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteText]}
+              style={[
+                styles.campusButton, 
+                isLargeText && styles.largeText,
+                isBlackAndWhite && styles.blackAndWhiteText
+              ]}
               onPress={() => setCampusPoint(SGW_COORDS, "SGW Campus")}
             >
               <Text style={styles.campusButtonText}>SGW Campus</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.campusButton, isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteText]}
+              style={[
+                styles.campusButton, 
+                isLargeText && styles.largeText,
+                isBlackAndWhite && styles.blackAndWhiteText
+              ]}
               onPress={() => setCampusPoint(LOYOLA_COORDS, "Loyola Campus")}
             >
               <Text style={styles.campusButtonText}>Loyola Campus</Text>
@@ -833,110 +830,45 @@ export default function DirectionsScreen() {
 
           {/* Travel Mode Buttons */}
           <View style={styles.modeContainer}>
-            <TouchableOpacity
-              style={[
-                styles.campusButton,
-                isBlackAndWhite && styles.blackAndWhiteButton
-              ]}
-              onPress={() => setCampusOrigin(SGW_COORDS)}
-            >
-              <Image
-                source={
-                  travelMode === 'DRIVING'
-                    ? require('../assets/images/transportModes/carWhite.png')
-                    : require('../assets/images/transportModes/carBlack.png')
-                }
-                style={styles.modeButtonIcon}
-              />
-              <Text
-                style={[
-                  styles.modeButtonText,
-                  travelMode === 'DRIVING' && styles.activeModeButtonText,
-                ]}
-              >
-                Driving
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.campusButton,
-                isBlackAndWhite && styles.blackAndWhiteButton
-              ]}
-              onPress={() => setCampusOrigin(LOYOLA_COORDS)}
-            >
-
-
-          {/* Travel Mode Buttons */}
-          <View style={styles.modeContainer}>
             {['DRIVING', 'WALKING', 'BICYCLING', 'TRANSIT'].map(mode => (
               <TouchableOpacity
                 key={mode}
-              <Image
-                source={
-                  travelMode === 'WALKING'
-                    ? require('../assets/images/transportModes/walkWhite.png')
-                    : require('../assets/images/transportModes/walkBlack.png')
-                }
-                style={styles.modeButtonIcon}
-              />
-              <Text
-                style={[
-                  styles.modeButtonText,
-                  travelMode === 'WALKING' && styles.activeModeButtonText,
-                ]}
-              >
-                Walking
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.modeButton,
-                travelMode === 'BICYCLING' && styles.activeModeButton,
-              ]}
-              onPress={() => setTravelMode('BICYCLING')}
-            >
-              <Image
-                source={
-                  travelMode === 'BICYCLING'
-                    ? require('../assets/images/transportModes/bikeWhite.png')
-                    : require('../assets/images/transportModes/bikeBlack.png')
-                }
-                style={styles.modeButtonIcon}
-              />
-              <Text
                 style={[
                   styles.modeButton,
                   travelMode === mode && styles.activeModeButton,
                   isBlackAndWhite && styles.blackAndWhiteButton,
                   travelMode === mode && isBlackAndWhite && styles.blackAndWhiteActiveButton
                 ]}
-                onPress={() => setTravelMode(mode as MapViewDirectionsMode)}
+                onPress={() => setTravelMode(mode)}
               >
-                Bicycling
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.modeButton,
-                travelMode === 'TRANSIT' && styles.activeModeButton,
-              ]}
-              onPress={() => setTravelMode('TRANSIT')}
-            >
-              <Image
-                source={
-                  travelMode === 'TRANSIT'
-                    ? require('../assets/images/transportModes/busWhite.png')
-                    : require('../assets/images/transportModes/busBlack.png')
-                }
-                style={styles.modeButtonIcon}
-              />
-              <Text
-                style={[
-                  styles.modeButtonText,
-                  travelMode === mode && styles.activeModeButtonText,
-                  isLargeText && styles.largeText,
-                  isBlackAndWhite && styles.blackAndWhiteText
-                ]}>
+                <Image
+                  source={
+                    mode === 'DRIVING' 
+                      ? travelMode === 'DRIVING'
+                        ? require('../assets/images/transportModes/carWhite.png')
+                        : require('../assets/images/transportModes/carBlack.png')
+                      : mode === 'WALKING'
+                        ? travelMode === 'WALKING'
+                          ? require('../assets/images/transportModes/walkWhite.png')
+                          : require('../assets/images/transportModes/walkBlack.png')
+                        : mode === 'BICYCLING'
+                          ? travelMode === 'BICYCLING'
+                            ? require('../assets/images/transportModes/bikeWhite.png')
+                            : require('../assets/images/transportModes/bikeBlack.png')
+                          : travelMode === 'TRANSIT'
+                            ? require('../assets/images/transportModes/busWhite.png')
+                            : require('../assets/images/transportModes/busBlack.png')
+                  }
+                  style={styles.modeButtonIcon}
+                />
+                <Text
+                  style={[
+                    styles.modeButtonText,
+                    travelMode === mode && styles.activeModeButtonText,
+                    isLargeText && styles.largeText,
+                    isBlackAndWhite && styles.blackAndWhiteText
+                  ]}
+                >
                   {mode.charAt(0) + mode.slice(1).toLowerCase()}
                 </Text>
               </TouchableOpacity>
@@ -961,11 +893,13 @@ export default function DirectionsScreen() {
         </View>
       )}
 
-
       {/* Back Button when directions are showing */}
       {showDirections && (
         <TouchableOpacity 
-          style={[styles.backButton, isBlackAndWhite && styles.blackAndWhiteContainer]}
+          style={[
+            styles.backButton, 
+            isBlackAndWhite && styles.blackAndWhiteContainer
+          ]}
           onPress={() => {
             setShowDirections(false);
             setShowShuttleRoute(false);
@@ -974,37 +908,65 @@ export default function DirectionsScreen() {
             setToastMessage('Returned to search view');
           }}
         >
-          <Text style={[styles.backButtonText, isLargeText && styles.largeText,
-            isBlackAndWhite && styles.blackAndWhiteText]}>Back to Search</Text>
+          <Text style={[
+            styles.backButtonText, 
+            isLargeText && styles.largeText,
+            isBlackAndWhite && styles.blackAndWhiteText
+          ]}>
+            Back to Search
+          </Text>
         </TouchableOpacity>
       )}
 
       {/* Directions */}
       {steps.length > 0 && (
-        <View style={[styles.directionsContainer, { height: directionsHeight },  isBlackAndWhite && styles.blackAndWhiteText]}>
+        <View style={[
+          styles.directionsContainer, 
+          { height: directionsHeight },  
+          isBlackAndWhite && styles.blackAndWhiteText
+        ]}>
           {/* Handle for expanding/collapsing with PanResponder for swipe gestures */}
           <Animated.View 
-            style={[styles.dragHandleContainer, { transform: [{ translateY: panY }], isLargeText && styles.largeText,
-            isBlackAndWhite && styles.blackAndWhiteText }]}
+            style={[
+              styles.dragHandleContainer, 
+              { transform: [{ translateY: panY }] }
+            ]}
             {...panResponder.panHandlers}
           >
-            <View style={[styles.dragIndicator], isBlackAndWhite && styles.blackAndWhiteText} />
+            <View style={[
+              styles.dragIndicator, 
+              isBlackAndWhite && styles.blackAndWhiteText
+            ]} />
           </Animated.View>
           
-          <View style={[styles.directionsHeaderRow, isBlackAndWhite && styles.blackAndWhiteText]}>
-            <Text style={[styles.directionsHeader, isLargeText && styles.largeText,
-            isBlackAndWhite && styles.blackAndWhiteText]}>Directions</Text>
+          <View style={[
+            styles.directionsHeaderRow, 
+            isBlackAndWhite && styles.blackAndWhiteText
+          ]}>
+            <Text style={[
+              styles.directionsHeader, 
+              isLargeText && styles.largeText,
+              isBlackAndWhite && styles.blackAndWhiteText
+            ]}>
+              Directions
+            </Text>
             <TouchableOpacity 
-              style={[styles.expandButton, isLargeText && styles.largeText,
-            isBlackAndWhite && styles.blackAndWhiteText]}
+              style={[
+                styles.expandButton, 
+                isLargeText && styles.largeText,
+                isBlackAndWhite && styles.blackAndWhiteText
+              ]}
               onPress={() => {
                 setExpandedDirections(!expandedDirections);
                 setDirectionsHeight(expandedDirections ? 150 : height * 0.6);
               }} 
             >
-              <Text style={[styles.expandButtonText, isLargeText && styles.largeText,
-            isBlackAndWhite && styles.blackAndWhiteText]}>
-                {expandedDirections ? 'Collapse' : 'Expand
+              <Text style={[
+                styles.expandButtonText, 
+                isLargeText && styles.largeText,
+                isBlackAndWhite && styles.blackAndWhiteText
+              ]}>
+                {expandedDirections ? 'Collapse' : 'Expand'}
               </Text>
             </TouchableOpacity>
           </View>
