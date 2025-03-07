@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useContext } from 'react';
 import {
   StyleSheet,
   View,
@@ -14,7 +14,8 @@ import MapView, {
   Polygon, 
   PROVIDER_DEFAULT, 
   Callout, 
-  Region
+  Region,
+  MapStyleElement
 } from 'react-native-maps';
 import Constants from 'expo-constants';
 import * as Location from 'expo-location';
@@ -22,6 +23,7 @@ import { GOOGLE_MAPS_API_KEY } from '@env';
 import { polygons } from '../components/polygonCoordinates';
 import { NavigationProp, ParamListBase, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { AccessibilityContext } from './AccessibilitySettings';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -78,6 +80,7 @@ const POI_TYPE_ICONS: Record<string, string> = {
 };
 
 export default function POIScreen() {
+  const { isBlackAndWhite, isLargeText } = useContext(AccessibilityContext);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [pois, setPOIs] = useState<POI[]>([]);
@@ -88,6 +91,22 @@ export default function POIScreen() {
   const mapRef = useRef<MapView | null>(null);
   const searchInputRef = useRef<TextInput | null>(null);
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  
+  // Black and white map style for accessibility
+  const mapStyle: MapStyleElement[] = isBlackAndWhite ? [
+    {
+      "elementType": "geometry",
+      "stylers": [{ "saturation": -100 }]
+    },
+    {
+      "elementType": "labels.text.fill",
+      "stylers": [{ "saturation": -100 }]
+    },
+    {
+      "elementType": "labels.text.stroke",
+      "stylers": [{ "saturation": -100 }]
+    }
+  ] : [];
   
   // Message timeout effect
   useEffect(() => {
@@ -278,7 +297,9 @@ export default function POIScreen() {
       {/* Message Banner */}
       {message && (
         <View style={styles.messageBanner}>
-          <Text style={styles.messageText}>{message}</Text>
+          <Text style={[styles.messageText, isLargeText && { fontSize: 16 }]}>
+            {message}
+          </Text>
         </View>
       )}
       
@@ -290,14 +311,15 @@ export default function POIScreen() {
         initialRegion={INITIAL_POSITION}
         showsUserLocation={true}
         showsMyLocationButton={true}
+        customMapStyle={mapStyle}
       >
         {/* Polygons for Concordia buildings */}
         {polygons.map((polygon, idx) => (
           <Polygon
             key={idx}
             coordinates={polygon.boundaries}
-            fillColor="#912338cc"
-            strokeColor="#912338cc"
+            fillColor={isBlackAndWhite ? "#333333cc" : "#912338cc"}
+            strokeColor={isBlackAndWhite ? "#333333cc" : "#912338cc"}
             strokeWidth={2}
           />
         ))}
@@ -310,6 +332,7 @@ export default function POIScreen() {
             title={poi.name}
             description={poi.description}
             onPress={() => setSelectedPOI(poi)}
+            pinColor={isBlackAndWhite ? "black" : undefined}
           >
             <View style={styles.markerContainer}>
               <Text style={styles.markerIcon}>
@@ -318,14 +341,14 @@ export default function POIScreen() {
             </View>
             <Callout tooltip onPress={() => getDirections(poi)}>
               <View style={styles.calloutContainer}>
-                <Text style={styles.calloutTitle}>{poi.name}</Text>
-                <Text style={styles.calloutAddress}>{poi.address}</Text>
+                <Text style={[styles.calloutTitle, isLargeText && { fontSize: 16 }]}>{poi.name}</Text>
+                <Text style={[styles.calloutAddress, isLargeText && { fontSize: 14 }]}>{poi.address}</Text>
                 {poi.rating !== 'N/A' && (
-                  <Text style={styles.calloutRating}>Rating: {poi.rating} ⭐</Text>
+                  <Text style={[styles.calloutRating, isLargeText && { fontSize: 14 }]}>Rating: {poi.rating} ⭐</Text>
                 )}
                 <View style={styles.directionsButton}>
-                  <Ionicons name="navigate" size={16} color="white" style={styles.directionsIcon} />
-                  <Text style={styles.directionsText}>Get Directions</Text>
+                  <Ionicons name="navigate" size={isLargeText ? 18 : 16} color="white" style={styles.directionsIcon} />
+                  <Text style={[styles.directionsText, isLargeText && { fontSize: 14 }]}>Get Directions</Text>
                 </View>
               </View>
             </Callout>
@@ -336,8 +359,13 @@ export default function POIScreen() {
       {/* Loading Indicator */}
       {isLoading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#912338" />
-          <Text style={styles.loadingText}>Loading...</Text>
+          <ActivityIndicator size="large" color={isBlackAndWhite ? "#333" : "#912338"} />
+          <Text style={[styles.loadingText, 
+            isBlackAndWhite && { color: "#333" }, 
+            isLargeText && { fontSize: 18 }
+          ]}>
+            Loading...
+          </Text>
         </View>
       )}
       
@@ -346,7 +374,7 @@ export default function POIScreen() {
         <View style={styles.searchBarWrapper}>
           <TextInput
             ref={searchInputRef}
-            style={styles.searchInput}
+            style={[styles.searchInput, isLargeText && { fontSize: 18 }]}
             placeholder="Search for places..."
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -354,7 +382,7 @@ export default function POIScreen() {
             returnKeyType="search"
           />
           <TouchableOpacity 
-            style={styles.searchButton}
+            style={[styles.searchButton, isBlackAndWhite && { backgroundColor: "#333" }]}
             onPress={handleSearch}
             disabled={isLoading}
           >
@@ -373,7 +401,7 @@ export default function POIScreen() {
             disabled={isLoading}
           >
             <Text style={styles.quickSearchIcon}>{option.icon}</Text>
-            <Text style={styles.quickSearchText}>{option.name}</Text>
+            <Text style={[styles.quickSearchText, isLargeText && { fontSize: 16 }]}>{option.name}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -381,7 +409,7 @@ export default function POIScreen() {
       {/* Current Location Button */}
       {userLocation && (
         <TouchableOpacity 
-          style={styles.myLocationButton}
+          style={[styles.myLocationButton, isBlackAndWhite && { backgroundColor: "#333" }]}
           onPress={() => {
             if (userLocation && mapRef.current) {
               mapRef.current.animateToRegion({
