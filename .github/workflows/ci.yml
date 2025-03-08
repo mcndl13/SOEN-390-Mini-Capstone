@@ -31,7 +31,7 @@ jobs:
 
 
       - name: Run Linter
-        run: cd lost-in-faubourg-app && npm run lint
+        run: cd lost-in-faubourg-app && npm run lint -- --fix
 
       - name: Run Test Suite with Coverage and Generate JUnit Report
         env:
