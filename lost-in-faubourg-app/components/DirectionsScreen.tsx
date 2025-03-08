@@ -800,7 +800,7 @@ export default function DirectionsScreen() {
           isBlackAndWhite && styles.blackAndWhiteContainer
         ]}>
           <Text style={[styles.label, isLargeText && styles.largeText]}>Origin</Text>
-          <GooglePlacesAutocomplete
+          <InputAutocomplete
             fetchDetails={true}
             placeholder="Enter origin"
             styles={{
@@ -819,7 +819,7 @@ export default function DirectionsScreen() {
           />
           
           <Text style={[styles.label, isLargeText && styles.largeText]}>Destination</Text>
-          <GooglePlacesAutocomplete
+          <InputAutocomplete
             fetchDetails={true}
             placeholder="Enter destination"
             styles={{
