@@ -1,27 +1,34 @@
-// calendarService.js
+export async function getCalendarEvents(token: string) {
+  try {
+    const res = await fetch(
+      "https://www.googleapis.com/calendar/v3/calendars/primary/events",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-// Mock function to simulate fetching calendar events
-export async function getCalendarEvents() {
-  // Replace this mock with actual integration with Google Calendar API
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-          summary: 'Math Class',
-          start: '2025-01-20T09:00:00',
-          location: 'Building A, Room 101',
-        },
-        {
-          summary: 'Physics Lab',
-          start: '2025-01-20T11:00:00',
-          location: 'Building B, Room 202',
-        },
-        {
-          summary: 'Meeting with Advisor',
-          start: '2025-01-20T14:00:00',
-          location: 'Building C, Office 303',
-        },
-      ])
-    }, 1000)
-  })
+    const data = await res.json();
+    console.log("Full Calendar API Response:", data);
+
+    if (data.error) {
+      console.error("Google Calendar API Error:", data.error);
+      return [];
+    }
+
+    if (data.items && Array.isArray(data.items)) {
+      return data.items.map((event: any) => ({
+        summary: event.summary,
+        start: event.start?.dateTime || event.start?.date,
+        location: event.location || "N/A",
+      }));
+    } else {
+      console.warn("No events found in the calendar.");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching calendar events:", error);
+    return [];
+  }
 }
