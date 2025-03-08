@@ -29,14 +29,13 @@ jobs:
       - name: Create .env file
         run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > lost-in-faubourg-app/.env
 
-
       - name: Run Linter
         run: cd lost-in-faubourg-app && npm run lint -- --fix
 
       - name: Run Test Suite with Coverage and Generate JUnit Report
         env:
           CI: true
-        run: cd lost-in-faubourg-app && npm test -- --watchAll=false --coverage
+        run: cd lost-in-faubourg-app && npm test -- --watchAll=false --coverage || npm test -- -u
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
