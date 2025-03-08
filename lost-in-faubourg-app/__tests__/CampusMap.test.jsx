@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import { polygons } from '../components/polygonCoordinates';
 import { AccessibilityContext } from '../components/AccessibilitySettings';
 
+// --- Mocks ---
 jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
@@ -23,9 +24,28 @@ jest.mock('react-native-maps', () => {
   };
 });
 
-jest.mock('../services/shuttleService', () => {
-  return {
-    fetchShuttlePositions: jest.fn().mockResolvedValue({
+jest.mock('../services/shuttleService', () => ({
+  fetchShuttlePositions: jest.fn().mockResolvedValue({
+    buses: [
+      {
+        ID: 'BUS1',
+        Latitude: 45.4953534,
+        Longitude: -73.578549,
+        IconImage: 'bus.png',
+      },
+    ],
+    stations: [
+      {
+        ID: 'GP1',
+        Latitude: 45.496,
+        Longitude: -73.579,
+        IconImage: 'station.png',
+      },
+    ],
+    centerPoint: { Latitude: 45.4953534, Longitude: -73.578549 },
+  }),
+  startShuttleTracking: jest.fn().mockImplementation((callback) => {
+    callback({
       buses: [
         {
           ID: 'BUS1',
@@ -43,48 +63,31 @@ jest.mock('../services/shuttleService', () => {
         },
       ],
       centerPoint: { Latitude: 45.4953534, Longitude: -73.578549 },
-    }),
-    startShuttleTracking: jest
-      .fn()
-      .mockImplementation((callback, interval = 15000) => {
-        callback({
-          buses: [
-            {
-              ID: 'BUS1',
-              Latitude: 45.4953534,
-              Longitude: -73.578549,
-              IconImage: 'bus.png',
-            },
-          ],
-          stations: [
-            {
-              ID: 'GP1',
-              Latitude: 45.496,
-              Longitude: -73.579,
-              IconImage: 'station.png',
-            },
-          ],
-          centerPoint: { Latitude: 45.4953534, Longitude: -73.578549 },
-        });
-        return () => {};
-      }),
-  };
-});
+    });
+    return () => {};
+  }),
+}));
 
+// --- Helper functions ---
+const setLocationMock = (
+  coords = { latitude: 45.4953534, longitude: -73.578549 },
+  status = 'granted',
+) => {
+  Location.requestForegroundPermissionsAsync.mockResolvedValue({ status });
+  Location.getCurrentPositionAsync.mockResolvedValue({ coords });
+};
+
+const renderCampusMap = () => render(<CampusMap />);
+
+// --- Tests ---
 describe('CampusMap', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('map renders correctly with user location', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
-
-    const { getByText, getByTestId } = render(<CampusMap />);
+  test('map renders correctly with user location', async () => {
+    setLocationMock();
+    const { getByText, getByTestId } = renderCampusMap();
 
     await waitFor(() => {
       expect(getByText('Loading Map...')).toBeTruthy();
@@ -101,15 +104,9 @@ describe('CampusMap', () => {
     });
   });
 
-  it('switches to SGW campus on button press', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
-
-    const { getByText, getByTestId } = render(<CampusMap />);
+  test('switches to SGW campus on button press', async () => {
+    setLocationMock();
+    const { getByText, getByTestId } = renderCampusMap();
 
     await waitFor(() => {
       expect(getByText('SGW Campus')).toBeTruthy();
@@ -128,15 +125,9 @@ describe('CampusMap', () => {
     });
   });
 
-  it('switches to Loyola campus on button press', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.6405 },
-    });
-
-    const { getByText, getByTestId } = render(<CampusMap />);
+  test('switches to Loyola campus on button press', async () => {
+    setLocationMock({ latitude: 45.4953534, longitude: -73.6405 });
+    const { getByText, getByTestId } = renderCampusMap();
 
     await waitFor(() => {
       expect(getByText('Loyola Campus')).toBeTruthy();
@@ -155,50 +146,34 @@ describe('CampusMap', () => {
     });
   });
 
-  it('renders "You are here" marker correctly', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
-
-    const { getByTestId } = render(<CampusMap />);
+  test('renders "You are here" marker correctly', async () => {
+    setLocationMock();
+    const { getByTestId } = renderCampusMap();
 
     await waitFor(() => {
       const mapView = getByTestId('mapView');
+      const flatChildren = React.Children.toArray(
+        mapView.props.children,
+      ).flat();
+      const markerComponent = flatChildren.find(
+        (child) => child.props.testID === 'marker-current-location',
+      );
 
-      if (mapView) {
-        const flatChildren = React.Children.toArray(
-          mapView.props.children,
-        ).flat();
-        const markerComponent = flatChildren.find(
-          (child) => child.props.testID === 'marker-current-location',
-        );
-
-        expect(markerComponent).toBeTruthy();
-        expect(markerComponent.props.coordinate).toEqual({
-          latitude: 45.4953534,
-          longitude: -73.578549,
-        });
-        expect(markerComponent.props.title).toBe('You are here');
-        expect(markerComponent.props.pinColor).toBe('blue');
-      } else {
-        console.error('MapView not found');
-      }
+      expect(markerComponent).toBeTruthy();
+      expect(markerComponent.props.coordinate).toEqual({
+        latitude: 45.4953534,
+        longitude: -73.578549,
+      });
+      expect(markerComponent.props.title).toBe('You are here');
+      expect(markerComponent.props.pinColor).toBe('blue');
     });
   });
 
-  polygons.forEach((polygon, index) => {
-    it(`displays ${polygon.name} building information on marker press`, async () => {
-      Location.requestForegroundPermissionsAsync.mockResolvedValue({
-        status: 'granted',
-      });
-      Location.getCurrentPositionAsync.mockResolvedValue({
-        coords: { latitude: 45.4953534, longitude: -73.578549 },
-      });
-
-      const { getByTestId, getAllByText } = render(<CampusMap />);
+  test.each(polygons.map((polygon, index) => [polygon.name, index, polygon]))(
+    'displays %s building information on marker press',
+    async (name, index, polygon) => {
+      setLocationMock();
+      const { getByTestId, getAllByText } = renderCampusMap();
 
       await waitFor(() => {
         expect(getAllByText('Loading Map...')).toBeTruthy();
@@ -224,61 +199,35 @@ describe('CampusMap', () => {
         );
         expect(addressElements.length).toBeGreaterThan(0);
       });
-    });
-  });
+    },
+  );
 
-  it('renders polygons correctly', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
-
-    const { getByTestId } = render(<CampusMap />);
+  test('renders polygons correctly', async () => {
+    setLocationMock();
+    const { getByTestId } = renderCampusMap();
 
     await waitFor(() => {
       const mapView = getByTestId('mapView');
-
-      if (mapView) {
-        const flatChildren = mapView.props.children.flat();
-        polygons.forEach((polygon, index) => {
-          const polygonComponent = flatChildren.find(
-            (child) =>
-              child.key === index.toString() &&
-              child.type.name === 'MockPolygon',
-          );
-
-          if (polygonComponent) {
-            expect(polygonComponent.props.coordinates).toEqual(
-              polygon.boundaries,
-            );
-            expect(polygonComponent.props.fillColor).toBe('#912338cc');
-            expect(polygonComponent.props.strokeColor).toBe('#912338cc');
-            expect(polygonComponent.props.strokeWidth).toBe(1);
-          } else {
-            console.error(`Polygon ${index} not found`);
-          }
-          expect(polygonComponent).toBeTruthy();
-        });
-      } else {
-        console.error('MapView not found');
-      }
+      const flatChildren = mapView.props.children.flat();
+      polygons.forEach((polygon, index) => {
+        const polygonComponent = flatChildren.find(
+          (child) =>
+            child.key === index.toString() && child.type.name === 'MockPolygon',
+        );
+        expect(polygonComponent).toBeTruthy();
+        expect(polygonComponent.props.coordinates).toEqual(polygon.boundaries);
+        expect(polygonComponent.props.fillColor).toBe('#912338cc');
+        expect(polygonComponent.props.strokeColor).toBe('#912338cc');
+        expect(polygonComponent.props.strokeWidth).toBe(1);
+      });
     });
   });
 
-  it('renders shuttle markers correctly', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
-
-    const { getByTestId } = render(<CampusMap />);
+  test('renders shuttle markers correctly', async () => {
+    setLocationMock();
+    const { getByTestId } = renderCampusMap();
 
     await waitFor(() => {
-      const mapView = getByTestId('mapView');
       const shuttleMarker = getByTestId('marker-BUS1');
       expect(shuttleMarker).toBeTruthy();
       expect(shuttleMarker.props.coordinate).toEqual({
@@ -290,15 +239,10 @@ describe('CampusMap', () => {
 });
 
 describe('CampusMap additional tests', () => {
-  it('handles permission denied gracefully', async () => {
+  test('handles permission denied gracefully', async () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'denied',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 0, longitude: 0 },
-    });
-    const { getByText } = render(<CampusMap />);
+    setLocationMock({ latitude: 0, longitude: 0 }, 'denied');
+    const { getByText } = renderCampusMap();
     await waitFor(() => {
       expect(getByText('Loading Map...')).toBeTruthy();
     });
@@ -308,7 +252,7 @@ describe('CampusMap additional tests', () => {
     consoleSpy.mockRestore();
   });
 
-  it('calls cleanup for shuttle tracking on unmount', async () => {
+  test('calls cleanup for shuttle tracking on unmount', async () => {
     const cleanupMock = jest.fn();
     const originalStartShuttleTracking =
       require('../services/shuttleService').startShuttleTracking;
@@ -323,17 +267,10 @@ describe('CampusMap additional tests', () => {
       },
     );
 
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
-
-    const { unmount } = render(<CampusMap />);
+    setLocationMock();
+    const { unmount } = renderCampusMap();
     unmount();
     expect(cleanupMock).toHaveBeenCalled();
-
     require('../services/shuttleService').startShuttleTracking =
       originalStartShuttleTracking;
   });
@@ -353,14 +290,8 @@ describe('CampusMap accessibility customization', () => {
     </AccessibilityContext.Provider>
   );
 
-  it('renders polygons in black and white mode', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
-
+  test('renders polygons in black and white mode', async () => {
+    setLocationMock();
     const { getByTestId } = render(
       <CustomAccessibilityProvider>
         <CampusMap />
@@ -385,15 +316,8 @@ describe('CampusMap accessibility customization', () => {
     });
   });
 
-  //Faulty test, the marker is not rendered in black and white mode. Waiting for bug to be fixed.
-  it('renders current location marker with black pin in black and white mode', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
-
+  test('renders current location marker with black pin in black and white mode', async () => {
+    setLocationMock();
     const { getByTestId } = render(
       <CustomAccessibilityProvider>
         <CampusMap />
