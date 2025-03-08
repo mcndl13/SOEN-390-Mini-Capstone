@@ -35,6 +35,7 @@ const AccessibilitySettings = () => {
             <Pressable 
                 style={styles.settingsButton} 
                 onPress={() => setModalVisible(true)}
+                testID="settings-button" // <-- added testID
             >
                 <Ionicons name="settings" size={24} color="black" />
             </Pressable>
@@ -50,6 +51,7 @@ const AccessibilitySettings = () => {
                         <Pressable 
                             style={styles.closeButton}
                             onPress={() => setModalVisible(false)}
+                            testID="close-button" // <-- added testID for close button
                         >
                             <Ionicons name="close" size={24} color="black" />
                         </Pressable>
@@ -65,6 +67,7 @@ const AccessibilitySettings = () => {
                             <Switch
                                 value={isBlackAndWhite}
                                 onValueChange={setIsBlackAndWhite}
+                                testID="black-and-white-switch" // <-- added testID
                             />
                         </View>
                         
@@ -75,6 +78,7 @@ const AccessibilitySettings = () => {
                             <Switch
                                 value={isLargeText}
                                 onValueChange={setIsLargeText}
+                                testID="larger-text-switch" // <-- added testID
                             />
                         </View>
                     </View>

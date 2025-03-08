@@ -3,21 +3,27 @@
 exports[`HomeScreen renders correctly 1`] = `
 <View
   style={
-    {
-      "alignItems": "center",
-      "flex": 1,
-      "justifyContent": "center",
-    }
+    [
+      {
+        "alignItems": "center",
+        "flex": 1,
+        "justifyContent": "center",
+      },
+      false,
+    ]
   }
 >
   <Text
     style={
-      {
-        "fontSize": 32,
-        "fontWeight": "600",
-        "marginBottom": 40,
-        "marginTop": 60,
-      }
+      [
+        {
+          "fontSize": 32,
+          "fontWeight": "600",
+          "marginBottom": 40,
+          "marginTop": 60,
+        },
+        false,
+      ]
     }
   >
     Welcome
@@ -66,10 +72,13 @@ exports[`HomeScreen renders correctly 1`] = `
       >
         <Text
           style={
-            {
-              "color": "white",
-              "fontSize": 18,
-            }
+            [
+              {
+                "color": "white",
+                "fontSize": 18,
+              },
+              false,
+            ]
           }
         >
           Explore Campus Map
@@ -117,10 +126,13 @@ exports[`HomeScreen renders correctly 1`] = `
       >
         <Text
           style={
-            {
-              "color": "white",
-              "fontSize": 18,
-            }
+            [
+              {
+                "color": "white",
+                "fontSize": 18,
+              },
+              false,
+            ]
           }
         >
           Get Directions
@@ -168,10 +180,13 @@ exports[`HomeScreen renders correctly 1`] = `
       >
         <Text
           style={
-            {
-              "color": "white",
-              "fontSize": 18,
-            }
+            [
+              {
+                "color": "white",
+                "fontSize": 18,
+              },
+              false,
+            ]
           }
         >
           Connect to Google Calendar
@@ -219,13 +234,70 @@ exports[`HomeScreen renders correctly 1`] = `
       >
         <Text
           style={
-            {
-              "color": "white",
-              "fontSize": 18,
-            }
+            [
+              {
+                "color": "white",
+                "fontSize": 18,
+              },
+              false,
+            ]
           }
         >
           Indoor Navigation
+        </Text>
+      </View>
+      <View
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onClick={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#912338",
+            "borderRadius": 30,
+            "justifyContent": "center",
+            "margin": 5,
+            "opacity": 1,
+            "padding": 20,
+          }
+        }
+      >
+        <Text
+          style={
+            [
+              {
+                "color": "white",
+                "fontSize": 18,
+              },
+              false,
+            ]
+          }
+        >
+          Find Points of Interest
         </Text>
       </View>
       <View
@@ -276,7 +348,7 @@ exports[`HomeScreen renders correctly 1`] = `
             }
           }
         >
-          Find Points of Interest
+          Shuttle Schedule
         </Text>
       </View>
     </View>
