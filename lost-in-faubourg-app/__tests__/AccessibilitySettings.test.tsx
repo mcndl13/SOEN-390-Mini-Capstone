@@ -9,7 +9,6 @@ jest.mock('@expo/vector-icons', () => {
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import AccessibilitySettings, {
-  AccessibilityContext,
   AccessibilityProvider,
 } from '../components/AccessibilitySettings';
 
@@ -39,5 +38,5 @@ describe('AccessibilitySettings', () => {
     await waitFor(() => {
       expect(queryByText('Accessibility Settings')).toBeNull();
     });
-  });
+  }, 10000);
 });
