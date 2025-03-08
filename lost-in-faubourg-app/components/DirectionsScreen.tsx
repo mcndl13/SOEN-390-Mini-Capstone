@@ -129,6 +129,10 @@ function InputAutocomplete({
   );
 }
 
+export function stripHtml(input: string): string {
+  return input.replace(/<[^>]*>?/gm, '');
+}
+
 export default function DirectionsScreen() {
   const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
   const [origin, setOrigin] = useState<{
@@ -503,9 +507,13 @@ export default function DirectionsScreen() {
         `key=${GOOGLE_MAPS_API_KEY}`;
 
       const res = await fetch(url);
-      console.log('Response status:', res.status);
+      if (!process.env.JEST_WORKER_ID) {
+        console.log('Response status:', res.status);
+      }
       const data = await res.json();
-      console.log('Directions API response:', data.status);
+      if (!process.env.JEST_WORKER_ID) {
+        console.log('Directions API response:', data.status);
+      }
 
       if (data.routes?.length) {
         const firstRoute = data.routes[0];
