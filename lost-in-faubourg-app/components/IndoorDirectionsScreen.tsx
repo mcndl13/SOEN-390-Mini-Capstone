@@ -246,7 +246,6 @@ const buildingData: Record<
 //--------------------------------------
 // 5) Helper Functions
 //--------------------------------------
-// Scale node coordinates from original dimensions to container dimensions
 function scaleCoordinates(
   coord: { x: number; y: number },
   original: { width: number; height: number },
@@ -257,7 +256,6 @@ function scaleCoordinates(
   return { x: coord.x * scaleX, y: coord.y * scaleY };
 }
 
-// Get scaled coordinates for an array of node IDs
 function getPathCoordinates(
   graph: Record<string, GraphNode>,
   nodeIds: string[],
@@ -329,7 +327,6 @@ function findNearestNode(
   return closestNodeId;
 }
 
-// Get all nodes from all floors in all buildings
 function getAllNodes(): Array<{ building: string; node: string; floor: number }> {
   const nodes: Array<{ building: string; node: string; floor: number }> = [];
   Object.keys(buildingData).forEach((b) => {
@@ -344,7 +341,6 @@ function getAllNodes(): Array<{ building: string; node: string; floor: number }>
   return nodes;
 }
 
-// Formats a raw node name by replacing underscores with spaces and capitalizing each word.
 function formatNodeName(node: string): string {
   return node
     .split('_')
@@ -352,7 +348,6 @@ function formatNodeName(node: string): string {
     .join(' ');
 }
 
-// Generates step-by-step directions from a path of node IDs.
 function generateDirections(path: string[]): string[] {
   if (!path || path.length === 0) return [];
   const directions = [];
@@ -366,32 +361,57 @@ function generateDirections(path: string[]): string[] {
   return directions;
 }
 
+
+
+function computeEstimatedTime(distanceMeters: number): number {
+  const WALKING_SPEED = 1.5; 
+  return distanceMeters / WALKING_SPEED;
+}
+
+function formatTime(seconds: number): string {
+  if (seconds < 60) {
+    return `${seconds.toFixed(0)} sec`;
+  } else {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.round(seconds % 60);
+    return `${minutes} min ${secs} sec`;
+  }
+}
+
+function getOriginalPathCoordinates(graph: Record<string, GraphNode>, nodeIds: string[]): { x: number; y: number }[] {
+  return nodeIds.map(id => ({ x: graph[id].x, y: graph[id].y }));
+}
+
+// ADDED TIME FOR DIFFERENT FLOORS/BUILDING (HARDCODED FOR NOW LOL)
+const CROSS_FLOOR_TIME_PENALTY = 40; 
+const CROSS_BUILDING_TIME_PENALTY = 120;
+
 //--------------------------------------
 // 6) COMPONENT
 //--------------------------------------
 export default function IndoorDirectionsScreen() {
-  // Search state for destinations
+
   const [startSearch, setStartSearch] = useState<string>('');
   const [endSearch, setEndSearch] = useState<string>('');
-  // Selected destinations now include building info.
+
   const [startDest, setStartDest] = useState<Destination | null>(null);
   const [endDest, setEndDest] = useState<Destination | null>(null);
-  // Also keep building and floor (for current view) for non–cross–building navigation
+
   const [selectedBuilding, setSelectedBuilding] = useState<string>('Hall');
   const [selectedFloor, setSelectedFloor] = useState<number>(1);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-  // For same-floor routing (when using map tap)
+
   const [path, setPath] = useState<string[]>([]);
-  // Full screen toggle
+
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   // Elevator Only check box (currently does nothing)
   const [elevatorOnly, setElevatorOnly] = useState<boolean>(false);
 
-  // When no search destination is chosen, we use the currently selected building/floor view.
+
   const currentBuilding = buildingData[selectedBuilding];
   const currentFloorData = currentBuilding.floors[selectedFloor];
 
-  // Get all nodes across all buildings for search suggestions
+
   const allNodes = getAllNodes();
 
   const filteredStartNodes = allNodes.filter((item) =>
@@ -408,17 +428,17 @@ export default function IndoorDirectionsScreen() {
 
   const handlePress = (event: GestureResponderEvent) => {
     const { locationX, locationY } = event.nativeEvent;
-    // Use current floor's graph for tap (for same–floor selection)
+
     const graph = currentFloorData.graph;
     if (!graph) {
       console.warn('No graph data for', selectedBuilding, 'floor', selectedFloor);
       return;
     }
     const tappedNodeId = findNearestNode(locationX, locationY, graph);
-    // Clear search fields when tapping
+
     setStartSearch('');
     setEndSearch('');
-    // For map tap, use the currently selected building and floor.
+
     if (!startDest) {
       setStartDest({ building: selectedBuilding, node: tappedNodeId, floor: selectedFloor });
       setEndDest(null);
@@ -427,21 +447,20 @@ export default function IndoorDirectionsScreen() {
     }
     if (!endDest) {
       setEndDest({ building: selectedBuilding, node: tappedNodeId, floor: selectedFloor });
-      // If same building and floor, compute same–floor path.
+
       if (selectedBuilding === startDest.building && startDest.floor === selectedFloor) {
         const newPath = findPathBFS(graph, startDest.node, tappedNodeId);
         setPath(newPath);
       }
       return;
     }
-    // Otherwise, reset start with new tap on current floor.
+
     setStartDest({ building: selectedBuilding, node: tappedNodeId, floor: selectedFloor });
     setEndDest(null);
     setPath([]);
   };
 
-  // Determine routing based on destination selection:
-  // We distinguish three cases:
+
   // 1) Same building, same floor (sameFloor)
   // 2) Same building, different floors (only implemented for Hall)
   // 3) Cross-building routing (for simplicity, only implemented for Hall -> John Molson)
@@ -455,14 +474,14 @@ export default function IndoorDirectionsScreen() {
         const graph = buildingData[startDest.building].floors[startDest.floor].graph;
         startFloorPath = findPathBFS(graph, startDest.node, endDest.node);
       } else if (startDest.building === 'Hall') {
-        // Cross–floor within Hall building (using elevator logic)
+
         const startGraph = buildingData['Hall'].floors[startDest.floor].graph;
         const endGraph = buildingData['Hall'].floors[endDest.floor].graph;
         startFloorPath = findPathBFS(startGraph, startDest.node, "Hall_1st_Elevator");
         endFloorPath = findPathBFS(endGraph, "Elevator9th", endDest.node);
       }
     } else if (startDest.building === 'Hall' && endDest.building === 'John Molson') {
-      // Cross–building routing: from Hall (start) to John Molson (end)
+
       const startGraph = buildingData['Hall'].floors[startDest.floor].graph;
       const endGraph = buildingData['John Molson'].floors[endDest.floor].graph;
       startFloorPath = findPathBFS(startGraph, startDest.node, "Hall_1st_Basement_Escalator");
@@ -470,7 +489,7 @@ export default function IndoorDirectionsScreen() {
     }
   }
 
-  // For same–floor view, scale path coordinates from the current floor's original dimensions
+
   const scaledPathCoords = sameFloor
     ? getPathCoordinates(
         buildingData[startDest?.building || selectedBuilding].floors[startDest?.floor || selectedFloor].graph,
@@ -484,7 +503,33 @@ export default function IndoorDirectionsScreen() {
   const drawingDistance = sameFloor ? computePathDistance(scaledPathCoords) : 0;
   const distanceInMeters = drawingDistance * PIXEL_TO_METER;
 
-  // Reset handler to clear destinations and path
+  let sameFloorEstimatedTime = '';
+  let crossFloorEstimatedTime = '';
+  let crossBuildingEstimatedTime = '';
+
+  if (startDest && endDest) {
+    if (startDest.building === endDest.building) {
+      if (startDest.floor === endDest.floor && path.length > 1) {
+        sameFloorEstimatedTime = formatTime(computeEstimatedTime(distanceInMeters));
+      } else if (startDest.floor !== endDest.floor && startDest.building === 'Hall') {
+        const startGraph = buildingData['Hall'].floors[startDest.floor].graph;
+        const endGraph = buildingData['Hall'].floors[endDest.floor].graph;
+        const startDistance = computePathDistance(getOriginalPathCoordinates(startGraph, startFloorPath)) * PIXEL_TO_METER;
+        const endDistance = computePathDistance(getOriginalPathCoordinates(endGraph, endFloorPath)) * PIXEL_TO_METER;
+        const totalTime = computeEstimatedTime(startDistance + endDistance) + CROSS_FLOOR_TIME_PENALTY;
+        crossFloorEstimatedTime = formatTime(totalTime);
+      }
+    } else if (startDest.building === 'Hall' && endDest.building === 'John Molson') {
+      const startGraph = buildingData['Hall'].floors[startDest.floor].graph;
+      const endGraph = buildingData['John Molson'].floors[endDest.floor].graph;
+      const startDistance = computePathDistance(getOriginalPathCoordinates(startGraph, startFloorPath)) * PIXEL_TO_METER;
+      const endDistance = computePathDistance(getOriginalPathCoordinates(endGraph, endFloorPath)) * PIXEL_TO_METER;
+      const totalTime = computeEstimatedTime(startDistance + endDistance) + CROSS_BUILDING_TIME_PENALTY;
+      crossBuildingEstimatedTime = formatTime(totalTime);
+    }
+  }
+  
+
   const handleReset = () => {
     setStartDest(null);
     setEndDest(null);
@@ -936,57 +981,65 @@ export default function IndoorDirectionsScreen() {
         )}
         {/* For same–floor view, show path info */}
         {startDest && endDest && startDest.building === endDest.building && startDest.floor === endDest.floor && path.length > 1 && (
-          <View style={styles.pathInfo}>
-            <Text style={{ fontWeight: 'bold' }}>Directions:</Text>
-            {generateDirections(path).map((step, index) => (
-              <Text key={index}>{step}</Text>
-            ))}
-            <Text style={{ marginTop: 5 }}>
-              Distance: {(computePathDistance(scaledPathCoords) * PIXEL_TO_METER).toFixed(2)} m
-            </Text>
-          </View>
-        )}
-        {/* For cross–floor view within the same building (Hall) */}
-        {startDest && endDest && startDest.building === endDest.building && startDest.floor !== endDest.floor && startDest.building === 'Hall' && (
-          <View style={styles.pathInfo}>
-          <Text style={{ fontWeight: 'bold' }}>Start Floor Path (Floor {startDest.floor}):</Text>
-          {generateDirections(
-            findPathBFS(buildingData['Hall'].floors[startDest.floor].graph, startDest.node, "Hall_1st_Elevator")
-          ).map((step, index) => (
-            <Text key={index}>{step}</Text>
-          ))}
-          <Text style={{ fontWeight: 'bold', marginTop: 5 }}>
-            End Floor Path (Floor {endDest.floor}):
-          </Text>
-          {generateDirections(
-            findPathBFS(buildingData['Hall'].floors[endDest.floor].graph, "Elevator9th", endDest.node)
-          ).map((step, index) => (
-            <Text key={index}>{step}</Text>
-          ))}
-        </View>
-        
-        )}
+  <View style={styles.pathInfo}>
+    <Text style={{ fontWeight: 'bold' }}>Directions:</Text>
+    {generateDirections(path).map((step, index) => (
+      <Text key={index}>{step}</Text>
+    ))}
+    <Text style={{ marginTop: 5 }}>
+      Distance: {(computePathDistance(scaledPathCoords) * PIXEL_TO_METER).toFixed(2)} m
+    </Text>
+    <Text style={{ marginTop: 5 }}>
+      Estimated Time: {sameFloorEstimatedTime}
+    </Text>
+  </View>
+)}
+{startDest && endDest && startDest.building === endDest.building && startDest.floor !== endDest.floor && startDest.building === 'Hall' && (
+  <View style={styles.pathInfo}>
+    <Text style={{ fontWeight: 'bold' }}>Start Floor Path (Floor {startDest.floor}):</Text>
+    {generateDirections(
+      findPathBFS(buildingData['Hall'].floors[startDest.floor].graph, startDest.node, "Hall_1st_Elevator")
+    ).map((step, index) => (
+      <Text key={index}>{step}</Text>
+    ))}
+    <Text style={{ fontWeight: 'bold', marginTop: 5 }}>
+      End Floor Path (Floor {endDest.floor}):
+    </Text>
+    {generateDirections(
+      findPathBFS(buildingData['Hall'].floors[endDest.floor].graph, "Elevator9th", endDest.node)
+    ).map((step, index) => (
+      <Text key={index}>{step}</Text>
+    ))}
+    <Text style={{ marginTop: 5 }}>
+      Estimated Time: {crossFloorEstimatedTime}
+    </Text>
+  </View>
+)}
+
         {/* For cross–building view (Hall -> John Molson) show routing info */}
         {startDest && endDest && startDest.building !== endDest.building && startDest.building === 'Hall' && endDest.building === 'John Molson' && (
-          <View style={styles.pathInfo}>
-          <Text style={{ fontWeight: 'bold' }}>Hall Building Path (Floor {startDest.floor}):</Text>
-          {generateDirections(
-            findPathBFS(buildingData['Hall'].floors[startDest.floor].graph, startDest.node, "Hall_1st_Basement_Escalator")
-          ).map((step, index) => (
-            <Text key={index}>{step}</Text>
-          ))}
-          <Text>Take the Tunnel until JMSB</Text>
-          <Text style={{ fontWeight: 'bold', marginTop: 5 }}>
-            John Molson Building Path (Floor {endDest.floor}):
-          </Text>
-          {generateDirections(
-            findPathBFS(buildingData['John Molson'].floors[endDest.floor].graph, "Tunnel", endDest.node)
-          ).map((step, index) => (
-            <Text key={index}>{step}</Text>
-          ))}
-        </View>
-        
-        )}
+  <View style={styles.pathInfo}>
+    <Text style={{ fontWeight: 'bold' }}>Hall Building Path (Floor {startDest.floor}):</Text>
+    {generateDirections(
+      findPathBFS(buildingData['Hall'].floors[startDest.floor].graph, startDest.node, "Hall_1st_Basement_Escalator")
+    ).map((step, index) => (
+      <Text key={index}>{step}</Text>
+    ))}
+    <Text>Take the Tunnel until JMSB</Text>
+    <Text style={{ fontWeight: 'bold', marginTop: 5 }}>
+      John Molson Building Path (Floor {endDest.floor}):
+    </Text>
+    {generateDirections(
+      findPathBFS(buildingData['John Molson'].floors[endDest.floor].graph, "Tunnel", endDest.node)
+    ).map((step, index) => (
+      <Text key={index}>{step}</Text>
+    ))}
+    <Text style={{ marginTop: 5 }}>
+      Estimated Time: {crossBuildingEstimatedTime}
+    </Text>
+  </View>
+)}
+
       </View>
     </ScrollView>
   );
