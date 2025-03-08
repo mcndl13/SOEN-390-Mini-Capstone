@@ -21,9 +21,7 @@ jest.spyOn(global, 'fetch').mockImplementation(() => {
       routes: [
         {
           legs: [
-            {
-              steps: [{ html_instructions: '<b>Step 1 instruction</b>' }],
-            },
+            { steps: [{ html_instructions: '<b>Step 1 instruction</b>' }] },
           ],
         },
       ],
@@ -95,7 +93,7 @@ jest.mock('expo-location', () => ({
 }));
 
 jest.mock('@react-navigation/native', () => ({
-  useRoute: jest.fn(() => ({ params: {} })),
+  useRoute: jest.fn(),
 }));
 
 jest.mock('../services/shuttleService', () => ({
@@ -106,6 +104,7 @@ jest.mock('../services/shuttleService', () => ({
   },
 }));
 
+// Helper: Accessibility Provider
 const AccessibilityContextProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -119,54 +118,44 @@ const AccessibilityContextProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
+// Helper functions to reduce duplication
+const renderDirectionsScreen = (params = {}) => {
+  const { useRoute } = require('@react-navigation/native');
+  useRoute.mockReturnValue({ params });
+  return render(
+    <AccessibilityContextProvider>
+      <DirectionsScreen />
+    </AccessibilityContextProvider>,
+  );
+};
+
+const waitForTimeout = (ms = 0) =>
+  act(() => new Promise((resolve) => setTimeout(resolve, ms)));
+
 describe('DirectionsScreen', () => {
   it('renders origin and destination input placeholders', async () => {
-    const { useRoute } = require('@react-navigation/native');
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 0)));
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(0);
     expect(rendered.getByText('Enter origin')).toBeTruthy();
     expect(rendered.getByText('Enter destination')).toBeTruthy();
   });
 
   it('renders Use My Location and Clear Points buttons', async () => {
-    const { useRoute } = require('@react-navigation/native');
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 0)));
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(0);
     expect(rendered.getByText('Use My Location')).toBeTruthy();
     expect(rendered.getByText('Clear Points')).toBeTruthy();
   });
 
   it('renders Trace route button', async () => {
-    const { useRoute } = require('@react-navigation/native');
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 0)));
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(0);
     expect(rendered.getByText('Trace route')).toBeTruthy();
   });
 
   it('calls clearPoints when Clear Points is pressed', async () => {
-    const { useRoute } = require('@react-navigation/native');
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 0)));
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(0);
     await act(async () => {
       fireEvent.press(rendered.getByText('Clear Points'));
     });
@@ -176,47 +165,28 @@ describe('DirectionsScreen', () => {
   });
 
   it('matches snapshot', async () => {
-    const { useRoute } = require('@react-navigation/native');
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 0)));
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(0);
     expect(rendered.toJSON()).toMatchSnapshot();
   });
 
   it('sets steps to empty when API returns no steps', async () => {
-    const { useRoute } = require('@react-navigation/native');
-    useRoute.mockReturnValue({
-      params: {
-        origin: { latitude: 45.4953534, longitude: -73.578549 },
-        destination: { latitude: 45.4582, longitude: -73.6405 },
-      },
+    const rendered = renderDirectionsScreen({
+      origin: { latitude: 45.4953534, longitude: -73.578549 },
+      destination: { latitude: 45.4582, longitude: -73.6405 },
     });
-    jest.spyOn(global, 'fetch').mockImplementationOnce(() => {
-      return Promise.resolve({
+    jest.spyOn(global, 'fetch').mockImplementationOnce(() =>
+      Promise.resolve({
         status: 200,
         json: async () => ({
           status: 'OK',
-          routes: [
-            {
-              legs: [{}],
-            },
-          ],
+          routes: [{ legs: [{}] }],
         }),
-      } as any);
-    });
-
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
+      } as any),
     );
     await act(async () => {
       fireEvent.press(rendered.getByText('Trace route'));
-      await new Promise((r) => setTimeout(r, 700));
+      await waitForTimeout(700);
     });
     expect(rendered.queryByText('Route Steps')).toBeNull();
     expect(rendered.queryAllByText(/^\d+\./).length).toBe(0);
@@ -231,15 +201,10 @@ describe('More DirectionsScreen interactions', () => {
   });
 
   it('shows error when tracing route with no origin', async () => {
-    useRoute.mockReturnValue({
-      params: { destination: { latitude: 45.5, longitude: -73.6 } },
+    const rendered = renderDirectionsScreen({
+      destination: { latitude: 45.5, longitude: -73.6 },
     });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    await waitForTimeout(600);
     fireEvent.press(rendered.getByText('Trace route'));
     await waitFor(() => {
       expect(rendered.queryByText('Please set an origin point')).toBeTruthy();
@@ -247,15 +212,10 @@ describe('More DirectionsScreen interactions', () => {
   });
 
   it('shows error when tracing route with no destination', async () => {
-    useRoute.mockReturnValue({
-      params: { origin: { latitude: 45.5, longitude: -73.6 } },
+    const rendered = renderDirectionsScreen({
+      origin: { latitude: 45.5, longitude: -73.6 },
     });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    await waitForTimeout(600);
     fireEvent.press(rendered.getByText('Trace route'));
     await waitFor(() => {
       expect(
@@ -265,13 +225,8 @@ describe('More DirectionsScreen interactions', () => {
   });
 
   it('sets campus points and toggles shuttle route', async () => {
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(600);
     fireEvent.press(rendered.getByText('SGW Campus'));
     await waitFor(() => {
       expect(rendered.queryByText(/SGW Campus set/)).toBeTruthy();
@@ -281,60 +236,44 @@ describe('More DirectionsScreen interactions', () => {
       expect(rendered.queryByText(/Loyola Campus set/)).toBeTruthy();
     });
     fireEvent.press(rendered.getByText('Trace route'));
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    await waitForTimeout(600);
     expect(rendered.getByText('Back to Search')).toBeTruthy();
   });
 
   it('toggles shuttle visibility', async () => {
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(600);
     const toggleButton = rendered.getByText(/Show Shuttles|Hide Shuttles/);
     const initialText = toggleButton.props.children;
     fireEvent.press(toggleButton);
-    await act(async () => new Promise((r) => setTimeout(r, 200)));
+    await waitForTimeout(200);
     const toggledText = rendered.getByText(/Show Shuttles|Hide Shuttles/).props
       .children;
     expect(toggledText).not.toEqual(initialText);
   });
 
   it('handles back button press in directions view', async () => {
-    useRoute.mockReturnValue({
-      params: {
-        origin: { latitude: 45.4953534, longitude: -73.578549 },
-        destination: { latitude: 45.4582, longitude: -73.6405 },
-      },
+    const rendered = renderDirectionsScreen({
+      origin: { latitude: 45.4953534, longitude: -73.578549 },
+      destination: { latitude: 45.4582, longitude: -73.6405 },
     });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    await waitForTimeout(600);
     const backButton = rendered.getByText('Back to Search');
     expect(backButton).toBeTruthy();
     fireEvent.press(backButton);
-    await act(async () => new Promise((r) => setTimeout(r, 200)));
+    await waitForTimeout(200);
     expect(rendered.queryByText('Back to Search')).toBeNull();
     expect(rendered.queryByText('Returned to search view')).toBeTruthy();
   });
 
   it('processes current location button press', async () => {
     const geometry = require('../utils/geometry');
-    jest
-      .spyOn(geometry, 'isUserInBuilding')
-      .mockReturnValue({ latitude: 45.0 + 0.0001, longitude: -73.0 + 0.0001 });
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    jest.spyOn(geometry, 'isUserInBuilding').mockReturnValue({
+      latitude: 45.0 + 0.0001,
+      longitude: -73.0 + 0.0001,
+    });
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(600);
     fireEvent.press(rendered.getByText('Use My Location'));
     await waitFor(() => {
       expect(rendered.queryByText(/Building location set/)).toBeTruthy();
@@ -346,61 +285,44 @@ describe('Additional DirectionsScreen interactions', () => {
   const { useRoute } = require('@react-navigation/native');
 
   it('changes travel mode when mode buttons are pressed', async () => {
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(600);
     const drivingButton = rendered.getAllByText('Driving')[0];
     const walkingButton = rendered.getAllByText('Walking')[0];
     await act(async () => {
       fireEvent.press(walkingButton);
-      await new Promise((r) => setTimeout(r, 100));
+      await waitForTimeout(100);
     });
     expect(rendered.getByText('Walking')).toBeTruthy();
     await act(async () => {
       fireEvent.press(drivingButton);
-      await new Promise((r) => setTimeout(r, 100));
+      await waitForTimeout(100);
     });
     expect(rendered.getByText('Driving')).toBeTruthy();
   });
 
   it('expands and collapses the directions panel when expand button is pressed', async () => {
-    useRoute.mockReturnValue({
-      params: {
-        origin: { latitude: 45.4953534, longitude: -73.578549 },
-        destination: { latitude: 45.4582, longitude: -73.6405 },
-      },
+    const rendered = renderDirectionsScreen({
+      origin: { latitude: 45.4953534, longitude: -73.578549 },
+      destination: { latitude: 45.4582, longitude: -73.6405 },
     });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 700)));
+    await waitForTimeout(700);
     const expandButton = await waitFor(() =>
       rendered.getByText(/Expand|Collapse/),
     );
     expect(expandButton).toBeTruthy();
     expect(expandButton.props.children).toBe('Expand');
     fireEvent.press(expandButton);
-    await act(async () => new Promise((r) => setTimeout(r, 200)));
+    await waitForTimeout(200);
     expect(rendered.getByText('Collapse')).toBeTruthy();
     fireEvent.press(rendered.getByText('Collapse'));
-    await act(async () => new Promise((r) => setTimeout(r, 200)));
+    await waitForTimeout(200);
     expect(rendered.getByText('Expand')).toBeTruthy();
   });
 
   it('handles campus button presses via onPlaceSelected callback', async () => {
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(600);
     fireEvent.press(rendered.getByText('SGW Campus'));
     await waitFor(() => {
       expect(rendered.queryByText(/SGW Campus set/)).toBeTruthy();
@@ -412,38 +334,27 @@ describe('Additional DirectionsScreen interactions', () => {
   });
 
   it('handles back button press in directions view', async () => {
-    useRoute.mockReturnValue({
-      params: {
-        origin: { latitude: 45.4953534, longitude: -73.578549 },
-        destination: { latitude: 45.4582, longitude: -73.6405 },
-      },
+    const rendered = renderDirectionsScreen({
+      origin: { latitude: 45.4953534, longitude: -73.578549 },
+      destination: { latitude: 45.4582, longitude: -73.6405 },
     });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    await waitForTimeout(600);
     const backButton = rendered.getByText('Back to Search');
     expect(backButton).toBeTruthy();
     fireEvent.press(backButton);
-    await act(async () => new Promise((r) => setTimeout(r, 200)));
+    await waitForTimeout(200);
     expect(rendered.queryByText('Back to Search')).toBeNull();
     expect(rendered.queryByText('Returned to search view')).toBeTruthy();
   });
 
   it('processes current location button press with building detection', async () => {
     const geometry = require('../utils/geometry');
-    jest
-      .spyOn(geometry, 'isUserInBuilding')
-      .mockReturnValue({ latitude: 45.0 + 0.0001, longitude: -73.0 + 0.0001 });
-    useRoute.mockReturnValue({ params: {} });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
-    await act(async () => new Promise((r) => setTimeout(r, 600)));
+    jest.spyOn(geometry, 'isUserInBuilding').mockReturnValue({
+      latitude: 45.0 + 0.0001,
+      longitude: -73.0 + 0.0001,
+    });
+    const rendered = renderDirectionsScreen();
+    await waitForTimeout(600);
     fireEvent.press(rendered.getByText('Use My Location'));
     await waitFor(() => {
       expect(rendered.queryByText(/Building location set/)).toBeTruthy();
@@ -451,28 +362,16 @@ describe('Additional DirectionsScreen interactions', () => {
   });
 
   it('handles error in fetching detailed directions', async () => {
-    const { useRoute } = require('@react-navigation/native');
-    // Set valid route parameters to trigger directions fetching
-    useRoute.mockReturnValue({
-      params: {
-        origin: { latitude: 45.4953534, longitude: -73.578549 },
-        destination: { latitude: 45.4582, longitude: -73.6405 },
-      },
+    const rendered = renderDirectionsScreen({
+      origin: { latitude: 45.4953534, longitude: -73.578549 },
+      destination: { latitude: 45.4582, longitude: -73.6405 },
     });
     jest
       .spyOn(global, 'fetch')
       .mockImplementationOnce(() => Promise.reject(new Error('Test error')));
-
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
     fireEvent.press(rendered.getByText('Trace route'));
-    await act(async () => new Promise((r) => setTimeout(r, 800)));
-
+    await waitForTimeout(800);
     expect(errorSpy).toHaveBeenCalledWith(
       'Directions fetch error',
       new Error('Test error'),
@@ -481,56 +380,33 @@ describe('Additional DirectionsScreen interactions', () => {
   });
 
   it('expands directions panel via button press', async () => {
-    const { useRoute } = require('@react-navigation/native');
-    useRoute.mockReturnValue({
-      params: {
-        origin: { latitude: 45.4953534, longitude: -73.578549 },
-        destination: { latitude: 45.4582, longitude: -73.6405 },
-      },
+    const rendered = renderDirectionsScreen({
+      origin: { latitude: 45.4953534, longitude: -73.578549 },
+      destination: { latitude: 45.4582, longitude: -73.6405 },
     });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
     fireEvent.press(rendered.getByText('Trace route'));
-    await act(async () => new Promise((r) => setTimeout(r, 800)));
-
+    await waitForTimeout(800);
     const expandButton = rendered.getByText(/Expand|Collapse/);
     expect(expandButton.props.children).toBe('Expand');
-
     fireEvent.press(expandButton);
-
-    await waitFor(
-      () => {
-        expect(rendered.getByText('Collapse')).toBeTruthy();
-      },
-      { timeout: 1000 },
-    );
+    await waitFor(() => {
+      expect(rendered.getByText('Collapse')).toBeTruthy();
+    });
   });
 
   it('renders route steps when API returns steps', async () => {
-    const { useRoute } = require('@react-navigation/native');
-    useRoute.mockReturnValue({
-      params: {
-        origin: { latitude: 45.4953534, longitude: -73.578549 },
-        destination: { latitude: 45.4582, longitude: -73.6405 },
-      },
+    const rendered = renderDirectionsScreen({
+      origin: { latitude: 45.4953534, longitude: -73.578549 },
+      destination: { latitude: 45.4582, longitude: -73.6405 },
     });
-    const rendered = render(
-      <AccessibilityContextProvider>
-        <DirectionsScreen />
-      </AccessibilityContextProvider>,
-    );
     await act(async () => {
       fireEvent.press(rendered.getByText('Trace route'));
-      await new Promise((r) => setTimeout(r, 700));
+      await waitForTimeout(700);
     });
     const routeStepsHeaders = await waitFor(() =>
       rendered.getAllByText('Route Steps'),
     );
-    const routeStepsHeader = routeStepsHeaders[0];
-    expect(routeStepsHeader).toBeTruthy();
+    expect(routeStepsHeaders[0]).toBeTruthy();
     expect(rendered.getByText(/^1\./)).toBeTruthy();
   });
 });
