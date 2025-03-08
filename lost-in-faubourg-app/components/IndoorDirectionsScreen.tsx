@@ -45,7 +45,6 @@ type GraphNode = {
   neighbors: string[];
 };
 
-// Updated Destination now includes building info.
 type Destination = {
   building: string;
   node: string;
@@ -55,7 +54,6 @@ type Destination = {
 type FloorData = {
   image: any;
   graph: Record<string, GraphNode>;
-  // These dimensions represent the coordinate system in which your nodes were defined.
   originalDimensions: { width: number; height: number };
 };
 
