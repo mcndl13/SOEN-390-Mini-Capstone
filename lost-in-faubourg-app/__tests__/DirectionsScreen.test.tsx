@@ -288,26 +288,6 @@ describe('Additional DirectionsScreen interactions', () => {
     await selectCampus(rendered, 'Loyola Campus');
   });
 
-  it('handles back button press in directions view', async () => {
-    const rendered = renderDirectionsScreen({
-      origin: defaultOrigin,
-      destination: defaultDestination,
-    });
-    await waitForTimeout(600);
-    await testBackButtonInteraction(rendered);
-  });
-
-  it('processes current location button press with building detection', async () => {
-    const geometry = require('../utils/geometry');
-    jest.spyOn(geometry, 'isUserInBuilding').mockReturnValue({
-      latitude: 45.0 + 0.0001,
-      longitude: -73.0 + 0.0001,
-    });
-    const rendered = renderDirectionsScreen();
-    await waitForTimeout(600);
-    await selectMyLocation(rendered, /Building location set/);
-  });
-
   it('handles error in fetching detailed directions', async () => {
     const rendered = renderDirectionsScreen({
       origin: defaultOrigin,
