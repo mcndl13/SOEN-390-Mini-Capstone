@@ -61,4 +61,3 @@ jobs:
 
       - name: Build the Project (Android)
         run: cd lost-in-faubourg-app && npx expo export --platform android
-        
