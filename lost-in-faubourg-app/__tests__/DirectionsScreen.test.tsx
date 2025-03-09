@@ -34,6 +34,40 @@ import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import DirectionsScreen, { stripHtml } from '../components/DirectionsScreen';
 import { renderDirectionsScreen, waitForTimeout } from './helpers/directionsTestHelpers';
 
+// --- Added helper constants and functions to reduce duplication ---
+const defaultOrigin = { latitude: 45.4953534, longitude: -73.578549 };
+const defaultDestination = { latitude: 45.4582, longitude: -73.6405 };
+
+async function traceRoute(rendered: any) {
+	// press and wait for route trace to complete
+	fireEvent.press(rendered.getByText('Trace route'));
+	await waitForTimeout(700);
+}
+
+async function testBackButtonInteraction(rendered: any) {
+	// common back button test & assertions
+	const backButton = rendered.getByText('Back to Search');
+	expect(backButton).toBeTruthy();
+	fireEvent.press(backButton);
+	await waitForTimeout(200);
+	expect(rendered.queryByText('Back to Search')).toBeNull();
+	expect(rendered.queryByText('Returned to search view')).toBeTruthy();
+}
+
+async function selectCampus(rendered: any, campus: string) {
+	fireEvent.press(rendered.getByText(campus));
+	await waitFor(() => {
+		expect(rendered.queryByText(new RegExp(`${campus} set`))).toBeTruthy();
+	});
+}
+
+async function selectMyLocation(rendered: any, expectedPattern: RegExp) {
+	fireEvent.press(rendered.getByText('Use My Location'));
+	await waitFor(() => {
+		expect(rendered.queryByText(expectedPattern)).toBeTruthy();
+	});
+}
+
 beforeAll(() => {
   process.env.EXPO_OS = 'ios';
   jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -145,8 +179,8 @@ describe('DirectionsScreen', () => {
 
   it('sets steps to empty when API returns no steps', async () => {
     const rendered = renderDirectionsScreen({
-      origin: { latitude: 45.4953534, longitude: -73.578549 },
-      destination: { latitude: 45.4582, longitude: -73.6405 },
+      origin: defaultOrigin,
+      destination: defaultDestination,
     });
     jest.spyOn(global, 'fetch').mockImplementationOnce(() =>
       Promise.resolve({
@@ -158,7 +192,7 @@ describe('DirectionsScreen', () => {
       } as any),
     );
     await act(async () => {
-      fireEvent.press(rendered.getByText('Trace route'));
+      await traceRoute(rendered);
       await waitForTimeout(700);
     });
     expect(rendered.queryByText('Route Steps')).toBeNull();
@@ -166,6 +200,7 @@ describe('DirectionsScreen', () => {
   });
 });
 
+// Refactored duplicate interactions using helper functions
 describe('More DirectionsScreen interactions', () => {
   const { useRoute } = require('@react-navigation/native');
 
@@ -191,24 +226,16 @@ describe('More DirectionsScreen interactions', () => {
     await waitForTimeout(600);
     fireEvent.press(rendered.getByText('Trace route'));
     await waitFor(() => {
-      expect(
-        rendered.queryByText('Please set a destination point'),
-      ).toBeTruthy();
+      expect(rendered.queryByText('Please set a destination point')).toBeTruthy();
     });
   });
 
   it('sets campus points and toggles shuttle route', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(600);
-    fireEvent.press(rendered.getByText('SGW Campus'));
-    await waitFor(() => {
-      expect(rendered.queryByText(/SGW Campus set/)).toBeTruthy();
-    });
-    fireEvent.press(rendered.getByText('Loyola Campus'));
-    await waitFor(() => {
-      expect(rendered.queryByText(/Loyola Campus set/)).toBeTruthy();
-    });
-    fireEvent.press(rendered.getByText('Trace route'));
+    await selectCampus(rendered, 'SGW Campus');
+    await selectCampus(rendered, 'Loyola Campus');
+    await traceRoute(rendered);
     await waitForTimeout(600);
     expect(rendered.getByText('Back to Search')).toBeTruthy();
   });
@@ -220,23 +247,17 @@ describe('More DirectionsScreen interactions', () => {
     const initialText = toggleButton.props.children;
     fireEvent.press(toggleButton);
     await waitForTimeout(200);
-    const toggledText = rendered.getByText(/Show Shuttles|Hide Shuttles/).props
-      .children;
+    const toggledText = rendered.getByText(/Show Shuttles|Hide Shuttles/).props.children;
     expect(toggledText).not.toEqual(initialText);
   });
 
   it('handles back button press in directions view', async () => {
     const rendered = renderDirectionsScreen({
-      origin: { latitude: 45.4953534, longitude: -73.578549 },
-      destination: { latitude: 45.4582, longitude: -73.6405 },
+      origin: defaultOrigin,
+      destination: defaultDestination,
     });
     await waitForTimeout(600);
-    const backButton = rendered.getByText('Back to Search');
-    expect(backButton).toBeTruthy();
-    fireEvent.press(backButton);
-    await waitForTimeout(200);
-    expect(rendered.queryByText('Back to Search')).toBeNull();
-    expect(rendered.queryByText('Returned to search view')).toBeTruthy();
+    await testBackButtonInteraction(rendered);
   });
 
   it('processes current location button press', async () => {
@@ -247,10 +268,7 @@ describe('More DirectionsScreen interactions', () => {
     });
     const rendered = renderDirectionsScreen();
     await waitForTimeout(600);
-    fireEvent.press(rendered.getByText('Use My Location'));
-    await waitFor(() => {
-      expect(rendered.queryByText(/Building location set/)).toBeTruthy();
-    });
+    await selectMyLocation(rendered, /Building location set/);
   });
 });
 
@@ -276,8 +294,8 @@ describe('Additional DirectionsScreen interactions', () => {
 
   it('expands and collapses the directions panel when expand button is pressed', async () => {
     const rendered = renderDirectionsScreen({
-      origin: { latitude: 45.4953534, longitude: -73.578549 },
-      destination: { latitude: 45.4582, longitude: -73.6405 },
+      origin: defaultOrigin,
+      destination: defaultDestination,
     });
     await waitForTimeout(700);
     const expandButton = await waitFor(() =>
@@ -296,28 +314,17 @@ describe('Additional DirectionsScreen interactions', () => {
   it('handles campus button presses via onPlaceSelected callback', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(600);
-    fireEvent.press(rendered.getByText('SGW Campus'));
-    await waitFor(() => {
-      expect(rendered.queryByText(/SGW Campus set/)).toBeTruthy();
-    });
-    fireEvent.press(rendered.getByText('Loyola Campus'));
-    await waitFor(() => {
-      expect(rendered.queryByText(/Loyola Campus set/)).toBeTruthy();
-    });
+    await selectCampus(rendered, 'SGW Campus');
+    await selectCampus(rendered, 'Loyola Campus');
   });
 
   it('handles back button press in directions view', async () => {
     const rendered = renderDirectionsScreen({
-      origin: { latitude: 45.4953534, longitude: -73.578549 },
-      destination: { latitude: 45.4582, longitude: -73.6405 },
+      origin: defaultOrigin,
+      destination: defaultDestination,
     });
     await waitForTimeout(600);
-    const backButton = rendered.getByText('Back to Search');
-    expect(backButton).toBeTruthy();
-    fireEvent.press(backButton);
-    await waitForTimeout(200);
-    expect(rendered.queryByText('Back to Search')).toBeNull();
-    expect(rendered.queryByText('Returned to search view')).toBeTruthy();
+    await testBackButtonInteraction(rendered);
   });
 
   it('processes current location button press with building detection', async () => {
@@ -328,20 +335,17 @@ describe('Additional DirectionsScreen interactions', () => {
     });
     const rendered = renderDirectionsScreen();
     await waitForTimeout(600);
-    fireEvent.press(rendered.getByText('Use My Location'));
-    await waitFor(() => {
-      expect(rendered.queryByText(/Building location set/)).toBeTruthy();
-    });
+    await selectMyLocation(rendered, /Building location set/);
   });
 
   it('handles error in fetching detailed directions', async () => {
     const rendered = renderDirectionsScreen({
-      origin: { latitude: 45.4953534, longitude: -73.578549 },
-      destination: { latitude: 45.4582, longitude: -73.6405 },
+      origin: defaultOrigin,
+      destination: defaultDestination,
     });
-    jest
-      .spyOn(global, 'fetch')
-      .mockImplementationOnce(() => Promise.reject(new Error('Test error')));
+    jest.spyOn(global, 'fetch').mockImplementationOnce(() =>
+      Promise.reject(new Error('Test error')),
+    );
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     fireEvent.press(rendered.getByText('Trace route'));
     await waitForTimeout(800);
@@ -354,8 +358,8 @@ describe('Additional DirectionsScreen interactions', () => {
 
   it('expands directions panel via button press', async () => {
     const rendered = renderDirectionsScreen({
-      origin: { latitude: 45.4953534, longitude: -73.578549 },
-      destination: { latitude: 45.4582, longitude: -73.6405 },
+      origin: defaultOrigin,
+      destination: defaultDestination,
     });
     fireEvent.press(rendered.getByText('Trace route'));
     await waitForTimeout(800);
@@ -369,11 +373,11 @@ describe('Additional DirectionsScreen interactions', () => {
 
   it('renders route steps when API returns steps', async () => {
     const rendered = renderDirectionsScreen({
-      origin: { latitude: 45.4953534, longitude: -73.578549 },
-      destination: { latitude: 45.4582, longitude: -73.6405 },
+      origin: defaultOrigin,
+      destination: defaultDestination,
     });
     await act(async () => {
-      fireEvent.press(rendered.getByText('Trace route'));
+      await traceRoute(rendered);
       await waitForTimeout(700);
     });
     const routeStepsHeaders = await waitFor(() =>
