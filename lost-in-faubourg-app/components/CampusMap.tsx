@@ -208,56 +208,19 @@ const CampusMap: React.FC = () => {
       )}
 
       {selectedBuilding && (
-        <View style={[styles.infoContainer, isBlackAndWhite && styles.blackAndWhiteContainer]}>
-          <Text style={[styles.buildingName, isLargeText && styles.largeText]}>{selectedBuilding.name}</Text>
-          <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.address}</Text>
-          <View style={styles.horizontalRule} />
-          <Text style={[styles.infoText, isLargeText && styles.largeText]}>Description</Text>
-          <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.description}</Text>
-        </View>
+        <BuildingInfo 
+          building={selectedBuilding} 
+          isBlackAndWhite={isBlackAndWhite} 
+          isLargeText={isLargeText} 
+        />
       )}
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[
-            styles.circularButton,
-            selectedCampus === 'SGW' && styles.selectedButton,
-            isBlackAndWhite && styles.blackAndWhiteButton,
-          ]}
-          onPress={() => switchToCampus(SGW_COORDS, 'SGW')}
-        >
-          <Text
-            style={[
-              styles.buttonText,
-              selectedCampus === 'SGW' && styles.selectedButtonText,
-              isLargeText && styles.largeText,
-              isBlackAndWhite && styles.blackAndWhiteText,
-            ]}
-          >
-            SGW Campus
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[
-            styles.circularButton,
-            selectedCampus === 'Loyola' && styles.selectedButton,
-            isBlackAndWhite && styles.blackAndWhiteButton,
-          ]}
-          onPress={() => switchToCampus(LOYOLA_COORDS, 'Loyola')}
-        >
-          <Text
-            style={[
-              styles.buttonText,
-              selectedCampus === 'Loyola' && styles.selectedButtonText,
-              isLargeText && styles.largeText,
-              isBlackAndWhite && styles.blackAndWhiteText,
-            ]}
-          >
-            Loyola Campus
-          </Text>
-        </TouchableOpacity>
-      </View>
+      <CampusButtons 
+        selectedCampus={selectedCampus} 
+        switchToCampus={switchToCampus} 
+        isBlackAndWhite={isBlackAndWhite} 
+        isLargeText={isLargeText} 
+      />
 
       <TouchableOpacity
         style={styles.shuttleToggleButton}
@@ -270,6 +233,60 @@ const CampusMap: React.FC = () => {
     </View>
   );
 };
+
+const BuildingInfo: React.FC<{ building: Building, isBlackAndWhite: boolean, isLargeText: boolean }> = ({ building, isBlackAndWhite, isLargeText }) => (
+  <View style={[styles.infoContainer, isBlackAndWhite && styles.blackAndWhiteContainer]}>
+    <Text style={[styles.buildingName, isLargeText && styles.largeText]}>{building.name}</Text>
+    <Text style={[styles.description, isLargeText && styles.largeText]}>{building.address}</Text>
+    <View style={styles.horizontalRule} />
+    <Text style={[styles.infoText, isLargeText && styles.largeText]}>Description</Text>
+    <Text style={[styles.description, isLargeText && styles.largeText]}>{building.description}</Text>
+  </View>
+);
+
+const CampusButtons: React.FC<{ selectedCampus: string | null, switchToCampus: (coords: LocationCoords, name: string) => void, isBlackAndWhite: boolean, isLargeText: boolean }> = ({ selectedCampus, switchToCampus, isBlackAndWhite, isLargeText }) => (
+  <View style={styles.buttonContainer}>
+    <TouchableOpacity
+      style={[
+        styles.circularButton,
+        selectedCampus === 'SGW' && styles.selectedButton,
+        isBlackAndWhite && styles.blackAndWhiteButton,
+      ]}
+      onPress={() => switchToCampus(SGW_COORDS, 'SGW')}
+    >
+      <Text
+        style={[
+          styles.buttonText,
+          selectedCampus === 'SGW' && styles.selectedButtonText,
+          isLargeText && styles.largeText,
+          isBlackAndWhite && styles.blackAndWhiteText,
+        ]}
+      >
+        SGW Campus
+      </Text>
+    </TouchableOpacity>
+    
+    <TouchableOpacity
+      style={[
+        styles.circularButton,
+        selectedCampus === 'Loyola' && styles.selectedButton,
+        isBlackAndWhite && styles.blackAndWhiteButton,
+      ]}
+      onPress={() => switchToCampus(LOYOLA_COORDS, 'Loyola')}
+    >
+      <Text
+        style={[
+          styles.buttonText,
+          selectedCampus === 'Loyola' && styles.selectedButtonText,
+          isLargeText && styles.largeText,
+          isBlackAndWhite && styles.blackAndWhiteText,
+        ]}
+      >
+        Loyola Campus
+      </Text>
+    </TouchableOpacity>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: { 
