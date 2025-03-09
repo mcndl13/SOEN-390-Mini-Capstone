@@ -1,11 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
-import MapView, { Marker, Polygon, Region,  MapStyleElement } from 'react-native-maps';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from 'react-native';
+import MapView, {
+  Marker,
+  Polygon,
+  Region,
+  MapStyleElement,
+} from 'react-native-maps';
 import * as Location from 'expo-location';
 import { polygons } from './polygonCoordinates';
 import { AccessibilityContext } from './AccessibilitySettings';
-import { fetchShuttlePositions, startShuttleTracking, ShuttleData, ShuttlePoint } from '../services/shuttleService';
-
+import {
+  fetchShuttlePositions,
+  startShuttleTracking,
+  ShuttleData,
+  ShuttlePoint,
+} from '../services/shuttleService';
+import { getOpeningHours } from '../services/openingHoursService';
 
 interface LocationCoords {
   latitude: number;
@@ -22,22 +39,36 @@ interface Building {
 }
 
 const CampusMap: React.FC = () => {
-  const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
-  const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
+  const { isBlackAndWhite, isLargeText } =
+    React.useContext(AccessibilityContext);
+  const [location, setLocation] =
+    useState<Location.LocationObjectCoords | null>(null);
   const [region, setRegion] = useState<Region | null>(null);
   const [selectedCampus, setSelectedCampus] = useState<string | null>(null);
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(
+    null,
+  );
   const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
+  const [openingHours, setOpeningHours] = useState<string>('Loading...');
+  const [showOpeningHours, setShowOpeningHours] = useState<boolean>(true);
+  const [showDescription, setshowDescription] = useState<boolean>(true);
 
   // SGW and Loyola Campus Coordinates
-  const SGW_COORDS: LocationCoords = { latitude: 45.4953534, longitude: -73.578549 };
-  const LOYOLA_COORDS: LocationCoords = { latitude: 45.4582, longitude: -73.6405 };
+  const SGW_COORDS: LocationCoords = {
+    latitude: 45.4953534,
+    longitude: -73.578549,
+  };
+  const LOYOLA_COORDS: LocationCoords = {
+    latitude: 45.4582,
+    longitude: -73.6405,
+  };
 
   // Function to calculate the center of a polygon
   const getPolygonCenter = (boundaries: LocationCoords[]): LocationCoords => {
-    let latSum = 0, lonSum = 0;
-    boundaries.forEach(coord => {
+    let latSum = 0,
+      lonSum = 0;
+    boundaries.forEach((coord) => {
       latSum += coord.latitude;
       lonSum += coord.longitude;
     });
@@ -57,20 +88,22 @@ const CampusMap: React.FC = () => {
     description: polygon.description,
   }));
 
-  const mapStyle: MapStyleElement[] = isBlackAndWhite ? [
-    {
-      "elementType": "geometry",
-      "stylers": [{ "saturation": -100 }]
-    },
-    {
-      "elementType": "labels.text.fill",
-      "stylers": [{ "saturation": -100 }]
-    },
-    {
-      "elementType": "labels.text.stroke",
-      "stylers": [{ "saturation": -100 }]
-    }
-  ] : [];
+  const mapStyle: MapStyleElement[] = isBlackAndWhite
+    ? [
+        {
+          elementType: 'geometry',
+          stylers: [{ saturation: -100 }],
+        },
+        {
+          elementType: 'labels.text.fill',
+          stylers: [{ saturation: -100 }],
+        },
+        {
+          elementType: 'labels.text.stroke',
+          stylers: [{ saturation: -100 }],
+        },
+      ]
+    : [];
 
   useEffect(() => {
     (async () => {
@@ -104,6 +137,24 @@ const CampusMap: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const fetchOpeningHours = async () => {
+      if (!selectedBuilding) {
+        setOpeningHours('No hours available');
+        return;
+      }
+
+      const hours = await getOpeningHours(
+        selectedBuilding.latitude,
+        selectedBuilding.longitude,
+      );
+
+      setOpeningHours(hours || 'No hours available');
+    };
+
+    fetchOpeningHours();
+  }, [selectedBuilding]);
+
   const switchToCampus = (campusCoords: LocationCoords, campusName: string) => {
     setRegion({
       latitude: campusCoords.latitude,
@@ -120,12 +171,18 @@ const CampusMap: React.FC = () => {
   };
 
   return (
-    <View style={[styles.container, isBlackAndWhite && { filter: 'grayscale(100%)' }]}>
+    <View
+      style={[
+        styles.container,
+        isBlackAndWhite && { filter: 'grayscale(100%)' },
+      ]}
+    >
       {region ? (
-        <MapView style={styles.map} 
-        region={region}
-        testID="mapView"
-        customMapStyle={mapStyle}
+        <MapView
+          style={styles.map}
+          region={region}
+          testID="mapView"
+          customMapStyle={mapStyle}
         >
           {/* User's current location marker */}
           {location && (
@@ -135,7 +192,7 @@ const CampusMap: React.FC = () => {
                 longitude: location.longitude,
               }}
               title="You are here"
-              pinColor={isBlackAndWhite ? "black" : "blue"}
+              pinColor={isBlackAndWhite ? 'black' : 'blue'}
               testID="marker-current-location"
             />
           )}
@@ -148,7 +205,7 @@ const CampusMap: React.FC = () => {
                 latitude: building.latitude,
                 longitude: building.longitude,
               }}
-              pinColor={isBlackAndWhite ? "black" : "red"}
+              pinColor={isBlackAndWhite ? 'black' : 'red'}
               onPress={() => setSelectedBuilding(building)}
               testID={`marker-${building.id}`}
             />
@@ -159,55 +216,61 @@ const CampusMap: React.FC = () => {
             <Polygon
               key={index}
               coordinates={polygon.boundaries}
-              fillColor={isBlackAndWhite ? "#000000cc" : "#912338cc"}
-              strokeColor={isBlackAndWhite ? "#000000" : "#912338cc"}
+              fillColor={isBlackAndWhite ? '#000000cc' : '#912338cc'}
+              strokeColor={isBlackAndWhite ? '#000000' : '#912338cc'}
               strokeWidth={isBlackAndWhite ? 2 : 1}
             />
           ))}
 
           {/* Shuttle bus markers */}
-          {showShuttles && shuttleData && shuttleData.buses.map((bus) => (
-            <Marker
-              key={bus.ID}
-              coordinate={{
-                latitude: bus.Latitude,
-                longitude: bus.Longitude,
-              }}
-              title={`Shuttle ${bus.ID}`}
-              testID={`marker-${bus.ID}`}
-            >
-              {/* Custom marker for bus icon */}
-              <View style={styles.busMarker}>
-                <Image 
-                  source={require('../assets/images/transportModes/busBlack.png')} //bus icon
-                  style={styles.busIcon}
-                  resizeMode="contain"
-                />
-              </View>
-            </Marker>
-          ))}
+          {showShuttles &&
+            shuttleData &&
+            shuttleData.buses.map((bus) => (
+              <Marker
+                key={bus.ID}
+                coordinate={{
+                  latitude: bus.Latitude,
+                  longitude: bus.Longitude,
+                }}
+                title={`Shuttle ${bus.ID}`}
+                testID={`marker-${bus.ID}`}
+              >
+                {/* Custom marker for bus icon */}
+                <View style={styles.busMarker}>
+                  <Image
+                    source={require('../assets/images/transportModes/busBlack.png')} //bus icon
+                    style={styles.busIcon}
+                    resizeMode="contain"
+                  />
+                </View>
+              </Marker>
+            ))}
 
           {/* Shuttle station markers */}
-          {showShuttles && shuttleData && shuttleData.stations.map((station) => (
-            <Marker
-              key={station.ID}
-              coordinate={{
-                latitude: station.Latitude,
-                longitude: station.Longitude,
-              }}
-              title={station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'}
-              testID={`marker-${station.ID}`}
-            >
-              {/* Custom marker for station icon */}
-              <View style={styles.stationMarker}>
-                <Image 
-                  source={require('../assets/images/transportModes/busStation.png')}
-                  style={styles.stationIcon}
-                  resizeMode="contain"
-                />
-              </View>
-            </Marker>
-          ))}
+          {showShuttles &&
+            shuttleData &&
+            shuttleData.stations.map((station) => (
+              <Marker
+                key={station.ID}
+                coordinate={{
+                  latitude: station.Latitude,
+                  longitude: station.Longitude,
+                }}
+                title={
+                  station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'
+                }
+                testID={`marker-${station.ID}`}
+              >
+                {/* Custom marker for station icon */}
+                <View style={styles.stationMarker}>
+                  <Image
+                    source={require('../assets/images/transportModes/busStation.png')}
+                    style={styles.stationIcon}
+                    resizeMode="contain"
+                  />
+                </View>
+              </Marker>
+            ))}
         </MapView>
       ) : (
         <Text style={[styles.infoText, isLargeText && styles.largeText]}>
@@ -217,12 +280,43 @@ const CampusMap: React.FC = () => {
 
       {/* Selected building info */}
       {selectedBuilding && (
-        <View style={[styles.infoContainer, isBlackAndWhite && styles.blackAndWhiteContainer]}>
-          <Text style={[styles.buildingName, isLargeText && styles.largeText]}>{selectedBuilding.name}</Text>
-          <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.address}</Text>
+        <View
+          style={[
+            styles.infoContainer,
+            isBlackAndWhite && styles.blackAndWhiteContainer,
+          ]}
+        >
+          <Text style={[styles.buildingName, isLargeText && styles.largeText]}>
+            {selectedBuilding.name}
+          </Text>
+          <Text style={[styles.description, isLargeText && styles.largeText]}>
+            {selectedBuilding.address}
+          </Text>
           <View style={styles.horizontalRule} />
-          <Text style={[styles.infoText, isLargeText && styles.largeText]}>Description</Text>
-          <Text style={[styles.description, isLargeText && styles.largeText]}>{selectedBuilding.description}</Text>
+          <Text style={[styles.infoText, isLargeText && styles.largeText]}>
+            Description
+          </Text>
+          <Text style={[styles.description, isLargeText && styles.largeText]}>
+            {selectedBuilding.description}
+          </Text>
+
+          <View style={styles.horizontalRule} />
+
+          {/* Toggle Button */}
+          <TouchableOpacity
+            onPress={() => setShowOpeningHours(!showOpeningHours)}
+          >
+            <Text style={[isLargeText && styles.largeText]}>
+              {showOpeningHours ? 'Hide Opening Hours' : 'Show Opening Hours'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Conditionally Show Opening Hours */}
+          {showOpeningHours && (
+            <Text style={[styles.description, isLargeText && styles.largeText]}>
+              {openingHours}
+            </Text>
+          )}
         </View>
       )}
 
@@ -247,7 +341,7 @@ const CampusMap: React.FC = () => {
             SGW Campus
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[
             styles.circularButton,
@@ -283,12 +377,12 @@ const CampusMap: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1 
+  container: {
+    flex: 1,
   },
-  map: { 
-    width: '100%', 
-    height: '100%' 
+  map: {
+    width: '100%',
+    height: '100%',
   },
   infoContainer: {
     position: 'absolute',
@@ -403,7 +497,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#912338',
     borderBottomWidth: 1,
     marginVertical: 10,
-  }
+  },
 });
 
 export default CampusMap;
