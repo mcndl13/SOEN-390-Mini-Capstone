@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - branch-*  # Enables branch analysis for any branch matching this pattern
   pull_request:
     branches:
       - main
@@ -28,7 +29,6 @@ jobs:
 
       - name: Create .env file
         run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" > lost-in-faubourg-app/.env
-
 
       - name: Run Linter
         run: cd lost-in-faubourg-app && npm run lint
@@ -55,9 +55,24 @@ jobs:
 
       - name: Set Environment Variables
         run: echo "GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" >> $GITHUB_ENV
-      
+
       - name: Build the Project (iOS)
         run: cd lost-in-faubourg-app && npx expo export --platform ios
 
       - name: Build the Project (Android)
         run: cd lost-in-faubourg-app && npx expo export --platform android
+
+      # SonarQube Analysis Step
+      - name: Run SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: "https://sonarcloud.io"
+        run: |
+          cd lost-in-faubourg-app
+          npx sonarqube-scanner \
+            -Dsonar.organization=lost-in-faubourg \
+            -Dsonar.projectKey=lost-in-faubourg \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.login=$SONAR_TOKEN \
+            -Dsonar.branch.name=${{ github.ref_name }}
