@@ -32,6 +32,7 @@ jest.spyOn(global, 'fetch').mockImplementation(() => {
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import DirectionsScreen, { stripHtml } from '../components/DirectionsScreen';
+import { renderDirectionsScreen, waitForTimeout } from './helpers/directionsTestHelpers';
 
 beforeAll(() => {
   process.env.EXPO_OS = 'ios';
@@ -103,34 +104,6 @@ jest.mock('../services/shuttleService', () => ({
     return () => {};
   },
 }));
-
-// Helper: Accessibility Provider
-const AccessibilityContextProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  return (
-    <React.Fragment>
-      {React.cloneElement(children as React.ReactElement, {
-        isBlackAndWhite: false,
-        isLargeText: false,
-      })}
-    </React.Fragment>
-  );
-};
-
-// Helper functions to reduce duplication
-const renderDirectionsScreen = (params = {}) => {
-  const { useRoute } = require('@react-navigation/native');
-  useRoute.mockReturnValue({ params });
-  return render(
-    <AccessibilityContextProvider>
-      <DirectionsScreen />
-    </AccessibilityContextProvider>,
-  );
-};
-
-const waitForTimeout = (ms = 0) =>
-  act(() => new Promise((resolve) => setTimeout(resolve, ms)));
 
 describe('DirectionsScreen', () => {
   it('renders origin and destination input placeholders', async () => {
