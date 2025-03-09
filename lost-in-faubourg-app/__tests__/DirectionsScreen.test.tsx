@@ -6,7 +6,6 @@ jest.mock('expo-constants', () => ({
 }));
 
 jest.mock('@expo/vector-icons', () => {
-  const React = require('react');
   const { Text } = require('react-native');
   return {
     Ionicons: (props: any) => <Text {...props}>icon</Text>,
@@ -30,8 +29,8 @@ jest.spyOn(global, 'fetch').mockImplementation(() => {
 });
 
 import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import DirectionsScreen, { stripHtml } from '../components/DirectionsScreen';
+import { fireEvent, waitFor, act } from '@testing-library/react-native';
+import { stripHtml } from '../components/DirectionsScreen';
 import { renderDirectionsScreen, waitForTimeout, traceRoute, testBackButtonInteraction, selectCampus, selectMyLocation } from './helpers/directionsTestHelpers';
 
 // Add default location definitions to be used in tests
@@ -44,7 +43,6 @@ beforeAll(() => {
 });
 
 jest.mock('react-native-maps-directions', () => {
-  const React = require('react');
   return {
     __esModule: true,
     default: (props: any) => {
@@ -243,7 +241,6 @@ describe('More DirectionsScreen interactions', () => {
 });
 
 describe('Additional DirectionsScreen interactions', () => {
-  const { useRoute } = require('@react-navigation/native');
 
   it('changes travel mode when mode buttons are pressed', async () => {
     const rendered = renderDirectionsScreen();

@@ -6,6 +6,34 @@ import { polygons } from '../components/polygonCoordinates';
 import { AccessibilityContext } from '../components/AccessibilitySettings';
 
 // --- Mocks ---
+jest.mock('react-native-maps', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const PropTypes = require('prop-types');
+
+  const MockMapView = (props) => <View {...props}>{props.children}</View>;
+  MockMapView.propTypes = {
+    children: PropTypes.node,
+  };
+
+  const MockMarker = (props) => <View {...props}>{props.children}</View>;
+  MockMarker.propTypes = {
+    children: PropTypes.node,
+  };
+
+  const MockPolygon = (props) => <View {...props}>{props.children}</View>;
+  MockPolygon.propTypes = {
+    children: PropTypes.node,
+  };
+
+  return {
+    __esModule: true,
+    default: MockMapView,
+    Marker: MockMarker,
+    Polygon: MockPolygon,
+  };
+});
+
 jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
@@ -209,27 +237,19 @@ describe('CampusMap', () => {
     await waitFor(() => {
       const mapView = getByTestId('mapView');
       const flatChildren = mapView.props.children.flat();
-      verifyPolygons(flatChildren);
+      polygons.forEach((polygon, index) => {
+        const polygonComponent = flatChildren.find(
+          (child) =>
+            child.key === index.toString() && child.type.name === 'MockPolygon',
+        );
+        expect(polygonComponent).toBeTruthy();
+        expect(polygonComponent.props.coordinates).toEqual(polygon.boundaries);
+        expect(polygonComponent.props.fillColor).toBe('#912338cc');
+        expect(polygonComponent.props.strokeColor).toBe('#912338cc');
+        expect(polygonComponent.props.strokeWidth).toBe(1);
+      });
     });
   });
-
-  const verifyPolygons = (flatChildren) => {
-    polygons.forEach((polygon, index) => {
-      const polygonComponent = findPolygonComponent(flatChildren, index);
-      expect(polygonComponent).toBeTruthy();
-      expect(polygonComponent.props.coordinates).toEqual(polygon.boundaries);
-      expect(polygonComponent.props.fillColor).toBe('#912338cc');
-      expect(polygonComponent.props.strokeColor).toBe('#912338cc');
-      expect(polygonComponent.props.strokeWidth).toBe(1);
-    });
-  };
-
-  const findPolygonComponent = (flatChildren, index) => {
-    return flatChildren.find(
-      (child) =>
-        child.key === index.toString() && child.type.name === 'MockPolygon',
-    );
-  };
 
   test('renders shuttle markers correctly', async () => {
     setLocationMock();

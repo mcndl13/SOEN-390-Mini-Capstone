@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import MapView, { Marker, Polygon, Region, MapStyleElement } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { polygons } from './polygonCoordinates';
 import { AccessibilityContext } from './AccessibilitySettings';
-import { fetchShuttlePositions, startShuttleTracking, ShuttleData, ShuttlePoint } from '../services/shuttleService';
+import { startShuttleTracking, ShuttleData } from '../services/shuttleService';
 
 interface LocationCoords {
   latitude: number;
@@ -161,7 +161,7 @@ const CampusMap: React.FC = () => {
             />
           ))}
 
-          {showShuttles && shuttleData && shuttleData.buses.map((bus) => (
+          {showShuttles && shuttleData?.buses.map((bus) => (
             <Marker
               key={bus.ID}
               coordinate={{
@@ -181,7 +181,7 @@ const CampusMap: React.FC = () => {
             </Marker>
           ))}
 
-          {showShuttles && shuttleData && shuttleData.stations.map((station) => (
+          {showShuttles && shuttleData?.stations.map((station) => (
             <Marker
               key={station.ID}
               coordinate={{
