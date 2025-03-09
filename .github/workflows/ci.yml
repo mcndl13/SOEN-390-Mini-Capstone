@@ -72,7 +72,7 @@ jobs:
           cd lost-in-faubourg-app
           npx sonarqube-scanner \
             -Dsonar.organization=lost-in-faubourg \
-            -Dsonar.projectKey=lost-in-faubourg \
+            -Dsonar.projectKey=mcndl13_SOEN-390-Mini-Capstone \
             -Dsonar.sources=. \
             -Dsonar.host.url=$SONAR_HOST_URL \
             -Dsonar.login=$SONAR_TOKEN \
