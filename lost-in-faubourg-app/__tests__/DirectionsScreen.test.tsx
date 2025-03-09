@@ -6,7 +6,6 @@ jest.mock('expo-constants', () => ({
 }));
 
 jest.mock('@expo/vector-icons', () => {
-  const React = require('react');
   const { Text } = require('react-native');
   return {
     Ionicons: (props: any) => <Text {...props}>icon</Text>,
@@ -44,7 +43,6 @@ beforeAll(() => {
 });
 
 jest.mock('react-native-maps-directions', () => {
-  const React = require('react');
   return {
     __esModule: true,
     default: (props: any) => {
@@ -243,7 +241,6 @@ describe('More DirectionsScreen interactions', () => {
 });
 
 describe('Additional DirectionsScreen interactions', () => {
-  const { useRoute } = require('@react-navigation/native');
 
   it('changes travel mode when mode buttons are pressed', async () => {
     const rendered = renderDirectionsScreen();
