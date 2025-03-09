@@ -698,7 +698,7 @@ export default function DirectionsScreen() {
             coordinates={polygon.boundaries}
             fillColor={isBlackAndWhite ? "#000000aa" : "#912338cc"}
             strokeColor={isBlackAndWhite ? "#000000" : "#912338cc"}
-            strokeWidth={isBlackAndWhite ? 2 : 2}
+            strokeWidth={2}
           />
         ))}
 
