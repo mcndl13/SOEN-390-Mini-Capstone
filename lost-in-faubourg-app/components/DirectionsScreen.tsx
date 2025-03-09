@@ -26,11 +26,10 @@ import { GOOGLE_MAPS_API_KEY } from '@env';
 import { AccessibilityContext } from './AccessibilitySettings';
 import { polygons } from '../components/polygonCoordinates';
 import {
-  fetchShuttlePositions,
   startShuttleTracking,
   ShuttleData,
 } from '../services/shuttleService';
-import { isUserInBuilding, getPolygonCenter } from '../utils/geometry';
+import { isUserInBuilding } from '../utils/geometry';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -238,8 +237,8 @@ export default function DirectionsScreen() {
         if (mapRef.current) {
           // Skip the traceRoute function entirely and do its work directly
           // This avoids the alert checks in the original function
-          const finalOrigin = snapToNearestBuilding(route.params.origin!);
-          const finalDestination = snapToNearestBuilding(route.params.destination!);
+          const finalOrigin = snapToNearestBuilding(route.params.origin);
+          const finalDestination = snapToNearestBuilding(route.params.destination);
           
           setShowDirections(true);
           
@@ -665,6 +664,25 @@ export default function DirectionsScreen() {
     }
   ] : [];
 
+  const getImageSource = (mode: string, travelMode: string) => {
+    const images = {
+      DRIVING: travelMode === 'DRIVING' ? require('../assets/images/transportModes/carWhite.png') : require('../assets/images/transportModes/carBlack.png'),
+      WALKING: travelMode === 'WALKING' ? require('../assets/images/transportModes/walkWhite.png') : require('../assets/images/transportModes/walkBlack.png'),
+      BICYCLING: travelMode === 'BICYCLING' ? require('../assets/images/transportModes/bikeWhite.png') : require('../assets/images/transportModes/bikeBlack.png'),
+      TRANSIT: travelMode === 'TRANSIT' ? require('../assets/images/transportModes/busWhite.png') : require('../assets/images/transportModes/busBlack.png'),
+    };
+    return images[mode];
+  };
+  
+  const getTextStyle = (mode: string, travelMode: string, isLargeText: boolean, isBlackAndWhite: boolean) => {
+    return [
+      styles.modeButtonText,
+      travelMode === mode && styles.activeModeButtonText,
+      isLargeText && styles.largeText,
+      isBlackAndWhite && styles.blackAndWhiteText,
+    ];
+  };
+
   return (
     <View style={styles.container}>
       {/* Toast Message */}
@@ -727,8 +745,7 @@ export default function DirectionsScreen() {
 
         {/* Shuttle bus markers */}
         {showShuttles &&
-          shuttleData &&
-          shuttleData.buses.map((bus) => (
+          shuttleData?.buses.map((bus) => (
             <Marker
               key={bus.ID}
               coordinate={{
@@ -752,8 +769,7 @@ export default function DirectionsScreen() {
 
         {/* Shuttle station markers */}
         {showShuttles &&
-          shuttleData &&
-          shuttleData.stations.map((station) => (
+          shuttleData?.stations.map((station) => (
             <Marker
               key={station.ID}
               coordinate={{
@@ -900,33 +916,10 @@ export default function DirectionsScreen() {
                 onPress={() => setTravelMode(mode)}
               >
                 <Image
-                  source={
-                    mode === 'DRIVING' 
-                      ? travelMode === 'DRIVING'
-                        ? require('../assets/images/transportModes/carWhite.png')
-                        : require('../assets/images/transportModes/carBlack.png')
-                      : mode === 'WALKING'
-                        ? travelMode === 'WALKING'
-                          ? require('../assets/images/transportModes/walkWhite.png')
-                          : require('../assets/images/transportModes/walkBlack.png')
-                        : mode === 'BICYCLING'
-                          ? travelMode === 'BICYCLING'
-                            ? require('../assets/images/transportModes/bikeWhite.png')
-                            : require('../assets/images/transportModes/bikeBlack.png')
-                          : travelMode === 'TRANSIT'
-                            ? require('../assets/images/transportModes/busWhite.png')
-                            : require('../assets/images/transportModes/busBlack.png')
-                  }
+                  source={getImageSource(mode, travelMode)}
                   style={styles.modeButtonIcon}
                 />
-                <Text
-                  style={[
-                    styles.modeButtonText,
-                    travelMode === mode && styles.activeModeButtonText,
-                    isLargeText && styles.largeText,
-                    isBlackAndWhite && styles.blackAndWhiteText
-                  ]}
-                >
+                <Text style={getTextStyle(mode, travelMode, isLargeText, isBlackAndWhite)}>
                   {mode.charAt(0) + mode.slice(1).toLowerCase()}
                 </Text>
               </TouchableOpacity>
