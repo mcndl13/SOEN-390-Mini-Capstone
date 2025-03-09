@@ -1,51 +1,58 @@
-import React from 'react'
-import { render, fireEvent } from '@testing-library/react-native'
-import HomeScreen from '../components/HomeScreen'
+import React from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import HomeScreen from '../components/HomeScreen';
+import { Linking } from 'react-native';
 
-const mockNavigation = { navigate: jest.fn() }
+const mockNavigation = { navigate: jest.fn() };
 
-test('HomeScreen renders correctly', () => {
-  const { toJSON } = render(<HomeScreen navigation={mockNavigation} />)
-  expect(toJSON()).toMatchSnapshot()
-})
+const renderHomeScreen = () =>
+  render(<HomeScreen navigation={mockNavigation} />);
 
-test('HomeScreen navigates to CampusMap on button press', () => {
-  const { getByText } = render(<HomeScreen navigation={mockNavigation} />)
-  const button = getByText('Explore Campus Map')
-  fireEvent.press(button)
-  expect(mockNavigation.navigate).toHaveBeenCalledWith('CampusMap')
-})
+describe('HomeScreen', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-test('HomeScreen navigates to Directions on button press', () => {
-  const { getByText } = render(<HomeScreen navigation={mockNavigation} />)
-  const button = getByText('Get Directions')
-  fireEvent.press(button)
-  expect(mockNavigation.navigate).toHaveBeenCalledWith('Directions')
-})
+  test('renders correctly', () => {
+    const { toJSON } = renderHomeScreen();
+    expect(toJSON()).toMatchSnapshot();
+  });
 
-test('HomeScreen navigates to CalendarIntegration on button press', () => {
-  const { getByText } = render(<HomeScreen navigation={mockNavigation} />)
-  const button = getByText('Connect to Google Calendar')
-  fireEvent.press(button)
-  expect(mockNavigation.navigate).toHaveBeenCalledWith('CalendarIntegration')
-})
+  const navigationTests = [
+    { buttonText: 'Explore Campus Map', target: 'CampusMap' },
+    { buttonText: 'Get Directions', target: 'Directions' },
+    { buttonText: 'Connect to Google Calendar', target: 'CalendarIntegration' },
+    { buttonText: 'Indoor Navigation', target: 'IndoorDirections' },
+    { buttonText: 'Find Points of Interest', target: 'PointsOfInterest' },
+  ];
 
-test('HomeScreen navigates to IndoorDirections on button press', () => {
-  const { getByText } = render(<HomeScreen navigation={mockNavigation} />)
-  const button = getByText('Indoor Navigation')
-  fireEvent.press(button)
-  expect(mockNavigation.navigate).toHaveBeenCalledWith('IndoorDirections')
-})
+  test.each(navigationTests)(
+    'navigates to $target when "$buttonText" button is pressed',
+    ({ buttonText, target }) => {
+      const { getByText } = renderHomeScreen();
+      const button = getByText(buttonText);
+      fireEvent.press(button);
+      expect(mockNavigation.navigate).toHaveBeenCalledWith(target);
+    },
+  );
 
-test('HomeScreen navigates to PointsOfInterest on button press', () => {
-  const { getByText } = render(<HomeScreen navigation={mockNavigation} />)
-  const button = getByText('Find Points of Interest')
-  fireEvent.press(button)
-  expect(mockNavigation.navigate).toHaveBeenCalledWith('PointsOfInterest')
-})
+  test('renders title correctly', () => {
+    const { getByText } = renderHomeScreen();
+    expect(getByText('Welcome')).toBeTruthy();
+  });
 
-test('HomeScreen renders title correctly', () => {
-  const { getByText } = render(<HomeScreen navigation={mockNavigation} />)
-  const title = getByText('Welcome')
-  expect(title).toBeTruthy()
-})
+  test('opens shuttle schedule on button press', async () => {
+    const openURLSpy = jest
+      .spyOn(Linking, 'openURL')
+      .mockImplementation(async () => {});
+    const { getByText } = renderHomeScreen();
+    const button = getByText('Shuttle Schedule');
+    fireEvent.press(button);
+    await waitFor(() => {
+      expect(openURLSpy).toHaveBeenCalledWith(
+        'https://www.concordia.ca/maps/shuttle-bus.html#depart',
+      );
+    });
+    openURLSpy.mockRestore();
+  });
+});
