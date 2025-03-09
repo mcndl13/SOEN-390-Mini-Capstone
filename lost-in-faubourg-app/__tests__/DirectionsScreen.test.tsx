@@ -32,41 +32,11 @@ jest.spyOn(global, 'fetch').mockImplementation(() => {
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import DirectionsScreen, { stripHtml } from '../components/DirectionsScreen';
-import { renderDirectionsScreen, waitForTimeout } from './helpers/directionsTestHelpers';
+import { renderDirectionsScreen, waitForTimeout, traceRoute, testBackButtonInteraction, selectCampus, selectMyLocation } from './helpers/directionsTestHelpers';
 
-// --- Added helper constants and functions to reduce duplication ---
+// Add default location definitions to be used in tests
 const defaultOrigin = { latitude: 45.4953534, longitude: -73.578549 };
 const defaultDestination = { latitude: 45.4582, longitude: -73.6405 };
-
-async function traceRoute(rendered: any) {
-	// press and wait for route trace to complete
-	fireEvent.press(rendered.getByText('Trace route'));
-	await waitForTimeout(700);
-}
-
-async function testBackButtonInteraction(rendered: any) {
-	// common back button test & assertions
-	const backButton = rendered.getByText('Back to Search');
-	expect(backButton).toBeTruthy();
-	fireEvent.press(backButton);
-	await waitForTimeout(200);
-	expect(rendered.queryByText('Back to Search')).toBeNull();
-	expect(rendered.queryByText('Returned to search view')).toBeTruthy();
-}
-
-async function selectCampus(rendered: any, campus: string) {
-	fireEvent.press(rendered.getByText(campus));
-	await waitFor(() => {
-		expect(rendered.queryByText(new RegExp(`${campus} set`))).toBeTruthy();
-	});
-}
-
-async function selectMyLocation(rendered: any, expectedPattern: RegExp) {
-	fireEvent.press(rendered.getByText('Use My Location'));
-	await waitFor(() => {
-		expect(rendered.queryByText(expectedPattern)).toBeTruthy();
-	});
-}
 
 beforeAll(() => {
   process.env.EXPO_OS = 'ios';
