@@ -29,8 +29,8 @@ jest.spyOn(global, 'fetch').mockImplementation(() => {
 });
 
 import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import DirectionsScreen, { stripHtml } from '../components/DirectionsScreen';
+import { fireEvent, waitFor, act } from '@testing-library/react-native';
+import { stripHtml } from '../components/DirectionsScreen';
 import { renderDirectionsScreen, waitForTimeout, traceRoute, testBackButtonInteraction, selectCampus, selectMyLocation } from './helpers/directionsTestHelpers';
 
 // Add default location definitions to be used in tests
