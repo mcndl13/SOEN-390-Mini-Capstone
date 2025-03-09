@@ -209,19 +209,27 @@ describe('CampusMap', () => {
     await waitFor(() => {
       const mapView = getByTestId('mapView');
       const flatChildren = mapView.props.children.flat();
-      polygons.forEach((polygon, index) => {
-        const polygonComponent = flatChildren.find(
-          (child) =>
-            child.key === index.toString() && child.type.name === 'MockPolygon',
-        );
-        expect(polygonComponent).toBeTruthy();
-        expect(polygonComponent.props.coordinates).toEqual(polygon.boundaries);
-        expect(polygonComponent.props.fillColor).toBe('#912338cc');
-        expect(polygonComponent.props.strokeColor).toBe('#912338cc');
-        expect(polygonComponent.props.strokeWidth).toBe(1);
-      });
+      verifyPolygons(flatChildren);
     });
   });
+
+  const verifyPolygons = (flatChildren) => {
+    polygons.forEach((polygon, index) => {
+      const polygonComponent = findPolygonComponent(flatChildren, index);
+      expect(polygonComponent).toBeTruthy();
+      expect(polygonComponent.props.coordinates).toEqual(polygon.boundaries);
+      expect(polygonComponent.props.fillColor).toBe('#912338cc');
+      expect(polygonComponent.props.strokeColor).toBe('#912338cc');
+      expect(polygonComponent.props.strokeWidth).toBe(1);
+    });
+  };
+
+  const findPolygonComponent = (flatChildren, index) => {
+    return flatChildren.find(
+      (child) =>
+        child.key === index.toString() && child.type.name === 'MockPolygon',
+    );
+  };
 
   test('renders shuttle markers correctly', async () => {
     setLocationMock();
