@@ -2,12 +2,14 @@ import React, { useEffect } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import MainNavigator from './app/index';
-import * as Clarity from '@microsoft/react-native-clarity';
+let Clarity: any;
+if (!__DEV__) {
+  Clarity = require('@microsoft/react-native-clarity');
+}
+//import * as Clarity from '@microsoft/react-native-clarity';
 
 // Initialize Clarity configuration
-const clarityConfig = {
-  logLevel: Clarity.LogLevel.Verbose,
-};
+const clarityConfig = Clarity ? { logLevel: Clarity.LogLevel.Verbose } : null;
 
 export default function App() {
   useEffect(() => {
@@ -15,11 +17,11 @@ export default function App() {
 
     // Start Clarity session when the app starts
     if (Clarity?.initialize) {
-      Clarity.initialize('key', clarityConfig);
+      Clarity.initialize('qlquku27ij', clarityConfig);
       console.log('Clarity session initialized.');
 
       // Start a new session and log session ID
-      Clarity.startNewSession((sessionId) => {
+      Clarity.startNewSession((sessionId: string) => {
         console.log(`New Clarity session started: ${sessionId}`);
       });
     } else {
