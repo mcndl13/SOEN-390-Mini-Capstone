@@ -1,0 +1,12 @@
+appId: Expo Go
+---
+- tapOn:
+    id: 'Expo Go'
+    waitToSettleTimeoutMs: 500
+
+- tapOn: 'Find Points of Interest'
+
+- tapOn:
+    point: "50%,35%"
+
+- tapOn: 'Get Directions'
