@@ -15,7 +15,7 @@ export default function App() {
 
     // Start Clarity session when the app starts
     if (Clarity?.initialize) {
-      Clarity.initialize('key', clarityConfig);
+      Clarity.initialize('qlquku27ij', clarityConfig);
       console.log('Clarity session initialized.');
 
       // Start a new session and log session ID
