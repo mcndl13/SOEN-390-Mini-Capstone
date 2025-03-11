@@ -63,82 +63,379 @@ type FloorData = {
 const hallFloorGraphs: Record<number, Record<string, GraphNode>> = {
   // HALL BUILDING NODES
   1: {
-    Hall_Entrance: { x: 110, y: 360, neighbors: ['Main_walway', 'Hall_1st_Basement_Escalator'] },
+    Hall_Entrance: {
+      x: 110,
+      y: 360,
+      neighbors: ['Main_walway', 'Hall_1st_Basement_Escalator'],
+    },
     Main_walway: { x: 110, y: 292, neighbors: ['Hall_Entrance', 'Hallway'] },
-    Hallway: { x: 265, y: 292, neighbors: ['Main_walway', 'Hall_1st_Elevator'] },
+    Hallway: {
+      x: 265,
+      y: 292,
+      neighbors: ['Main_walway', 'Hall_1st_Elevator'],
+    },
     Hall_1st_Elevator: { x: 265, y: 302, neighbors: ['Hallway'] },
-    Hall_1st_Basement_Escalator: { x: 275, y: 360, neighbors: ['Hall_Entrance'] },
+    Hall_1st_Basement_Escalator: {
+      x: 275,
+      y: 360,
+      neighbors: ['Hall_Entrance'],
+    },
   },
   2: {},
   8: {
     // hallway intersections
-    hallwayLowerLeftCorner: { x: 70, y: 289, neighbors: ['hallwayMiddleLower', 'hallwayMiddleLeft','h849', 'h847', 'h845', 'h843', 'h842', 'h841', 'h857', 'h855', 'h854', 'h853', 'h852', 'h851'] },
-    hallwayLowerRightCorner: { x: 305, y: 289, neighbors: ['hallwayMiddleLower', 'hallwayHigherRightCorner', 'h837', 'h835', 'h833', 'h832', 'h831', 'h829', 'h827', 'h825', 'h823', 'h822', 'h821', 'h820'] },
-    hallwayHigherRightCorner: { x: 305, y: 78, neighbors: ['hallwayMiddleUpper', 'hallwayLowerRightCorner', 'h827', 'h825', 'h823', 'h822', 'h821', 'h820', 'h819', 'h817', 'h815', 'h813', 'h811', 'mensBathroom'] },
-    hallwayHigherLeftCorner: { x: 65, y: 78, neighbors: ['hallwayHigherRightCorner', 'hallwayMiddleLeft', 'h807', 'h805', 'h803', 'h801', 'womensBathroom', 'h867', 'h865', 'h863', 'h861'] },
-    hallwayMiddleLower: { x: 200, y: 289, neighbors: ['hallwayMiddleMiddle', 'hallwayLowerLeftCorner', 'hallwayLowerRightCorner', 'h845', 'h843', 'h842', 'h841', 'h837', 'h835', 'h832'] },
-    hallwayMiddleMiddle: { x: 200, y: 145, neighbors: ['hallwayMiddleUpper', 'hallwayMiddleLower', 'hallwayMiddleLeft', 'h806', 'h862', 'h860'] },
-    hallwayMiddleUpper: { x: 200, y: 78, neighbors: ['hallwayHigherRightCorner', 'hallwayHigherLeftCorner', 'hallwayMiddleMiddle','h806', 'h862', 'h860', 'h813', 'h811', 'h807', 'h806', 'h805', 'h803', 'h801', 'womensBathroom', 'mensBathroom'] },
-    hallwayMiddleLeft:{ x: 65, y: 145, neighbors: ['hallwayMiddleMiddle', 'hallwayLowerLeftCorner', 'hallwayHigherLeftCorner', 'h863', 'h862', 'h861', 'h860', 'h859', 'h857', 'h855', 'h854', 'h853', 'h852'] },
+    hallwayLowerLeftCorner: {
+      x: 70,
+      y: 289,
+      neighbors: [
+        'hallwayMiddleLower',
+        'hallwayMiddleLeft',
+        'h849',
+        'h847',
+        'h845',
+        'h843',
+        'h842',
+        'h841',
+        'h857',
+        'h855',
+        'h854',
+        'h853',
+        'h852',
+        'h851',
+      ],
+    },
+    hallwayLowerRightCorner: {
+      x: 305,
+      y: 289,
+      neighbors: [
+        'hallwayMiddleLower',
+        'hallwayHigherRightCorner',
+        'h837',
+        'h835',
+        'h833',
+        'h832',
+        'h831',
+        'h829',
+        'h827',
+        'h825',
+        'h823',
+        'h822',
+        'h821',
+        'h820',
+      ],
+    },
+    hallwayHigherRightCorner: {
+      x: 305,
+      y: 78,
+      neighbors: [
+        'hallwayMiddleUpper',
+        'hallwayLowerRightCorner',
+        'h827',
+        'h825',
+        'h823',
+        'h822',
+        'h821',
+        'h820',
+        'h819',
+        'h817',
+        'h815',
+        'h813',
+        'h811',
+        'mensBathroom',
+      ],
+    },
+    hallwayHigherLeftCorner: {
+      x: 65,
+      y: 78,
+      neighbors: [
+        'hallwayHigherRightCorner',
+        'hallwayMiddleLeft',
+        'h807',
+        'h805',
+        'h803',
+        'h801',
+        'womensBathroom',
+        'h867',
+        'h865',
+        'h863',
+        'h861',
+      ],
+    },
+    hallwayMiddleLower: {
+      x: 200,
+      y: 289,
+      neighbors: [
+        'hallwayMiddleMiddle',
+        'hallwayLowerLeftCorner',
+        'hallwayLowerRightCorner',
+        'h845',
+        'h843',
+        'h842',
+        'h841',
+        'h837',
+        'h835',
+        'h832',
+      ],
+    },
+    hallwayMiddleMiddle: {
+      x: 200,
+      y: 145,
+      neighbors: [
+        'hallwayMiddleUpper',
+        'hallwayMiddleLower',
+        'hallwayMiddleLeft',
+        'h806',
+        'h862',
+        'h860',
+      ],
+    },
+    hallwayMiddleUpper: {
+      x: 200,
+      y: 78,
+      neighbors: [
+        'hallwayHigherRightCorner',
+        'hallwayHigherLeftCorner',
+        'hallwayMiddleMiddle',
+        'h806',
+        'h862',
+        'h860',
+        'h813',
+        'h811',
+        'h807',
+        'h806',
+        'h805',
+        'h803',
+        'h801',
+        'womensBathroom',
+        'mensBathroom',
+      ],
+    },
+    hallwayMiddleLeft: {
+      x: 65,
+      y: 145,
+      neighbors: [
+        'hallwayMiddleMiddle',
+        'hallwayLowerLeftCorner',
+        'hallwayHigherLeftCorner',
+        'h863',
+        'h862',
+        'h861',
+        'h860',
+        'h859',
+        'h857',
+        'h855',
+        'h854',
+        'h853',
+        'h852',
+      ],
+    },
 
     // lower section
     h849: { x: 30, y: 325, neighbors: ['hallwayLowerLeftCorner'] },
     h847: { x: 70, y: 325, neighbors: ['hallwayLowerLeftCorner'] },
-    h845: { x: 105, y: 325, neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLower'] },
-    h843: { x: 135, y: 325, neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLower'] },
-    h842: { x: 145, y: 235, neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLower'] },
-    h841: { x: 165, y: 325, neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLower'] },
-    h837: { x: 235, y: 325, neighbors: ['hallwayLowerRightCorner', 'hallwayMiddleLower'] },
-    h835: { x: 265, y: 325, neighbors: ['hallwayLowerRightCorner', 'hallwayMiddleLower'] },
+    h845: {
+      x: 105,
+      y: 325,
+      neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLower'],
+    },
+    h843: {
+      x: 135,
+      y: 325,
+      neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLower'],
+    },
+    h842: {
+      x: 145,
+      y: 235,
+      neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLower'],
+    },
+    h841: {
+      x: 165,
+      y: 325,
+      neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLower'],
+    },
+    h837: {
+      x: 235,
+      y: 325,
+      neighbors: ['hallwayLowerRightCorner', 'hallwayMiddleLower'],
+    },
+    h835: {
+      x: 265,
+      y: 325,
+      neighbors: ['hallwayLowerRightCorner', 'hallwayMiddleLower'],
+    },
     h833: { x: 300, y: 325, neighbors: ['hallwayLowerRightCorner'] },
-    h832: { x: 232, y: 245, neighbors: ['hallwayLowerRightCorner','hallwayMiddleLower'] },
+    h832: {
+      x: 232,
+      y: 245,
+      neighbors: ['hallwayLowerRightCorner', 'hallwayMiddleLower'],
+    },
     h831: { x: 345, y: 325, neighbors: ['hallwayLowerRightCorner'] },
 
     // Right section
     h829: { x: 345, y: 285, neighbors: ['hallwayLowerRightCorner'] },
-    h827: { x: 345, y: 220, neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'] },
-    h825: { x: 345, y: 190, neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'] },
-    h823: { x: 345, y: 155, neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'] },
-    h822: { x: 285, y: 222, neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'] },
-    h821: { x: 345, y: 120, neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'] },
-    h820: { x: 265, y: 168, neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'] },
+    h827: {
+      x: 345,
+      y: 220,
+      neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'],
+    },
+    h825: {
+      x: 345,
+      y: 190,
+      neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'],
+    },
+    h823: {
+      x: 345,
+      y: 155,
+      neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'],
+    },
+    h822: {
+      x: 285,
+      y: 222,
+      neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'],
+    },
+    h821: {
+      x: 345,
+      y: 120,
+      neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'],
+    },
+    h820: {
+      x: 265,
+      y: 168,
+      neighbors: ['hallwayLowerRightCorner', 'hallwayHigherRightCorner'],
+    },
     h819: { x: 345, y: 85, neighbors: ['hallwayHigherRightCorner'] },
     h817: { x: 345, y: 50, neighbors: ['hallwayHigherRightCorner'] },
 
     // Top section
     h815: { x: 305, y: 40, neighbors: ['hallwayHigherRightCorner'] },
-    h813: { x: 270, y: 40, neighbors: ['hallwayHigherRightCorner', 'hallwayMiddleUpper'] },
-    h811: { x: 230, y: 40, neighbors: ['hallwayHigherRightCorner', 'hallwayMiddleUpper'] },
-    h807: { x: 173, y: 40, neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleUpper'] },
-    h806: { x: 176, y: 120, neighbors: ['hallwayMiddleMiddle', 'hallwayMiddleUpper'] },
-    h805: { x: 143, y: 40, neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleUpper'] },
-    h803: { x: 110, y: 40, neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleUpper'] },
-    h801: { x: 75, y: 40, neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleUpper'] },
-    womensBathroom: { x: 143, y: 95, neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleUpper'] },
-    mensBathroom: { x: 235, y: 95, neighbors: ['hallwayHigherRightCorner', 'hallwayMiddleUpper'] },
+    h813: {
+      x: 270,
+      y: 40,
+      neighbors: ['hallwayHigherRightCorner', 'hallwayMiddleUpper'],
+    },
+    h811: {
+      x: 230,
+      y: 40,
+      neighbors: ['hallwayHigherRightCorner', 'hallwayMiddleUpper'],
+    },
+    h807: {
+      x: 173,
+      y: 40,
+      neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleUpper'],
+    },
+    h806: {
+      x: 176,
+      y: 120,
+      neighbors: ['hallwayMiddleMiddle', 'hallwayMiddleUpper'],
+    },
+    h805: {
+      x: 143,
+      y: 40,
+      neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleUpper'],
+    },
+    h803: {
+      x: 110,
+      y: 40,
+      neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleUpper'],
+    },
+    h801: {
+      x: 75,
+      y: 40,
+      neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleUpper'],
+    },
+    womensBathroom: {
+      x: 143,
+      y: 95,
+      neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleUpper'],
+    },
+    mensBathroom: {
+      x: 235,
+      y: 95,
+      neighbors: ['hallwayHigherRightCorner', 'hallwayMiddleUpper'],
+    },
 
     // Right section
     h867: { x: 35, y: 40, neighbors: ['hallwayHigherLeftCorner'] },
     h865: { x: 27, y: 64, neighbors: ['hallwayHigherLeftCorner'] },
-    h863: { x: 27, y: 90, neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleLeft'] },
-    h862: { x: 138, y: 165, neighbors: ['hallwayMiddleMiddle', 'hallwayMiddleLeft'] },
-    h861: { x: 27, y: 120, neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleLeft'] },
-    h860: { x: 98, y: 180, neighbors: ['hallwayMiddleMiddle', 'hallwayMiddleLeft'] },
+    h863: {
+      x: 27,
+      y: 90,
+      neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleLeft'],
+    },
+    h862: {
+      x: 138,
+      y: 165,
+      neighbors: ['hallwayMiddleMiddle', 'hallwayMiddleLeft'],
+    },
+    h861: {
+      x: 27,
+      y: 120,
+      neighbors: ['hallwayHigherLeftCorner', 'hallwayMiddleLeft'],
+    },
+    h860: {
+      x: 98,
+      y: 180,
+      neighbors: ['hallwayMiddleMiddle', 'hallwayMiddleLeft'],
+    },
     h859: { x: 27, y: 150, neighbors: ['hallwayMiddleLeft'] },
-    h857: { x: 27, y: 180, neighbors: ['hallwayMiddleLeft', 'hallwayLowerLeftCorner'] },
-    h855: { x: 27, y: 215, neighbors: ['hallwayMiddleLeft', 'hallwayLowerLeftCorner'] },
-    h854: { x: 98, y: 215, neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLeft'] },
-    h853: { x: 27, y: 248, neighbors: ['hallwayMiddleLeft', 'hallwayLowerLeftCorner'] },
-    h852: { x: 90, y: 235, neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLeft'] },
+    h857: {
+      x: 27,
+      y: 180,
+      neighbors: ['hallwayMiddleLeft', 'hallwayLowerLeftCorner'],
+    },
+    h855: {
+      x: 27,
+      y: 215,
+      neighbors: ['hallwayMiddleLeft', 'hallwayLowerLeftCorner'],
+    },
+    h854: {
+      x: 98,
+      y: 215,
+      neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLeft'],
+    },
+    h853: {
+      x: 27,
+      y: 248,
+      neighbors: ['hallwayMiddleLeft', 'hallwayLowerLeftCorner'],
+    },
+    h852: {
+      x: 90,
+      y: 235,
+      neighbors: ['hallwayLowerLeftCorner', 'hallwayMiddleLeft'],
+    },
     h851: { x: 27, y: 285, neighbors: ['hallwayLowerLeftCorner'] },
   },
   9: {
     // Hallway Nodes
-    hallwayLowerLeftCorner: { x: 73, y: 289, neighbors: ['hallwayMiddleLower', 'hallwayMiddleLeftCorner'] },
-    hallwayMiddleLeftCorner: { x: 73, y: 140, neighbors: ['hallwayLowerLeftCorner','hallwayHigherLeftCorner'] },
-    hallwayHigherLeftCorner: { x: 73, y: 66, neighbors: ['hallwayMiddleLeftCorner','h929'] },
-    hallwayMiddleLower: { x: 178, y: 289, neighbors: ['hallwayLowerLeftCorner', 'hallwayLowerRightCorner','womensBathroom'] },
-    hallwayLowerRightCorner: { x: 305, y: 289, neighbors: ['hallwayMiddleLower'] },
+    hallwayLowerLeftCorner: {
+      x: 73,
+      y: 289,
+      neighbors: ['hallwayMiddleLower', 'hallwayMiddleLeftCorner'],
+    },
+    hallwayMiddleLeftCorner: {
+      x: 73,
+      y: 140,
+      neighbors: ['hallwayLowerLeftCorner', 'hallwayHigherLeftCorner'],
+    },
+    hallwayHigherLeftCorner: {
+      x: 73,
+      y: 66,
+      neighbors: ['hallwayMiddleLeftCorner', 'h929'],
+    },
+    hallwayMiddleLower: {
+      x: 178,
+      y: 289,
+      neighbors: [
+        'hallwayLowerLeftCorner',
+        'hallwayLowerRightCorner',
+        'womensBathroom',
+      ],
+    },
+    hallwayLowerRightCorner: {
+      x: 305,
+      y: 289,
+      neighbors: ['hallwayMiddleLower'],
+    },
     h929: { x: 53, y: 66, neighbors: ['hallwayHigherLeftCorner'] },
     womensBathroom: { x: 228, y: 275, neighbors: ['hallwayMiddleLower'] },
     Elevator9th: { x: 241, y: 235, neighbors: ['h962'] },
@@ -156,7 +453,7 @@ const jmFloorGraphs: Record<number, Record<string, GraphNode>> = {
   1: {},
   2: {
     Tunnel: { x: 53, y: 176, neighbors: ['hallway'] },
-    hallway: { x: 168, y: 166, neighbors: ['Tunnel','s2101'] },
+    hallway: { x: 168, y: 166, neighbors: ['Tunnel', 's2101'] },
     s2101: { x: 168, y: 60, neighbors: ['hallway'] },
   },
 };
@@ -183,33 +480,77 @@ const buildingData: Record<
 > = {
   Hall: {
     floors: {
-      1: { image: HallFloor1, graph: hallFloorGraphs[1], originalDimensions: { width: 370, height: 370 } },
-      2: { image: HallFloor2, graph: hallFloorGraphs[2], originalDimensions: { width: 370, height: 370 } },
-      8: { image: HallFloor8, graph: hallFloorGraphs[8], originalDimensions: { width: 370, height: 370 } },
-      9: { image: HallFloor9, graph: hallFloorGraphs[9], originalDimensions: { width: 370, height: 370 } },
+      1: {
+        image: HallFloor1,
+        graph: hallFloorGraphs[1],
+        originalDimensions: { width: 370, height: 370 },
+      },
+      2: {
+        image: HallFloor2,
+        graph: hallFloorGraphs[2],
+        originalDimensions: { width: 370, height: 370 },
+      },
+      8: {
+        image: HallFloor8,
+        graph: hallFloorGraphs[8],
+        originalDimensions: { width: 370, height: 370 },
+      },
+      9: {
+        image: HallFloor9,
+        graph: hallFloorGraphs[9],
+        originalDimensions: { width: 370, height: 370 },
+      },
     },
   },
   CC: {
     floors: {
-      1: { image: CCFloor1, graph: ccFloorGraphs[1], originalDimensions: { width: 370, height: 370 } },
+      1: {
+        image: CCFloor1,
+        graph: ccFloorGraphs[1],
+        originalDimensions: { width: 370, height: 370 },
+      },
     },
   },
   'John Molson': {
     floors: {
-      1: { image: JMFloor1, graph: jmFloorGraphs[1], originalDimensions: { width: 370, height: 370 } },
-      2: { image: JMFloor2, graph: jmFloorGraphs[2], originalDimensions: { width: 370, height: 370 } },
+      1: {
+        image: JMFloor1,
+        graph: jmFloorGraphs[1],
+        originalDimensions: { width: 370, height: 370 },
+      },
+      2: {
+        image: JMFloor2,
+        graph: jmFloorGraphs[2],
+        originalDimensions: { width: 370, height: 370 },
+      },
     },
   },
   'Vanier Extension': {
     floors: {
-      1: { image: VEFloor1, graph: veFloorGraphs[1], originalDimensions: { width: 370, height: 370 } },
-      2: { image: VEFloor2, graph: veFloorGraphs[2], originalDimensions: { width: 370, height: 370 } },
+      1: {
+        image: VEFloor1,
+        graph: veFloorGraphs[1],
+        originalDimensions: { width: 370, height: 370 },
+      },
+      2: {
+        image: VEFloor2,
+        graph: veFloorGraphs[2],
+        originalDimensions: { width: 370, height: 370 },
+      },
     },
   },
   'Vanier Library': {
     floors: {
-      1: { image: VLFloor1, graph: vlFloorGraphs[1], originalDimensions: { width: 370, height: 370 } },
-      2: { image: VLFloor2, graph: vlFloorGraphs[2], originalDimensions: { width: 370, height: 370 } },
+      1: {
+        image: VLFloor1,
+        graph: vlFloorGraphs[1],
+        originalDimensions: { width: 370, height: 370 },
+      },
+      2: {
+        image: VLFloor2,
+        graph: vlFloorGraphs[2],
+        originalDimensions: { width: 370, height: 370 },
+      },
     },
   },
 };
@@ -220,7 +561,7 @@ const buildingData: Record<
 function scaleCoordinates(
   coord: { x: number; y: number },
   original: { width: number; height: number },
-  container: { width: number; height: number }
+  container: { width: number; height: number },
 ): { x: number; y: number } {
   const scaleX = container.width / original.width;
   const scaleY = container.height / original.height;
@@ -231,10 +572,10 @@ function getPathCoordinates(
   graph: Record<string, GraphNode>,
   nodeIds: string[],
   original: { width: number; height: number },
-  container: { width: number; height: number }
+  container: { width: number; height: number },
 ): { x: number; y: number }[] {
   return nodeIds.map((id) =>
-    scaleCoordinates({ x: graph[id].x, y: graph[id].y }, original, container)
+    scaleCoordinates({ x: graph[id].x, y: graph[id].y }, original, container),
   );
 }
 
@@ -251,7 +592,7 @@ function computePathDistance(coords: { x: number; y: number }[]): number {
 function findPathBFS(
   graph: Record<string, GraphNode>,
   startId: string,
-  endId: string
+  endId: string,
 ): string[] {
   if (startId === endId) return [startId];
   const queue = [startId];
@@ -281,7 +622,7 @@ function findPathBFS(
 function findNearestNode(
   tapX: number,
   tapY: number,
-  graph: Record<string, GraphNode>
+  graph: Record<string, GraphNode>,
 ): string {
   let closestNodeId = '';
   let minDist = Infinity;
@@ -298,7 +639,11 @@ function findNearestNode(
   return closestNodeId;
 }
 
-function getAllNodes(): Array<{ building: string; node: string; floor: number }> {
+function getAllNodes(): Array<{
+  building: string;
+  node: string;
+  floor: number;
+}> {
   const nodes: Array<{ building: string; node: string; floor: number }> = [];
   Object.keys(buildingData).forEach((b) => {
     Object.keys(buildingData[b].floors).forEach((floorStr) => {
@@ -327,13 +672,15 @@ function generateDirections(path: string[]): string[] {
     directions.push(`Then, take a turn at ${formatNodeName(path[i])}.`);
   }
   if (path.length > 1) {
-    directions.push(`Finally, arrive at ${formatNodeName(path[path.length - 1])}.`);
+    directions.push(
+      `Finally, arrive at ${formatNodeName(path[path.length - 1])}.`,
+    );
   }
   return directions;
 }
 
 function computeEstimatedTime(distanceMeters: number): number {
-  const WALKING_SPEED = 1.5; 
+  const WALKING_SPEED = 1.5;
   return distanceMeters / WALKING_SPEED;
 }
 
@@ -347,12 +694,15 @@ function formatTime(seconds: number): string {
   }
 }
 
-function getOriginalPathCoordinates(graph: Record<string, GraphNode>, nodeIds: string[]): { x: number; y: number }[] {
-  return nodeIds.map(id => ({ x: graph[id].x, y: graph[id].y }));
+function getOriginalPathCoordinates(
+  graph: Record<string, GraphNode>,
+  nodeIds: string[],
+): { x: number; y: number }[] {
+  return nodeIds.map((id) => ({ x: graph[id].x, y: graph[id].y }));
 }
 
 // ADDED TIME FOR DIFFERENT FLOORS/BUILDING (HARDCODED FOR NOW LOL)
-const CROSS_FLOOR_TIME_PENALTY = 40; 
+const CROSS_FLOOR_TIME_PENALTY = 40;
 const CROSS_BUILDING_TIME_PENALTY = 120;
 
 //--------------------------------------
@@ -383,10 +733,10 @@ export default function IndoorDirectionsScreen() {
   const allNodes = getAllNodes();
 
   const filteredStartNodes = allNodes.filter((item) =>
-    item.node.toLowerCase().includes(startSearch.toLowerCase())
+    item.node.toLowerCase().includes(startSearch.toLowerCase()),
   );
   const filteredEndNodes = allNodes.filter((item) =>
-    item.node.toLowerCase().includes(endSearch.toLowerCase())
+    item.node.toLowerCase().includes(endSearch.toLowerCase()),
   );
 
   const handleContainerLayout = (event: LayoutChangeEvent) => {
@@ -398,7 +748,12 @@ export default function IndoorDirectionsScreen() {
     const { locationX, locationY } = event.nativeEvent;
     const graph = currentFloorData.graph;
     if (!graph) {
-      console.warn('No graph data for', selectedBuilding, 'floor', selectedFloor);
+      console.warn(
+        'No graph data for',
+        selectedBuilding,
+        'floor',
+        selectedFloor,
+      );
       return;
     }
     const tappedNodeId = findNearestNode(locationX, locationY, graph);
@@ -408,21 +763,36 @@ export default function IndoorDirectionsScreen() {
 
     // Use parseInt(selectedFloor, 10) when setting destinations
     if (!startDest) {
-      setStartDest({ building: selectedBuilding, node: tappedNodeId, floor: parseInt(selectedFloor, 10) });
+      setStartDest({
+        building: selectedBuilding,
+        node: tappedNodeId,
+        floor: parseInt(selectedFloor, 10),
+      });
       setEndDest(null);
       setPath([]);
       return;
     }
     if (!endDest) {
-      setEndDest({ building: selectedBuilding, node: tappedNodeId, floor: parseInt(selectedFloor, 10) });
-      if (selectedBuilding === startDest.building && startDest.floor === parseInt(selectedFloor, 10)) {
+      setEndDest({
+        building: selectedBuilding,
+        node: tappedNodeId,
+        floor: parseInt(selectedFloor, 10),
+      });
+      if (
+        selectedBuilding === startDest.building &&
+        startDest.floor === parseInt(selectedFloor, 10)
+      ) {
         const newPath = findPathBFS(graph, startDest.node, tappedNodeId);
         setPath(newPath);
       }
       return;
     }
 
-    setStartDest({ building: selectedBuilding, node: tappedNodeId, floor: parseInt(selectedFloor, 10) });
+    setStartDest({
+      building: selectedBuilding,
+      node: tappedNodeId,
+      floor: parseInt(selectedFloor, 10),
+    });
     setEndDest(null);
     setPath([]);
   };
@@ -434,9 +804,13 @@ export default function IndoorDirectionsScreen() {
   let startFloorPath: string[] = [];
   let endFloorPath: string[] = [];
   if (startDest && endDest) {
-    const { building: startBuilding, floor: startFloor, node: startNode } = startDest;
+    const {
+      building: startBuilding,
+      floor: startFloor,
+      node: startNode,
+    } = startDest;
     const { building: endBuilding, floor: endFloor, node: endNode } = endDest;
-  
+
     if (startBuilding === endBuilding) {
       if (startFloor === endFloor) {
         sameFloor = true;
@@ -445,23 +819,35 @@ export default function IndoorDirectionsScreen() {
       } else if (startBuilding === 'Hall') {
         const startGraph = buildingData['Hall'].floors[startFloor].graph;
         const endGraph = buildingData['Hall'].floors[endFloor].graph;
-        startFloorPath = findPathBFS(startGraph, startNode, "Hall_1st_Elevator");
-        endFloorPath = findPathBFS(endGraph, "Elevator9th", endNode);
+        startFloorPath = findPathBFS(
+          startGraph,
+          startNode,
+          'Hall_1st_Elevator',
+        );
+        endFloorPath = findPathBFS(endGraph, 'Elevator9th', endNode);
       }
     } else if (startBuilding === 'Hall' && endBuilding === 'John Molson') {
       const startGraph = buildingData['Hall'].floors[startFloor].graph;
       const endGraph = buildingData['John Molson'].floors[endFloor].graph;
-      startFloorPath = findPathBFS(startGraph, startNode, "Hall_1st_Basement_Escalator");
-      endFloorPath = findPathBFS(endGraph, "Tunnel", endNode);
+      startFloorPath = findPathBFS(
+        startGraph,
+        startNode,
+        'Hall_1st_Basement_Escalator',
+      );
+      endFloorPath = findPathBFS(endGraph, 'Tunnel', endNode);
     }
   }
 
   const scaledPathCoords = sameFloor
     ? getPathCoordinates(
-        buildingData[startDest?.building || selectedBuilding].floors[startDest?.floor || parseInt(selectedFloor, 10)].graph,
+        buildingData[startDest?.building || selectedBuilding].floors[
+          startDest?.floor || parseInt(selectedFloor, 10)
+        ].graph,
         startFloorPath,
-        buildingData[startDest?.building || selectedBuilding].floors[startDest?.floor || parseInt(selectedFloor, 10)].originalDimensions,
-        containerSize
+        buildingData[startDest?.building || selectedBuilding].floors[
+          startDest?.floor || parseInt(selectedFloor, 10)
+        ].originalDimensions,
+        containerSize,
       )
     : [];
   const polylinePoints = scaledPathCoords.map((p) => `${p.x},${p.y}`).join(' ');
@@ -474,30 +860,52 @@ export default function IndoorDirectionsScreen() {
   let crossBuildingEstimatedTime = '';
 
   if (startDest && endDest) {
-    const { building: startBuilding, floor: startFloor, node: startNode } = startDest;
+    const {
+      building: startBuilding,
+      floor: startFloor,
+      node: startNode,
+    } = startDest;
     const { building: endBuilding, floor: endFloor, node: endNode } = endDest;
-  
+
     if (startBuilding === endBuilding) {
       if (startFloor === endFloor && path.length > 1) {
-        sameFloorEstimatedTime = formatTime(computeEstimatedTime(distanceInMeters));
+        sameFloorEstimatedTime = formatTime(
+          computeEstimatedTime(distanceInMeters),
+        );
       } else if (startFloor !== endFloor && startBuilding === 'Hall') {
         const startGraph = buildingData['Hall'].floors[startFloor].graph;
         const endGraph = buildingData['Hall'].floors[endFloor].graph;
-        const startDistance = computePathDistance(getOriginalPathCoordinates(startGraph, startFloorPath)) * PIXEL_TO_METER;
-        const endDistance = computePathDistance(getOriginalPathCoordinates(endGraph, endFloorPath)) * PIXEL_TO_METER;
-        const totalTime = computeEstimatedTime(startDistance + endDistance) + CROSS_FLOOR_TIME_PENALTY;
+        const startDistance =
+          computePathDistance(
+            getOriginalPathCoordinates(startGraph, startFloorPath),
+          ) * PIXEL_TO_METER;
+        const endDistance =
+          computePathDistance(
+            getOriginalPathCoordinates(endGraph, endFloorPath),
+          ) * PIXEL_TO_METER;
+        const totalTime =
+          computeEstimatedTime(startDistance + endDistance) +
+          CROSS_FLOOR_TIME_PENALTY;
         crossFloorEstimatedTime = formatTime(totalTime);
       }
     } else if (startBuilding === 'Hall' && endBuilding === 'John Molson') {
       const startGraph = buildingData['Hall'].floors[startFloor].graph;
       const endGraph = buildingData['John Molson'].floors[endFloor].graph;
-      const startDistance = computePathDistance(getOriginalPathCoordinates(startGraph, startFloorPath)) * PIXEL_TO_METER;
-      const endDistance = computePathDistance(getOriginalPathCoordinates(endGraph, endFloorPath)) * PIXEL_TO_METER;
-      const totalTime = computeEstimatedTime(startDistance + endDistance) + CROSS_BUILDING_TIME_PENALTY;
+      const startDistance =
+        computePathDistance(
+          getOriginalPathCoordinates(startGraph, startFloorPath),
+        ) * PIXEL_TO_METER;
+      const endDistance =
+        computePathDistance(
+          getOriginalPathCoordinates(endGraph, endFloorPath),
+        ) * PIXEL_TO_METER;
+      const totalTime =
+        computeEstimatedTime(startDistance + endDistance) +
+        CROSS_BUILDING_TIME_PENALTY;
       crossBuildingEstimatedTime = formatTime(totalTime);
     }
   }
-  
+
   const handleReset = () => {
     setStartDest(null);
     setEndDest(null);
@@ -506,31 +914,50 @@ export default function IndoorDirectionsScreen() {
     setEndSearch('');
   };
 
-  const renderBuildingMap = (building: string, floor: number, graph: Record<string, GraphNode>, path: string[], node: string, color: string) => {
+  const renderBuildingMap = (
+    building: string,
+    floor: number,
+    graph: Record<string, GraphNode>,
+    path: string[],
+    node: string,
+    color: string,
+  ) => {
     const scaledPath = getPathCoordinates(
       graph,
       path,
       buildingData[building].floors[floor].originalDimensions,
-      containerSize
+      containerSize,
     );
-    const polyPoints = scaledPath.map(p => `${p.x},${p.y}`).join(' ');
-  
+    const polyPoints = scaledPath.map((p) => `${p.x},${p.y}`).join(' ');
+
     return (
-      <Svg style={StyleSheet.absoluteFill} viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}>
+      <Svg
+        style={StyleSheet.absoluteFill}
+        viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+      >
         {path.length > 1 && (
-          <Polyline points={polyPoints} fill="none" stroke="blue" strokeWidth="3" />
+          <Polyline
+            points={polyPoints}
+            fill="none"
+            stroke="blue"
+            strokeWidth="3"
+          />
         )}
         <Circle
-          cx={scaleCoordinates(
-            { x: graph[node].x, y: graph[node].y },
-            buildingData[building].floors[floor].originalDimensions,
-            containerSize
-          ).x}
-          cy={scaleCoordinates(
-            { x: graph[node].x, y: graph[node].y },
-            buildingData[building].floors[floor].originalDimensions,
-            containerSize
-          ).y}
+          cx={
+            scaleCoordinates(
+              { x: graph[node].x, y: graph[node].y },
+              buildingData[building].floors[floor].originalDimensions,
+              containerSize,
+            ).x
+          }
+          cy={
+            scaleCoordinates(
+              { x: graph[node].x, y: graph[node].y },
+              buildingData[building].floors[floor].originalDimensions,
+              containerSize,
+            ).y
+          }
           r="5"
           fill={color}
         />
@@ -539,7 +966,10 @@ export default function IndoorDirectionsScreen() {
   };
 
   return (
-    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollViewContent}>
+    <ScrollView
+      style={styles.scrollView}
+      contentContainerStyle={styles.scrollViewContent}
+    >
       <View style={styles.container}>
         <Text style={styles.title}>Indoor Navigation</Text>
         {/* Search Bar for Start Destination */}
@@ -552,12 +982,18 @@ export default function IndoorDirectionsScreen() {
             onChangeText={setStartSearch}
           />
           {startSearch.length > 0 && (
-            <ScrollView style={styles.suggestionList} nestedScrollEnabled={true}>
+            <ScrollView
+              style={styles.suggestionList}
+              nestedScrollEnabled={true}
+            >
               {filteredStartNodes.map((item) => (
-                <TouchableOpacity key={item.building + "_" + item.node + "_" + item.floor} onPress={() => {
-                  setStartDest(item);
-                  setStartSearch('');
-                }}>
+                <TouchableOpacity
+                  key={item.building + '_' + item.node + '_' + item.floor}
+                  onPress={() => {
+                    setStartDest(item);
+                    setStartSearch('');
+                  }}
+                >
                   <Text style={styles.suggestionItem}>
                     {item.node} (Building: {item.building}, Floor {item.floor})
                   </Text>
@@ -576,12 +1012,18 @@ export default function IndoorDirectionsScreen() {
             onChangeText={setEndSearch}
           />
           {endSearch.length > 0 && (
-            <ScrollView style={styles.suggestionList} nestedScrollEnabled={true}>
+            <ScrollView
+              style={styles.suggestionList}
+              nestedScrollEnabled={true}
+            >
               {filteredEndNodes.map((item) => (
-                <TouchableOpacity key={item.building + "_" + item.node + "_" + item.floor} onPress={() => {
-                  setEndDest(item);
-                  setEndSearch('');
-                }}>
+                <TouchableOpacity
+                  key={item.building + '_' + item.node + '_' + item.floor}
+                  onPress={() => {
+                    setEndDest(item);
+                    setEndSearch('');
+                  }}
+                >
                   <Text style={styles.suggestionItem}>
                     {item.node} (Building: {item.building}, Floor {item.floor})
                   </Text>
@@ -594,10 +1036,16 @@ export default function IndoorDirectionsScreen() {
         {(startDest || endDest) && (
           <View style={styles.destinationInfo}>
             {startDest && (
-              <Text style={styles.destinationText}>Start: {startDest.node} (Building: {startDest.building}, Floor {startDest.floor})</Text>
+              <Text style={styles.destinationText}>
+                Start: {startDest.node} (Building: {startDest.building}, Floor{' '}
+                {startDest.floor})
+              </Text>
             )}
             {endDest && (
-              <Text style={styles.destinationText}>End: {endDest.node} (Building: {endDest.building}, Floor {endDest.floor})</Text>
+              <Text style={styles.destinationText}>
+                End: {endDest.node} (Building: {endDest.building}, Floor{' '}
+                {endDest.floor})
+              </Text>
             )}
           </View>
         )}
@@ -608,56 +1056,80 @@ export default function IndoorDirectionsScreen() {
         {/* Elevator Only Checkbox (Switch) */}
         <View style={styles.switchContainer}>
           <Text style={styles.switchLabel}>Elevator Only Routing:</Text>
-          <Switch value={elevatorOnly} onValueChange={setElevatorOnly} />
+          <Switch
+            value={elevatorOnly}
+            onValueChange={setElevatorOnly}
+            trackColor={{ false: '#cecece', true: '#912338' }} // Background color
+            thumbColor={elevatorOnly ? '#912338' : '#cecece'} // Circle color
+            ios_backgroundColor="#3e3e3e"
+          />
         </View>
         {/* Building Picker & Floor Picker are used for map tap selection when no search destination is chosen */}
         {(!startDest || !endDest) && (
           <>
-            <Picker
-              selectedValue={selectedBuilding}
-              style={styles.picker}
-              onValueChange={(itemValue) => {
-                setSelectedBuilding(itemValue);
-                setSelectedFloor('1');
-                setStartDest(null);
-                setEndDest(null);
-                setPath([]);
-                setStartSearch('');
-                setEndSearch('');
-              }}
-            >
-              {Object.keys(buildingData).map((b) => (
-                <Picker.Item key={b} label={b} value={b} />
-              ))}
-            </Picker>
-            <Picker
-              selectedValue={selectedFloor}
-              style={styles.picker}
-              onValueChange={(itemValue) => {
-                setSelectedFloor(itemValue);
-                setStartDest(null);
-                setEndDest(null);
-                setPath([]);
-                setStartSearch('');
-                setEndSearch('');
-              }}
-            >
-              {Object.keys(buildingData[selectedBuilding].floors).map((floor) => (
-                <Picker.Item key={floor} label={`Floor ${floor}`} value={floor} />
-              ))}
-            </Picker>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedBuilding}
+                style={styles.picker}
+                onValueChange={(itemValue) => {
+                  setSelectedBuilding(itemValue);
+                  setSelectedFloor('1');
+                  setStartDest(null);
+                  setEndDest(null);
+                  setPath([]);
+                  setStartSearch('');
+                  setEndSearch('');
+                }}
+              >
+                {Object.keys(buildingData).map((b) => (
+                  <Picker.Item key={b} label={b} value={b} />
+                ))}
+              </Picker>
+            </View>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={selectedFloor}
+                style={styles.picker}
+                onValueChange={(itemValue) => {
+                  setSelectedFloor(itemValue);
+                  setStartDest(null);
+                  setEndDest(null);
+                  setPath([]);
+                  setStartSearch('');
+                  setEndSearch('');
+                }}
+              >
+                {Object.keys(buildingData[selectedBuilding].floors).map(
+                  (floor) => (
+                    <Picker.Item
+                      key={floor}
+                      label={`Floor ${floor}`}
+                      value={floor}
+                    />
+                  ),
+                )}
+              </Picker>
+            </View>
           </>
         )}
         {/* Default Map View if no destinations are selected */}
         {(!startDest || !endDest) && (
           <View
-            style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
+            style={
+              isFullScreen
+                ? styles.fullScreenImageContainer
+                : styles.imageContainer
+            }
             onLayout={handleContainerLayout}
           >
             <TouchableWithoutFeedback onPress={handlePress}>
               <View style={styles.touchableArea}>
                 <Image
-                  source={buildingData[selectedBuilding].floors[parseInt(selectedFloor, 10)].image}
+                  source={
+                    buildingData[selectedBuilding].floors[
+                      parseInt(selectedFloor, 10)
+                    ].image
+                  }
                   style={styles.floorImage}
                   resizeMode="contain"
                 />
@@ -670,292 +1142,467 @@ export default function IndoorDirectionsScreen() {
           </View>
         )}
         {/* Same-building, same-floor view */}
-        {startDest && endDest && startDest.building === endDest.building && startDest.floor === endDest.floor && (
-          <View
-            style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
-            onLayout={handleContainerLayout}
-          >
-            <TouchableWithoutFeedback onPress={handlePress}>
-              <View style={styles.touchableArea}>
-                <Image
-                  source={buildingData[startDest.building].floors[startDest.floor].image}
-                  style={styles.floorImage}
-                  resizeMode="contain"
-                />
-                <Svg
-                  style={StyleSheet.absoluteFill}
-                  viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
-                >
-                  {startFloorPath.length > 1 && (
-                    <Polyline
-                      points={polylinePoints}
-                      fill="none"
-                      stroke="blue"
-                      strokeWidth="3"
-                    />
-                  )}
-                  {startDest && buildingData[startDest.building].floors[startDest.floor].graph[startDest.node] && (
-                    <Circle
-                      cx={scaleCoordinates(
-                        { x: buildingData[startDest.building].floors[startDest.floor].graph[startDest.node].x, y: buildingData[startDest.building].floors[startDest.floor].graph[startDest.node].y },
-                        buildingData[startDest.building].floors[startDest.floor].originalDimensions,
-                        containerSize
-                      ).x}
-                      cy={scaleCoordinates(
-                        { x: buildingData[startDest.building].floors[startDest.floor].graph[startDest.node].x, y: buildingData[startDest.building].floors[startDest.floor].graph[startDest.node].y },
-                        buildingData[startDest.building].floors[startDest.floor].originalDimensions,
-                        containerSize
-                      ).y}
-                      r="5"
-                      fill="blue"
-                    />
-                  )}
-                  {endDest && buildingData[endDest.building].floors[endDest.floor].graph[endDest.node] && (
-                    <Circle
-                      cx={scaleCoordinates(
-                        { x: buildingData[endDest.building].floors[endDest.floor].graph[endDest.node].x, y: buildingData[endDest.building].floors[endDest.floor].graph[endDest.node].y },
-                        buildingData[endDest.building].floors[endDest.floor].originalDimensions,
-                        containerSize
-                      ).x}
-                      cy={scaleCoordinates(
-                        { x: buildingData[endDest.building].floors[endDest.floor].graph[endDest.node].x, y: buildingData[endDest.building].floors[endDest.floor].graph[endDest.node].y },
-                        buildingData[endDest.building].floors[endDest.floor].originalDimensions,
-                        containerSize
-                      ).y}
-                      r="5"
-                      fill="green"
-                    />
-                  )}
-                </Svg>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        )}
+        {startDest &&
+          endDest &&
+          startDest.building === endDest.building &&
+          startDest.floor === endDest.floor && (
+            <View
+              style={
+                isFullScreen
+                  ? styles.fullScreenImageContainer
+                  : styles.imageContainer
+              }
+              onLayout={handleContainerLayout}
+            >
+              <TouchableWithoutFeedback onPress={handlePress}>
+                <View style={styles.touchableArea}>
+                  <Image
+                    source={
+                      buildingData[startDest.building].floors[startDest.floor]
+                        .image
+                    }
+                    style={styles.floorImage}
+                    resizeMode="contain"
+                  />
+                  <Svg
+                    style={StyleSheet.absoluteFill}
+                    viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+                  >
+                    {startFloorPath.length > 1 && (
+                      <Polyline
+                        points={polylinePoints}
+                        fill="none"
+                        stroke="black"
+                        strokeWidth="3"
+                      />
+                    )}
+                    {startDest &&
+                      buildingData[startDest.building].floors[startDest.floor]
+                        .graph[startDest.node] && (
+                        <Circle
+                          cx={
+                            scaleCoordinates(
+                              {
+                                x: buildingData[startDest.building].floors[
+                                  startDest.floor
+                                ].graph[startDest.node].x,
+                                y: buildingData[startDest.building].floors[
+                                  startDest.floor
+                                ].graph[startDest.node].y,
+                              },
+                              buildingData[startDest.building].floors[
+                                startDest.floor
+                              ].originalDimensions,
+                              containerSize,
+                            ).x
+                          }
+                          cy={
+                            scaleCoordinates(
+                              {
+                                x: buildingData[startDest.building].floors[
+                                  startDest.floor
+                                ].graph[startDest.node].x,
+                                y: buildingData[startDest.building].floors[
+                                  startDest.floor
+                                ].graph[startDest.node].y,
+                              },
+                              buildingData[startDest.building].floors[
+                                startDest.floor
+                              ].originalDimensions,
+                              containerSize,
+                            ).y
+                          }
+                          r="8"
+                          fill="black"
+                        />
+                      )}
+                    {endDest &&
+                      buildingData[endDest.building].floors[endDest.floor]
+                        .graph[endDest.node] && (
+                        <Circle
+                          cx={
+                            scaleCoordinates(
+                              {
+                                x: buildingData[endDest.building].floors[
+                                  endDest.floor
+                                ].graph[endDest.node].x,
+                                y: buildingData[endDest.building].floors[
+                                  endDest.floor
+                                ].graph[endDest.node].y,
+                              },
+                              buildingData[endDest.building].floors[
+                                endDest.floor
+                              ].originalDimensions,
+                              containerSize,
+                            ).x
+                          }
+                          cy={
+                            scaleCoordinates(
+                              {
+                                x: buildingData[endDest.building].floors[
+                                  endDest.floor
+                                ].graph[endDest.node].x,
+                                y: buildingData[endDest.building].floors[
+                                  endDest.floor
+                                ].graph[endDest.node].y,
+                              },
+                              buildingData[endDest.building].floors[
+                                endDest.floor
+                              ].originalDimensions,
+                              containerSize,
+                            ).y
+                          }
+                          r="8"
+                          fill="#34b233"
+                        />
+                      )}
+                  </Svg>
+                </View>
+              </TouchableWithoutFeedback>
+            </View>
+          )}
         {/* Same-building, cross–floor view (implemented for Hall building) */}
-        {startDest && endDest && startDest.building === endDest.building && startDest.floor !== endDest.floor && startDest.building === 'Hall' && (
-          <View style={styles.crossFloorContainer}>
-            {/* Map for start floor */}
-            <View
-              style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
-              onLayout={handleContainerLayout}
-            >
-              <Text style={styles.mapLabel}>Floor {startDest.floor}</Text>
-              <TouchableWithoutFeedback onPress={handlePress}>
-                <View style={styles.touchableArea}>
-                  <Image
-                    source={buildingData['Hall'].floors[startDest.floor].image}
-                    style={styles.floorImage}
-                    resizeMode="contain"
-                  />
-                  <Svg
-                    style={StyleSheet.absoluteFill}
-                    viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
-                  >
-                    {(() => {
-                      const graph = buildingData['Hall'].floors[startDest.floor].graph;
-                      const path1 = startFloorPath;
-                      const scaledPath1 = getPathCoordinates(
-                        graph,
-                        path1,
-                        buildingData['Hall'].floors[startDest.floor].originalDimensions,
-                        containerSize
-                      );
-                      const polyPoints1 = scaledPath1.map(p => `${p.x},${p.y}`).join(' ');
-                      return (
-                        <>
-                          {path1.length > 1 && (
-                            <Polyline
-                              points={polyPoints1}
-                              fill="none"
-                              stroke="blue"
-                              strokeWidth="3"
+        {startDest &&
+          endDest &&
+          startDest.building === endDest.building &&
+          startDest.floor !== endDest.floor &&
+          startDest.building === 'Hall' && (
+            <View style={styles.crossFloorContainer}>
+              {/* Map for start floor */}
+              <View
+                style={
+                  isFullScreen
+                    ? styles.fullScreenImageContainer
+                    : styles.imageContainer
+                }
+                onLayout={handleContainerLayout}
+              >
+                <Text style={styles.mapLabel}>Floor {startDest.floor}</Text>
+                <TouchableWithoutFeedback onPress={handlePress}>
+                  <View style={styles.touchableArea}>
+                    <Image
+                      source={
+                        buildingData['Hall'].floors[startDest.floor].image
+                      }
+                      style={styles.floorImage}
+                      resizeMode="contain"
+                    />
+                    <Svg
+                      style={StyleSheet.absoluteFill}
+                      viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+                    >
+                      {(() => {
+                        const graph =
+                          buildingData['Hall'].floors[startDest.floor].graph;
+                        const path1 = startFloorPath;
+                        const scaledPath1 = getPathCoordinates(
+                          graph,
+                          path1,
+                          buildingData['Hall'].floors[startDest.floor]
+                            .originalDimensions,
+                          containerSize,
+                        );
+                        const polyPoints1 = scaledPath1
+                          .map((p) => `${p.x},${p.y}`)
+                          .join(' ');
+                        return (
+                          <>
+                            {path1.length > 1 && (
+                              <Polyline
+                                points={polyPoints1}
+                                fill="none"
+                                stroke="blue"
+                                strokeWidth="3"
+                              />
+                            )}
+                            <Circle
+                              cx={
+                                scaleCoordinates(
+                                  {
+                                    x: graph[startDest.node].x,
+                                    y: graph[startDest.node].y,
+                                  },
+                                  buildingData['Hall'].floors[startDest.floor]
+                                    .originalDimensions,
+                                  containerSize,
+                                ).x
+                              }
+                              cy={
+                                scaleCoordinates(
+                                  {
+                                    x: graph[startDest.node].x,
+                                    y: graph[startDest.node].y,
+                                  },
+                                  buildingData['Hall'].floors[startDest.floor]
+                                    .originalDimensions,
+                                  containerSize,
+                                ).y
+                              }
+                              r="5"
+                              fill="blue"
                             />
-                          )}
-                          <Circle
-                            cx={scaleCoordinates(
-                              { x: graph[startDest.node].x, y: graph[startDest.node].y },
-                              buildingData['Hall'].floors[startDest.floor].originalDimensions,
-                              containerSize
-                            ).x}
-                            cy={scaleCoordinates(
-                              { x: graph[startDest.node].x, y: graph[startDest.node].y },
-                              buildingData['Hall'].floors[startDest.floor].originalDimensions,
-                              containerSize
-                            ).y}
-                            r="5"
-                            fill="blue"
-                          />
-                        </>
-                      );
-                    })()}
-                  </Svg>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-            {/* Map for destination floor */}
-            <View
-              style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
-              onLayout={handleContainerLayout}
-            >
-              <Text style={styles.mapLabel}>Floor {endDest.floor}</Text>
-              <TouchableWithoutFeedback onPress={handlePress}>
-                <View style={styles.touchableArea}>
-                  <Image
-                    source={buildingData['Hall'].floors[endDest.floor].image}
-                    style={styles.floorImage}
-                    resizeMode="contain"
-                  />
-                  <Svg
-                    style={StyleSheet.absoluteFill}
-                    viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
-                  >
-                    {(() => {
-                      const graph = buildingData['Hall'].floors[endDest.floor].graph;
-                      const path2 = endFloorPath;
-                      const scaledPath2 = getPathCoordinates(
-                        graph,
-                        path2,
-                        buildingData['Hall'].floors[endDest.floor].originalDimensions,
-                        containerSize
-                      );
-                      const polyPoints2 = scaledPath2.map(p => `${p.x},${p.y}`).join(' ');
-                      return (
-                        <>
-                          {path2.length > 1 && (
-                            <Polyline
-                              points={polyPoints2}
-                              fill="none"
-                              stroke="blue"
-                              strokeWidth="3"
+                          </>
+                        );
+                      })()}
+                    </Svg>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+              {/* Map for destination floor */}
+              <View
+                style={
+                  isFullScreen
+                    ? styles.fullScreenImageContainer
+                    : styles.imageContainer
+                }
+                onLayout={handleContainerLayout}
+              >
+                <Text style={styles.mapLabel}>Floor {endDest.floor}</Text>
+                <TouchableWithoutFeedback onPress={handlePress}>
+                  <View style={styles.touchableArea}>
+                    <Image
+                      source={buildingData['Hall'].floors[endDest.floor].image}
+                      style={styles.floorImage}
+                      resizeMode="contain"
+                    />
+                    <Svg
+                      style={StyleSheet.absoluteFill}
+                      viewBox={`0 0 ${containerSize.width} ${containerSize.height}`}
+                    >
+                      {(() => {
+                        const graph =
+                          buildingData['Hall'].floors[endDest.floor].graph;
+                        const path2 = endFloorPath;
+                        const scaledPath2 = getPathCoordinates(
+                          graph,
+                          path2,
+                          buildingData['Hall'].floors[endDest.floor]
+                            .originalDimensions,
+                          containerSize,
+                        );
+                        const polyPoints2 = scaledPath2
+                          .map((p) => `${p.x},${p.y}`)
+                          .join(' ');
+                        return (
+                          <>
+                            {path2.length > 1 && (
+                              <Polyline
+                                points={polyPoints2}
+                                fill="none"
+                                stroke="blue"
+                                strokeWidth="3"
+                              />
+                            )}
+                            <Circle
+                              cx={
+                                scaleCoordinates(
+                                  {
+                                    x: graph[endDest.node].x,
+                                    y: graph[endDest.node].y,
+                                  },
+                                  buildingData['Hall'].floors[endDest.floor]
+                                    .originalDimensions,
+                                  containerSize,
+                                ).x
+                              }
+                              cy={
+                                scaleCoordinates(
+                                  {
+                                    x: graph[endDest.node].x,
+                                    y: graph[endDest.node].y,
+                                  },
+                                  buildingData['Hall'].floors[endDest.floor]
+                                    .originalDimensions,
+                                  containerSize,
+                                ).y
+                              }
+                              r="5"
+                              fill="green"
                             />
-                          )}
-                          <Circle
-                            cx={scaleCoordinates(
-                              { x: graph[endDest.node].x, y: graph[endDest.node].y },
-                              buildingData['Hall'].floors[endDest.floor].originalDimensions,
-                              containerSize
-                            ).x}
-                            cy={scaleCoordinates(
-                              { x: graph[endDest.node].x, y: graph[endDest.node].y },
-                              buildingData['Hall'].floors[endDest.floor].originalDimensions,
-                              containerSize
-                            ).y}
-                            r="5"
-                            fill="green"
-                          />
-                        </>
-                      );
-                    })()}
-                  </Svg>
-                </View>
-              </TouchableWithoutFeedback>
+                          </>
+                        );
+                      })()}
+                    </Svg>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
             </View>
-          </View>
-        )}
+          )}
         {/* Cross-building view: For now, only Hall -> John Molson routing is implemented */}
         {startDest && endDest && startDest.building !== endDest.building && (
           <View style={styles.crossFloorContainer}>
-            {startDest.building === 'Hall' && endDest.building === 'John Molson' ? (
+            {startDest.building === 'Hall' &&
+            endDest.building === 'John Molson' ? (
               <>
                 {/* Map for Hall building (start) */}
                 <View
-                  style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
+                  style={
+                    isFullScreen
+                      ? styles.fullScreenImageContainer
+                      : styles.imageContainer
+                  }
                   onLayout={handleContainerLayout}
                 >
-                  <Text style={styles.mapLabel}>{startDest.building} Floor {startDest.floor}</Text>
+                  <Text style={styles.mapLabel}>
+                    {startDest.building} Floor {startDest.floor}
+                  </Text>
                   <TouchableWithoutFeedback onPress={handlePress}>
                     <View style={styles.touchableArea}>
                       <Image
-                        source={buildingData['Hall'].floors[startDest.floor].image}
+                        source={
+                          buildingData['Hall'].floors[startDest.floor].image
+                        }
                         style={styles.floorImage}
                         resizeMode="contain"
                       />
-                      {renderBuildingMap('Hall', startDest.floor, buildingData['Hall'].floors[startDest.floor].graph, startFloorPath, startDest.node, 'blue')}
+                      {renderBuildingMap(
+                        'Hall',
+                        startDest.floor,
+                        buildingData['Hall'].floors[startDest.floor].graph,
+                        startFloorPath,
+                        startDest.node,
+                        'blue',
+                      )}
                     </View>
                   </TouchableWithoutFeedback>
                 </View>
                 {/* Map for John Molson building (destination) */}
                 <View
-                  style={isFullScreen ? styles.fullScreenImageContainer : styles.imageContainer}
+                  style={
+                    isFullScreen
+                      ? styles.fullScreenImageContainer
+                      : styles.imageContainer
+                  }
                   onLayout={handleContainerLayout}
                 >
-                  <Text style={styles.mapLabel}>{endDest.building} Floor {endDest.floor}</Text>
+                  <Text style={styles.mapLabel}>
+                    {endDest.building} Floor {endDest.floor}
+                  </Text>
                   <TouchableWithoutFeedback onPress={handlePress}>
                     <View style={styles.touchableArea}>
                       <Image
-                        source={buildingData['John Molson'].floors[endDest.floor].image}
+                        source={
+                          buildingData['John Molson'].floors[endDest.floor]
+                            .image
+                        }
                         style={styles.floorImage}
                         resizeMode="contain"
                       />
-                      {renderBuildingMap('John Molson', endDest.floor, buildingData['John Molson'].floors[endDest.floor].graph, endFloorPath, endDest.node, 'green')}
+                      {renderBuildingMap(
+                        'John Molson',
+                        endDest.floor,
+                        buildingData['John Molson'].floors[endDest.floor].graph,
+                        endFloorPath,
+                        endDest.node,
+                        'green',
+                      )}
                     </View>
                   </TouchableWithoutFeedback>
                 </View>
               </>
             ) : (
-              <Text>Routing between {startDest.building} and {endDest.building} is not implemented.</Text>
+              <Text>
+                Routing between {startDest.building} and {endDest.building} is
+                not implemented.
+              </Text>
             )}
           </View>
         )}
         {/* For same–floor view, show path info */}
-        {startDest && endDest && startDest.building === endDest.building && startDest.floor === endDest.floor && path.length > 1 && (
-          <View style={styles.pathInfo}>
-            <Text style={{ fontWeight: 'bold' }}>Directions:</Text>
-            {generateDirections(path).map((step, index) => (
-              <Text key={index}>{step}</Text>
-            ))}
-            <Text style={{ marginTop: 5 }}>
-              Distance: {(computePathDistance(scaledPathCoords) * PIXEL_TO_METER).toFixed(2)} m
-            </Text>
-            <Text style={{ marginTop: 5 }}>
-              Estimated Time: {sameFloorEstimatedTime}
-            </Text>
-          </View>
-        )}
-        {startDest && endDest && startDest.building === endDest.building && startDest.floor !== endDest.floor && startDest.building === 'Hall' && (
-          <View style={styles.pathInfo}>
-            <Text style={{ fontWeight: 'bold' }}>Start Floor Path (Floor {startDest.floor}):</Text>
-            {generateDirections(
-              findPathBFS(buildingData['Hall'].floors[startDest.floor].graph, startDest.node, "Hall_1st_Elevator")
-            ).map((step, index) => (
-              <Text key={index}>{step}</Text>
-            ))}
-            <Text style={{ fontWeight: 'bold', marginTop: 5 }}>
-              End Floor Path (Floor {endDest.floor}):
-            </Text>
-            {generateDirections(
-              findPathBFS(buildingData['Hall'].floors[endDest.floor].graph, "Elevator9th", endDest.node)
-            ).map((step, index) => (
-              <Text key={index}>{step}</Text>
-            ))}
-            <Text style={{ marginTop: 5 }}>
-              Estimated Time: {crossFloorEstimatedTime}
-            </Text>
-          </View>
-        )}
+        {startDest &&
+          endDest &&
+          startDest.building === endDest.building &&
+          startDest.floor === endDest.floor &&
+          path.length > 1 && (
+            <View style={styles.pathInfo}>
+              <Text style={{ fontWeight: 'bold' }}>Directions:</Text>
+              {generateDirections(path).map((step, index) => (
+                <Text key={index}>{step}</Text>
+              ))}
+              <Text style={{ marginTop: 5 }}>
+                Distance:{' '}
+                {(
+                  computePathDistance(scaledPathCoords) * PIXEL_TO_METER
+                ).toFixed(2)}{' '}
+                m
+              </Text>
+              <Text style={{ marginTop: 5 }}>
+                Estimated Time: {sameFloorEstimatedTime}
+              </Text>
+            </View>
+          )}
+        {startDest &&
+          endDest &&
+          startDest.building === endDest.building &&
+          startDest.floor !== endDest.floor &&
+          startDest.building === 'Hall' && (
+            <View style={styles.pathInfo}>
+              <Text style={{ fontWeight: 'bold' }}>
+                Start Floor Path (Floor {startDest.floor}):
+              </Text>
+              {generateDirections(
+                findPathBFS(
+                  buildingData['Hall'].floors[startDest.floor].graph,
+                  startDest.node,
+                  'Hall_1st_Elevator',
+                ),
+              ).map((step, index) => (
+                <Text key={index}>{step}</Text>
+              ))}
+              <Text style={{ fontWeight: 'bold', marginTop: 5 }}>
+                End Floor Path (Floor {endDest.floor}):
+              </Text>
+              {generateDirections(
+                findPathBFS(
+                  buildingData['Hall'].floors[endDest.floor].graph,
+                  'Elevator9th',
+                  endDest.node,
+                ),
+              ).map((step, index) => (
+                <Text key={index}>{step}</Text>
+              ))}
+              <Text style={{ marginTop: 5 }}>
+                Estimated Time: {crossFloorEstimatedTime}
+              </Text>
+            </View>
+          )}
         {/* For cross–building view (Hall -> John Molson) show routing info */}
-        {startDest && endDest && startDest.building !== endDest.building && startDest.building === 'Hall' && endDest.building === 'John Molson' && (
-          <View style={styles.pathInfo}>
-            <Text style={{ fontWeight: 'bold' }}>Hall Building Path (Floor {startDest.floor}):</Text>
-            {generateDirections(
-              findPathBFS(buildingData['Hall'].floors[startDest.floor].graph, startDest.node, "Hall_1st_Basement_Escalator")
-            ).map((step, index) => (
-              <Text key={index}>{step}</Text>
-            ))}
-            <Text>Take the Tunnel until JMSB</Text>
-            <Text style={{ fontWeight: 'bold', marginTop: 5 }}>
-              John Molson Building Path (Floor {endDest.floor}):
-            </Text>
-            {generateDirections(
-              findPathBFS(buildingData['John Molson'].floors[endDest.floor].graph, "Tunnel", endDest.node)
-            ).map((step, index) => (
-              <Text key={index}>{step}</Text>
-            ))}
-            <Text style={{ marginTop: 5 }}>
-              Estimated Time: {crossBuildingEstimatedTime}
-            </Text>
-          </View>
-        )}
+        {startDest &&
+          endDest &&
+          startDest.building !== endDest.building &&
+          startDest.building === 'Hall' &&
+          endDest.building === 'John Molson' && (
+            <View style={styles.pathInfo}>
+              <Text style={{ fontWeight: 'bold' }}>
+                Hall Building Path (Floor {startDest.floor}):
+              </Text>
+              {generateDirections(
+                findPathBFS(
+                  buildingData['Hall'].floors[startDest.floor].graph,
+                  startDest.node,
+                  'Hall_1st_Basement_Escalator',
+                ),
+              ).map((step, index) => (
+                <Text key={index}>{step}</Text>
+              ))}
+              <Text>Take the Tunnel until JMSB</Text>
+              <Text style={{ fontWeight: 'bold', marginTop: 5 }}>
+                John Molson Building Path (Floor {endDest.floor}):
+              </Text>
+              {generateDirections(
+                findPathBFS(
+                  buildingData['John Molson'].floors[endDest.floor].graph,
+                  'Tunnel',
+                  endDest.node,
+                ),
+              ).map((step, index) => (
+                <Text key={index}>{step}</Text>
+              ))}
+              <Text style={{ marginTop: 5 }}>
+                Estimated Time: {crossBuildingEstimatedTime}
+              </Text>
+            </View>
+          )}
       </View>
     </ScrollView>
   );
@@ -975,45 +1622,61 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingTop: 40,
+    paddingTop: 30,
     alignItems: 'center',
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 20,
-    marginBottom: 10,
-    fontWeight: 'bold',
+    fontSize: 30,
+    marginBottom: 8,
+  },
+  pickerContainer: {
+    borderRadius: 30,
+    overflow: 'hidden',
+    backgroundColor: '#E2B9C0',
+    margin: 3,
+    paddingLeft: 10,
   },
   picker: {
     height: 50,
-    width: 200,
+    width: 150,
   },
   searchContainer: {
-    width: '90%',
+    width: 300,
     marginVertical: 5,
   },
   searchLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
   },
   searchInput: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 5,
+    borderColor: '#912338',
+    padding: 8,
     marginTop: 5,
-    borderRadius: 4,
+    borderRadius: 16,
   },
   suggestionList: {
+    position: 'absolute',
+    top: 59,
+    width: 300,
     maxHeight: 100,
-    backgroundColor: '#f9f9f9',
-    borderWidth: 1,
-    borderColor: '#ccc',
+    backgroundColor: '#ffffff',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 1.5,
+    borderWidth: 2,
+    borderColor: '#912338',
     marginTop: 2,
+    borderRadius: 15,
+    zIndex: 1000,
   },
   suggestionItem: {
-    padding: 5,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
+    padding: 10,
+    borderWidth: 0.2,
+    borderColor: '#912338',
   },
   destinationInfo: {
     width: '90%',
@@ -1021,18 +1684,22 @@ const styles = StyleSheet.create({
   },
   destinationText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '400',
   },
   resetButton: {
-    backgroundColor: '#d9534f',
-    paddingVertical: 8,
+    backgroundColor: '#912338',
+    paddingVertical: 3,
     paddingHorizontal: 12,
-    borderRadius: 5,
+    borderRadius: 30,
     marginVertical: 10,
   },
   resetButtonText: {
     color: '#fff',
     fontSize: 16,
+    paddingRight: 30,
+    paddingLeft: 30,
+    paddingTop: 8,
+    paddingBottom: 8,
   },
   fullScreenImageContainer: {
     width: '90%',
@@ -1046,8 +1713,6 @@ const styles = StyleSheet.create({
     width: '90%',
     aspectRatio: 1,
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: '#ccc',
     position: 'relative',
   },
   touchableArea: {
