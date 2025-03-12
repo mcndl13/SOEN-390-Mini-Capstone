@@ -981,17 +981,14 @@ export default function IndoorDirectionsScreen() {
             value={startSearch}
             onChangeText={setStartSearch}
           />
-          {startSearch.length > 0 && (
-            <ScrollView
-              style={styles.suggestionList}
-              nestedScrollEnabled={true}
-            >
+          {!startDest && startSearch.length > 0 && (
+            <ScrollView style={styles.suggestionList} nestedScrollEnabled={true}>
               {filteredStartNodes.map((item) => (
                 <TouchableOpacity
                   key={item.building + '_' + item.node + '_' + item.floor}
                   onPress={() => {
                     setStartDest(item);
-                    setStartSearch('');
+                    setStartSearch(`${item.node} (Building: ${item.building}, Floor ${item.floor})`);
                   }}
                 >
                   <Text style={styles.suggestionItem}>
@@ -1001,9 +998,10 @@ export default function IndoorDirectionsScreen() {
               ))}
             </ScrollView>
           )}
+
         </View>
         {/* Search Bar for End Destination */}
-        <View style={styles.searchContainer}>
+          <View style={styles.searchContainer}>
           <Text style={styles.searchLabel}>End Destination:</Text>
           <TextInput
             style={styles.searchInput}
@@ -1011,17 +1009,14 @@ export default function IndoorDirectionsScreen() {
             value={endSearch}
             onChangeText={setEndSearch}
           />
-          {endSearch.length > 0 && (
-            <ScrollView
-              style={styles.suggestionList}
-              nestedScrollEnabled={true}
-            >
+          {!endDest && endSearch.length > 0 && (
+            <ScrollView style={styles.suggestionList} nestedScrollEnabled={true}>
               {filteredEndNodes.map((item) => (
                 <TouchableOpacity
                   key={item.building + '_' + item.node + '_' + item.floor}
                   onPress={() => {
                     setEndDest(item);
-                    setEndSearch('');
+                    setEndSearch(`${item.node} (Building: ${item.building}, Floor ${item.floor})`);
                   }}
                 >
                   <Text style={styles.suggestionItem}>
@@ -1031,24 +1026,9 @@ export default function IndoorDirectionsScreen() {
               ))}
             </ScrollView>
           )}
+
         </View>
-        {/* Display chosen destinations */}
-        {(startDest || endDest) && (
-          <View style={styles.destinationInfo}>
-            {startDest && (
-              <Text style={styles.destinationText}>
-                Start: {startDest.node} (Building: {startDest.building}, Floor{' '}
-                {startDest.floor})
-              </Text>
-            )}
-            {endDest && (
-              <Text style={styles.destinationText}>
-                End: {endDest.node} (Building: {endDest.building}, Floor{' '}
-                {endDest.floor})
-              </Text>
-            )}
-          </View>
-        )}
+
         {/* Reset Button */}
         <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
           <Text style={styles.resetButtonText}>Reset</Text>
