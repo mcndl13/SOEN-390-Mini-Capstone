@@ -982,13 +982,18 @@ export default function IndoorDirectionsScreen() {
             onChangeText={setStartSearch}
           />
           {!startDest && startSearch.length > 0 && (
-            <ScrollView style={styles.suggestionList} nestedScrollEnabled={true}>
+            <ScrollView
+              style={styles.suggestionList}
+              nestedScrollEnabled={true}
+            >
               {filteredStartNodes.map((item) => (
                 <TouchableOpacity
                   key={item.building + '_' + item.node + '_' + item.floor}
                   onPress={() => {
                     setStartDest(item);
-                    setStartSearch(`${item.node} (Building: ${item.building}, Floor ${item.floor})`);
+                    setStartSearch(
+                      `${item.node} (Building: ${item.building}, Floor ${item.floor})`,
+                    );
                   }}
                 >
                   <Text style={styles.suggestionItem}>
@@ -998,10 +1003,9 @@ export default function IndoorDirectionsScreen() {
               ))}
             </ScrollView>
           )}
-
         </View>
         {/* Search Bar for End Destination */}
-          <View style={styles.searchContainer}>
+        <View style={styles.searchContainer}>
           <Text style={styles.searchLabel}>End Destination:</Text>
           <TextInput
             style={styles.searchInput}
@@ -1010,13 +1014,18 @@ export default function IndoorDirectionsScreen() {
             onChangeText={setEndSearch}
           />
           {!endDest && endSearch.length > 0 && (
-            <ScrollView style={styles.suggestionList} nestedScrollEnabled={true}>
+            <ScrollView
+              style={styles.suggestionList}
+              nestedScrollEnabled={true}
+            >
               {filteredEndNodes.map((item) => (
                 <TouchableOpacity
                   key={item.building + '_' + item.node + '_' + item.floor}
                   onPress={() => {
                     setEndDest(item);
-                    setEndSearch(`${item.node} (Building: ${item.building}, Floor ${item.floor})`);
+                    setEndSearch(
+                      `${item.node} (Building: ${item.building}, Floor ${item.floor})`,
+                    );
                   }}
                 >
                   <Text style={styles.suggestionItem}>
@@ -1026,7 +1035,6 @@ export default function IndoorDirectionsScreen() {
               ))}
             </ScrollView>
           )}
-
         </View>
 
         {/* Reset Button */}
@@ -1047,48 +1055,50 @@ export default function IndoorDirectionsScreen() {
         {/* Building Picker & Floor Picker are used for map tap selection when no search destination is chosen */}
         {(!startDest || !endDest) && (
           <>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={selectedBuilding}
-                style={styles.picker}
-                onValueChange={(itemValue) => {
-                  setSelectedBuilding(itemValue);
-                  setSelectedFloor('1');
-                  setStartDest(null);
-                  setEndDest(null);
-                  setPath([]);
-                  setStartSearch('');
-                  setEndSearch('');
-                }}
-              >
-                {Object.keys(buildingData).map((b) => (
-                  <Picker.Item key={b} label={b} value={b} />
-                ))}
-              </Picker>
-            </View>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={selectedFloor}
-                style={styles.picker}
-                onValueChange={(itemValue) => {
-                  setSelectedFloor(itemValue);
-                  setStartDest(null);
-                  setEndDest(null);
-                  setPath([]);
-                  setStartSearch('');
-                  setEndSearch('');
-                }}
-              >
-                {Object.keys(buildingData[selectedBuilding].floors).map(
-                  (floor) => (
-                    <Picker.Item
-                      key={floor}
-                      label={`Floor ${floor}`}
-                      value={floor}
-                    />
-                  ),
-                )}
-              </Picker>
+            <View style={styles.pickerRow}>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={selectedBuilding}
+                  style={styles.picker}
+                  onValueChange={(itemValue) => {
+                    setSelectedBuilding(itemValue);
+                    setSelectedFloor('1');
+                    setStartDest(null);
+                    setEndDest(null);
+                    setPath([]);
+                    setStartSearch('');
+                    setEndSearch('');
+                  }}
+                >
+                  {Object.keys(buildingData).map((b) => (
+                    <Picker.Item key={b} label={b} value={b} />
+                  ))}
+                </Picker>
+              </View>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={selectedFloor}
+                  style={styles.picker}
+                  onValueChange={(itemValue) => {
+                    setSelectedFloor(itemValue);
+                    setStartDest(null);
+                    setEndDest(null);
+                    setPath([]);
+                    setStartSearch('');
+                    setEndSearch('');
+                  }}
+                >
+                  {Object.keys(buildingData[selectedBuilding].floors).map(
+                    (floor) => (
+                      <Picker.Item
+                        key={floor}
+                        label={`Floor ${floor}`}
+                        value={floor}
+                      />
+                    ),
+                  )}
+                </Picker>
+              </View>
             </View>
           </>
         )}
@@ -1616,6 +1626,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2B9C0',
     margin: 3,
     paddingLeft: 10,
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   picker: {
     height: 50,
