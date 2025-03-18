@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { GOOGLE_PLACES_API_KEY } from '@env';
+import { GOOGLE_MAPS_API_KEY } from '@env';
 
 const getPlaceID = async (
   latitude: number,
@@ -13,7 +13,7 @@ const getPlaceID = async (
           location: `${latitude},${longitude}`,
           radius: 100,
           type: 'university',
-          key: GOOGLE_PLACES_API_KEY,
+          key: GOOGLE_MAPS_API_KEY,
         },
       },
     );
@@ -43,7 +43,7 @@ const getOpeningHours = async (
         params: {
           place_id: placeId,
           fields: 'current_opening_hours',
-          key: GOOGLE_PLACES_API_KEY,
+          key: GOOGLE_MAPS_API_KEY,
         },
       },
     );
