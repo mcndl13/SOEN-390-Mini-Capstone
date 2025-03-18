@@ -1,16 +1,11 @@
 appId: Expo Go
 ---
-- tapOn:
-    id: 'Expo Go'
-    waitToSettleTimeoutMs: 500
-
-- tapOn: 'Get Directions'
 
 - tapOn: 
     text: "Enter origin"
     waitToSettleTimeoutMs: 200
 
-- inputText: "Concordia SGW"
+- inputText: "Hall Building"
 
 - tapOn:
     point: "50%,35%"
@@ -19,7 +14,7 @@ appId: Expo Go
     text: "Enter destination"
     waitToSettleTimeoutMs: 200
 
-- inputText: "Concordia Loyola"
+- inputText: "John Molson"
 
 - tapOn:
     point: "50%,42%"

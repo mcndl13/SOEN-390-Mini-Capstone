@@ -1,0 +1,10 @@
+appId: Expo Go
+---
+- tapOn: "Type start destination"
+- inputText: "H849"
+- tapOn: "h849 (Building: Hall, Floor 8)"
+- tapOn: "h849 (Building: Hall, Floor 8)"
+- tapOn: "Type end destination"
+- inputText: "H833"
+- tapOn: "h833 (Building: Hall, Floor 8)"
+- tapOn: "h833 (Building: Hall, Floor 8)"
