@@ -1,0 +1,7 @@
+appId: Expo Go
+---
+- doubleTapOn:
+    point: 38%,49%
+    waitToSettleTimeoutMs: 500
+
+- tapOn: You are here

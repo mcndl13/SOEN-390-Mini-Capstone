@@ -1,0 +1,7 @@
+appId: Expo Go
+---
+- tapOn:
+    id: 'Expo Go'
+    waitToSettleTimeoutMs: 500
+
+- tapOn: 'Shuttle Service'

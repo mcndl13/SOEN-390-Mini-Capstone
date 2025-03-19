@@ -26,11 +26,10 @@ import { GOOGLE_MAPS_API_KEY } from '@env';
 import { AccessibilityContext } from './AccessibilitySettings';
 import { polygons } from '../components/polygonCoordinates';
 import {
-  fetchShuttlePositions,
   startShuttleTracking,
   ShuttleData,
 } from '../services/shuttleService';
-import { isUserInBuilding, getPolygonCenter } from '../utils/geometry';
+import { isUserInBuilding } from '../utils/geometry';
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -69,7 +68,7 @@ function InputAutocomplete({
 }: {
   label: string;
   placeholder: string;
-  onPlaceSelected: (details: any) => void;
+  onPlaceSelected: (data: any, details: any) => void;
   currentValue?: string;
 }) {
   // Minimal custom styling for Google Autocomplete
@@ -112,7 +111,7 @@ function InputAutocomplete({
           placeholder={placeholder || 'Type here...'}
           fetchDetails={true}
           onPress={(data, details = null) => {
-            onPlaceSelected && onPlaceSelected(details);
+            onPlaceSelected && onPlaceSelected(data, details);
           }}
           query={{
             key: GOOGLE_MAPS_API_KEY,
@@ -127,6 +126,10 @@ function InputAutocomplete({
       )}
     </>
   );
+}
+
+export function stripHtml(input: string): string {
+  return input.replace(/<[^>]*>?/gm, '');
 }
 
 export default function DirectionsScreen() {
@@ -234,8 +237,8 @@ export default function DirectionsScreen() {
         if (mapRef.current) {
           // Skip the traceRoute function entirely and do its work directly
           // This avoids the alert checks in the original function
-          const finalOrigin = snapToNearestBuilding(route.params.origin!);
-          const finalDestination = snapToNearestBuilding(route.params.destination!);
+          const finalOrigin = snapToNearestBuilding(route.params.origin);
+          const finalDestination = snapToNearestBuilding(route.params.destination);
           
           setShowDirections(true);
           
@@ -401,7 +404,10 @@ export default function DirectionsScreen() {
   };
 
   // Helper function to format location names
-  const formatLocationName = (location: { latitude: number; longitude: number }) => {
+  const formatLocationName = (location: { latitude: number; longitude: number; name?: string }) => {
+    if (location.name) {
+      return location.name;
+    }
     // Check if it's one of the campuses
     if (Math.abs(location.latitude - SGW_COORDS.latitude) < 0.001 && 
         Math.abs(location.longitude - SGW_COORDS.longitude) < 0.001) {
@@ -423,6 +429,7 @@ export default function DirectionsScreen() {
     // Otherwise show coordinates
     return `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
   };
+  
 
   interface Coordinates {
     latitude: number;
@@ -503,9 +510,13 @@ export default function DirectionsScreen() {
         `key=${GOOGLE_MAPS_API_KEY}`;
 
       const res = await fetch(url);
-      console.log('Response status:', res.status);
+      if (!process.env.JEST_WORKER_ID) {
+        console.log('Response status:', res.status);
+      }
       const data = await res.json();
-      console.log('Directions API response:', data.status);
+      if (!process.env.JEST_WORKER_ID) {
+        console.log('Directions API response:', data.status);
+      }
 
       if (data.routes?.length) {
         const firstRoute = data.routes[0];
@@ -553,7 +564,7 @@ export default function DirectionsScreen() {
   };
 
   // Enhanced onPlaceSelected function
-  const onPlaceSelected = (details: any, flag: string) => {
+  const onPlaceSelected = (data: any, details: any, flag: string) => {
     if (!details?.geometry?.location) {
       console.error('No location data in selected place', details);
       return;
@@ -564,24 +575,26 @@ export default function DirectionsScreen() {
       longitude: details.geometry.location.lng,
     };
     
-    // Try to snap the selected point to a building if it's close to one
+    // Snap the location to the nearest building if needed
     const snappedPosition = snapToNearestBuilding(position);
     
-    console.log(`Setting ${flag} to:`, snappedPosition);
+    // Extract the place name from details (or fallback to the description)
+    const placeName = details.name || data?.description || '';
+    
+    // Create a new object that includes the name
+    const newLocation = { ...snappedPosition, name: placeName };
     
     if (flag === 'origin') {
-      setOrigin(snappedPosition);
+      setOrigin(newLocation);
       setToastMessage('Origin set');
-      // If this was manually selected, don't change the alternating state
     } else {
-      setDestination(snappedPosition);
+      setDestination(newLocation);
       setToastMessage('Destination set');
-      // If this was manually selected, don't change the alternating state
     }
     
     moveTo(snappedPosition);
   };
-
+  
   // Simple helper to remove HTML tags
   // Safely removes HTML tags without relying on DOMParser
   const stripHtml = (html = '') => {
@@ -657,6 +670,25 @@ export default function DirectionsScreen() {
     }
   ] : [];
 
+  const getImageSource = (mode: string, travelMode: string) => {
+    const images = {
+      DRIVING: travelMode === 'DRIVING' ? require('../assets/images/transportModes/carWhite.png') : require('../assets/images/transportModes/carBlack.png'),
+      WALKING: travelMode === 'WALKING' ? require('../assets/images/transportModes/walkWhite.png') : require('../assets/images/transportModes/walkBlack.png'),
+      BICYCLING: travelMode === 'BICYCLING' ? require('../assets/images/transportModes/bikeWhite.png') : require('../assets/images/transportModes/bikeBlack.png'),
+      TRANSIT: travelMode === 'TRANSIT' ? require('../assets/images/transportModes/busWhite.png') : require('../assets/images/transportModes/busBlack.png'),
+    };
+    return images[mode];
+  };
+  
+  const getTextStyle = (mode: string, travelMode: string, isLargeText: boolean, isBlackAndWhite: boolean) => {
+    return [
+      styles.modeButtonText,
+      travelMode === mode && styles.activeModeButtonText,
+      isLargeText && styles.largeText,
+      isBlackAndWhite && styles.blackAndWhiteText,
+    ];
+  };
+
   return (
     <View style={styles.container}>
       {/* Toast Message */}
@@ -690,7 +722,7 @@ export default function DirectionsScreen() {
             coordinates={polygon.boundaries}
             fillColor={isBlackAndWhite ? "#000000aa" : "#912338cc"}
             strokeColor={isBlackAndWhite ? "#000000" : "#912338cc"}
-            strokeWidth={isBlackAndWhite ? 2 : 2}
+            strokeWidth={2}
           />
         ))}
 
@@ -719,8 +751,7 @@ export default function DirectionsScreen() {
 
         {/* Shuttle bus markers */}
         {showShuttles &&
-          shuttleData &&
-          shuttleData.buses.map((bus) => (
+          shuttleData?.buses.map((bus) => (
             <Marker
               key={bus.ID}
               coordinate={{
@@ -744,8 +775,7 @@ export default function DirectionsScreen() {
 
         {/* Shuttle station markers */}
         {showShuttles &&
-          shuttleData &&
-          shuttleData.stations.map((station) => (
+          shuttleData?.stations.map((station) => (
             <Marker
               key={station.ID}
               coordinate={{
@@ -800,8 +830,7 @@ export default function DirectionsScreen() {
           isBlackAndWhite && styles.blackAndWhiteContainer
         ]}>
           <Text style={[styles.label, isLargeText && styles.largeText]}>Origin</Text>
-          <GooglePlacesAutocomplete
-            fetchDetails={true}
+          <InputAutocomplete
             placeholder="Enter origin"
             styles={{
               textInput: [
@@ -810,7 +839,7 @@ export default function DirectionsScreen() {
                 isBlackAndWhite && styles.blackAndWhiteInput
               ]
             }}
-            onPress={(data, details = null) => onPlaceSelected(details, 'origin')}
+            onPlaceSelected={(data, details = null) => onPlaceSelected(data, details, 'origin')}
             query={{
               key: GOOGLE_MAPS_API_KEY,
               language: 'en'
@@ -819,8 +848,7 @@ export default function DirectionsScreen() {
           />
           
           <Text style={[styles.label, isLargeText && styles.largeText]}>Destination</Text>
-          <GooglePlacesAutocomplete
-            fetchDetails={true}
+          <InputAutocomplete
             placeholder="Enter destination"
             styles={{
               textInput: [
@@ -829,7 +857,7 @@ export default function DirectionsScreen() {
                 isBlackAndWhite && styles.blackAndWhiteInput
               ]
             }}
-            onPress={(data, details = null) => onPlaceSelected(details, 'destination')}
+            onPlaceSelected={(data, details = null) => onPlaceSelected(data, details, 'destination')}
             query={{
               key: GOOGLE_MAPS_API_KEY,
               language: 'en'
@@ -892,33 +920,10 @@ export default function DirectionsScreen() {
                 onPress={() => setTravelMode(mode)}
               >
                 <Image
-                  source={
-                    mode === 'DRIVING' 
-                      ? travelMode === 'DRIVING'
-                        ? require('../assets/images/transportModes/carWhite.png')
-                        : require('../assets/images/transportModes/carBlack.png')
-                      : mode === 'WALKING'
-                        ? travelMode === 'WALKING'
-                          ? require('../assets/images/transportModes/walkWhite.png')
-                          : require('../assets/images/transportModes/walkBlack.png')
-                        : mode === 'BICYCLING'
-                          ? travelMode === 'BICYCLING'
-                            ? require('../assets/images/transportModes/bikeWhite.png')
-                            : require('../assets/images/transportModes/bikeBlack.png')
-                          : travelMode === 'TRANSIT'
-                            ? require('../assets/images/transportModes/busWhite.png')
-                            : require('../assets/images/transportModes/busBlack.png')
-                  }
+                  source={getImageSource(mode, travelMode)}
                   style={styles.modeButtonIcon}
                 />
-                <Text
-                  style={[
-                    styles.modeButtonText,
-                    travelMode === mode && styles.activeModeButtonText,
-                    isLargeText && styles.largeText,
-                    isBlackAndWhite && styles.blackAndWhiteText
-                  ]}
-                >
+                <Text style={getTextStyle(mode, travelMode, isLargeText, isBlackAndWhite)}>
                   {mode.charAt(0) + mode.slice(1).toLowerCase()}
                 </Text>
               </TouchableOpacity>

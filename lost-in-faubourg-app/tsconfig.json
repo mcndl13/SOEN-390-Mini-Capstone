@@ -14,5 +14,5 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "@types/**/*.d.ts"
-  ]
+, "__tests__/CampusMap.test.jsx", "__tests__/HomeScreen.test.jsx"  ]
 }
