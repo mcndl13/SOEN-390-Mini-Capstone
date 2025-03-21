@@ -1,0 +1,21 @@
+appId: Expo Go
+---
+- tapOn: 
+    text: "📚 Library"
+    waitToSettleTimeoutMs: 200
+
+- tapOn: 
+    text: "🍽️ Restaurant"
+    waitToSettleTimeoutMs: 200
+
+- tapOn:
+    point: "89%,87%"
+    waitToSettleTimeoutMs: 200
+
+- tapOn:
+    id: "VKPointFeature"
+    index: 32
+    waitToSettleTimeoutMs: 200
+
+- tapOn:
+    point: "42%,43%"
