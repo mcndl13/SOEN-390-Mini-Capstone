@@ -1,0 +1,22 @@
+appId: Expo Go
+---
+
+- tapOn: 
+    text: "Enter origin"
+    waitToSettleTimeoutMs: 200
+
+- inputText: "Hall Building"
+
+- tapOn:
+    point: "50%,35%"
+
+- tapOn: 
+    text: "Enter destination"
+    waitToSettleTimeoutMs: 200
+
+- inputText: "John Molson"
+
+- tapOn:
+    point: "50%,42%"
+
+- tapOn: "Trace route"

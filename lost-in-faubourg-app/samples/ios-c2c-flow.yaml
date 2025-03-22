@@ -1,0 +1,30 @@
+appId: Expo Go
+---
+- tapOn: 
+    text: "SGW Campus"
+    waitToSettleTimeoutMs: 100
+
+- tapOn: 
+    text: "Loyola Campus"
+    waitToSettleTimeoutMs: 100
+
+- tapOn: 
+    text: "Bicycling"
+    waitToSettleTimeoutMs: 100
+
+- tapOn: 
+    text: "Trace route"
+    waitToSettleTimeoutMs: 100
+
+- tapOn: 
+    text: "Expand"
+    waitToSettleTimeoutMs: 100
+
+- tapOn: 
+    text: "Standard Route"
+    waitToSettleTimeoutMs: 100
+
+- swipe:
+    start: "61%,87%"
+    end: "68%,47%"
+    duration: 1433

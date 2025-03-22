@@ -68,7 +68,7 @@ function InputAutocomplete({
 }: {
   label: string;
   placeholder: string;
-  onPlaceSelected: (details: any) => void;
+  onPlaceSelected: (data: any, details: any) => void;
   currentValue?: string;
 }) {
   // Minimal custom styling for Google Autocomplete
@@ -111,7 +111,7 @@ function InputAutocomplete({
           placeholder={placeholder || 'Type here...'}
           fetchDetails={true}
           onPress={(data, details = null) => {
-            onPlaceSelected && onPlaceSelected(details);
+            onPlaceSelected && onPlaceSelected(data, details);
           }}
           query={{
             key: GOOGLE_MAPS_API_KEY,
@@ -404,7 +404,10 @@ export default function DirectionsScreen() {
   };
 
   // Helper function to format location names
-  const formatLocationName = (location: { latitude: number; longitude: number }) => {
+  const formatLocationName = (location: { latitude: number; longitude: number; name?: string }) => {
+    if (location.name) {
+      return location.name;
+    }
     // Check if it's one of the campuses
     if (Math.abs(location.latitude - SGW_COORDS.latitude) < 0.001 && 
         Math.abs(location.longitude - SGW_COORDS.longitude) < 0.001) {
@@ -426,6 +429,7 @@ export default function DirectionsScreen() {
     // Otherwise show coordinates
     return `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
   };
+  
 
   interface Coordinates {
     latitude: number;
@@ -560,7 +564,7 @@ export default function DirectionsScreen() {
   };
 
   // Enhanced onPlaceSelected function
-  const onPlaceSelected = (details: any, flag: string) => {
+  const onPlaceSelected = (data: any, details: any, flag: string) => {
     if (!details?.geometry?.location) {
       console.error('No location data in selected place', details);
       return;
@@ -571,24 +575,26 @@ export default function DirectionsScreen() {
       longitude: details.geometry.location.lng,
     };
     
-    // Try to snap the selected point to a building if it's close to one
+    // Snap the location to the nearest building if needed
     const snappedPosition = snapToNearestBuilding(position);
     
-    console.log(`Setting ${flag} to:`, snappedPosition);
+    // Extract the place name from details (or fallback to the description)
+    const placeName = details.name || data?.description || '';
+    
+    // Create a new object that includes the name
+    const newLocation = { ...snappedPosition, name: placeName };
     
     if (flag === 'origin') {
-      setOrigin(snappedPosition);
+      setOrigin(newLocation);
       setToastMessage('Origin set');
-      // If this was manually selected, don't change the alternating state
     } else {
-      setDestination(snappedPosition);
+      setDestination(newLocation);
       setToastMessage('Destination set');
-      // If this was manually selected, don't change the alternating state
     }
     
     moveTo(snappedPosition);
   };
-
+  
   // Simple helper to remove HTML tags
   // Safely removes HTML tags without relying on DOMParser
   const stripHtml = (html = '') => {
@@ -825,7 +831,6 @@ export default function DirectionsScreen() {
         ]}>
           <Text style={[styles.label, isLargeText && styles.largeText]}>Origin</Text>
           <InputAutocomplete
-            fetchDetails={true}
             placeholder="Enter origin"
             styles={{
               textInput: [
@@ -834,7 +839,7 @@ export default function DirectionsScreen() {
                 isBlackAndWhite && styles.blackAndWhiteInput
               ]
             }}
-            onPress={(data, details = null) => onPlaceSelected(details, 'origin')}
+            onPlaceSelected={(data, details = null) => onPlaceSelected(data, details, 'origin')}
             query={{
               key: GOOGLE_MAPS_API_KEY,
               language: 'en'
@@ -844,7 +849,6 @@ export default function DirectionsScreen() {
           
           <Text style={[styles.label, isLargeText && styles.largeText]}>Destination</Text>
           <InputAutocomplete
-            fetchDetails={true}
             placeholder="Enter destination"
             styles={{
               textInput: [
@@ -853,7 +857,7 @@ export default function DirectionsScreen() {
                 isBlackAndWhite && styles.blackAndWhiteInput
               ]
             }}
-            onPress={(data, details = null) => onPlaceSelected(details, 'destination')}
+            onPlaceSelected={(data, details = null) => onPlaceSelected(data, details, 'destination')}
             query={{
               key: GOOGLE_MAPS_API_KEY,
               language: 'en'
