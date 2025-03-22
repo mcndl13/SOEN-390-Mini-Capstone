@@ -2,11 +2,11 @@
   "name": "lost-in-faubourg-app",
   "version": "1.0.0",
   "scripts": {
-    "start": "npx expo start",
+    "start": "expo start",
     "start-tunnel": "expo start --tunnel",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
-    "ios": "npx expo run:ios",
+    "ios": "expo run:ios",
     "go:android": "expo start --android",
     "go:ios": "expo start --ios",
     "web": "expo start --web",
