@@ -51,7 +51,7 @@ export default function IndoorDirectionsScreen() {
             <WebView
               ref={webViewRef}
               source={{ uri: selectedBuilding.url }}
-              style={{ flex: 1 }}
+              style={styles.webView}
             />
           )}
         </View>
@@ -66,6 +66,11 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: "center",
     backgroundColor: "#fff",
+  },
+  webView: {
+    flex: 1, 
+    paddingBottom : 30, 
+    backgroundColor: "#912338", 
   },
   title: {
     fontSize: 22,
