@@ -11,7 +11,6 @@ module.exports = function (api) {
           allowUndefined: false,
         },
       ],
-      'expo-router/babel',
     ],
   };
 };
