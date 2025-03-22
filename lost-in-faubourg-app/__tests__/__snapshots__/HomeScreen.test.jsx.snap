@@ -3,27 +3,21 @@
 exports[`HomeScreen renders correctly 1`] = `
 <View
   style={
-    [
-      {
-        "alignItems": "center",
-        "flex": 1,
-        "justifyContent": "center",
-      },
-      false,
-    ]
+    {
+      "alignItems": "center",
+      "flex": 1,
+      "justifyContent": "center",
+    }
   }
 >
   <Text
     style={
-      [
-        {
-          "fontSize": 32,
-          "fontWeight": "600",
-          "marginBottom": 40,
-          "marginTop": 60,
-        },
-        false,
-      ]
+      {
+        "fontSize": 32,
+        "fontWeight": "600",
+        "marginBottom": 40,
+        "marginTop": 60,
+      }
     }
   >
     Welcome
@@ -72,13 +66,10 @@ exports[`HomeScreen renders correctly 1`] = `
       >
         <Text
           style={
-            [
-              {
-                "color": "white",
-                "fontSize": 18,
-              },
-              false,
-            ]
+            {
+              "color": "white",
+              "fontSize": 18,
+            }
           }
         >
           Explore Campus Map
@@ -126,13 +117,10 @@ exports[`HomeScreen renders correctly 1`] = `
       >
         <Text
           style={
-            [
-              {
-                "color": "white",
-                "fontSize": 18,
-              },
-              false,
-            ]
+            {
+              "color": "white",
+              "fontSize": 18,
+            }
           }
         >
           Get Directions
@@ -180,13 +168,10 @@ exports[`HomeScreen renders correctly 1`] = `
       >
         <Text
           style={
-            [
-              {
-                "color": "white",
-                "fontSize": 18,
-              },
-              false,
-            ]
+            {
+              "color": "white",
+              "fontSize": 18,
+            }
           }
         >
           Connect to Google Calendar
@@ -234,13 +219,10 @@ exports[`HomeScreen renders correctly 1`] = `
       >
         <Text
           style={
-            [
-              {
-                "color": "white",
-                "fontSize": 18,
-              },
-              false,
-            ]
+            {
+              "color": "white",
+              "fontSize": 18,
+            }
           }
         >
           Indoor Navigation
@@ -288,13 +270,10 @@ exports[`HomeScreen renders correctly 1`] = `
       >
         <Text
           style={
-            [
-              {
-                "color": "white",
-                "fontSize": 18,
-              },
-              false,
-            ]
+            {
+              "color": "white",
+              "fontSize": 18,
+            }
           }
         >
           Find Points of Interest

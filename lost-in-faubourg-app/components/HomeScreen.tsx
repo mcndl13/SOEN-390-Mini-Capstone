@@ -1,23 +1,32 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Linking,
-} from "react-native";
-
-import { NavigationProp } from '@react-navigation/native';
-import { AccessibilityContext } from './AccessibilitySettings';
+import React, { useEffect, useState } from "react";
+import { Linking, View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from "react-native";
+import * as Location from "expo-location";
+import { NavigationProp } from "@react-navigation/native";
 
 type HomeScreenProps = {
   navigation: NavigationProp<any>;
 };
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+const HomeScreen = ({ navigation }: HomeScreenProps) => {
+  const [hasPermission, setHasPermission] = useState(false);
 
-  const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
+  const requestLocationPermission = async () => {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Denied", "Allow location access to use maps.");
+      return false;
+    }
+    return true;
+  };
+
+  useEffect(() => {
+    const getPermission = async () => {
+      const permission = await requestLocationPermission();
+      setHasPermission(permission);
+    };
+    getPermission();
+  }, []);
+
   // Function to open the shuttle schedule webpage
   const openShuttleSchedule = async () => {
     const url = "https://www.concordia.ca/maps/shuttle-bus.html#depart";
@@ -30,53 +39,56 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     }
   };
 
-
   return (
-    <View style={[styles.container, isBlackAndWhite && styles.blackAndWhite]}>
-      <Text style={[styles.title, isLargeText && styles.largeText]}>Welcome</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Welcome</Text>
       <ScrollView>
         <TouchableOpacity
-          style={[styles.button, isBlackAndWhite && styles.blackAndWhiteButton]}
-          onPress={() => navigation.navigate("CampusMap")}
+          style={styles.button}
+          onPress={() => {
+            if (hasPermission) {
+              navigation.navigate("CampusMap");
+            } else {
+              Alert.alert("Permission Needed", "You need to allow location access.");
+            }
+          }}
         >
-          <Text style={[styles.buttonText, isLargeText && styles.largeText]}>Explore Campus Map</Text>
+          <Text style={styles.buttonText}>Explore Campus Map</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, isBlackAndWhite && styles.blackAndWhiteButton]}
+          style={styles.button}
           onPress={() => navigation.navigate("Directions")}
         >
-          <Text style={[styles.buttonText, isLargeText && styles.largeText]}>Get Directions</Text>
+          <Text style={styles.buttonText}>Get Directions</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, isBlackAndWhite && styles.blackAndWhiteButton]}
+          style={styles.button}
           onPress={() => navigation.navigate("CalendarIntegration")}
         >
-          <Text style={[styles.buttonText, isLargeText && styles.largeText]}>Connect to Google Calendar</Text>
+          <Text style={styles.buttonText}>Connect to Google Calendar</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, isBlackAndWhite && styles.blackAndWhiteButton]}
+          style={styles.button}
           onPress={() => navigation.navigate("IndoorDirections")}
         >
-          <Text style={[styles.buttonText, isLargeText && styles.largeText]}>Indoor Navigation</Text>
+          <Text style={styles.buttonText}>Indoor Navigation</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.button, isBlackAndWhite && styles.blackAndWhiteButton]}
+          style={styles.button}
           onPress={() => navigation.navigate("PointsOfInterest")}
         >
-          <Text style={[styles.buttonText, isLargeText && styles.largeText]}>Find Points of Interest</Text>
+          <Text style={styles.buttonText}>Find Points of Interest</Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.button}
           onPress={openShuttleSchedule}
         >
           <Text style={styles.buttonText}>Shuttle Schedule</Text>
         </TouchableOpacity>
-
       </ScrollView>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -102,14 +114,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
   },
-
-  blackAndWhite: {
-    backgroundColor: '#fff',
-  },
-  blackAndWhiteButton: {
-    backgroundColor: '#000',
-  },
-  largeText: {
-    fontSize: 24,
-  },
 });
+
+export default HomeScreen;
