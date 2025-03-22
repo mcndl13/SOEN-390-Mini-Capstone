@@ -51,6 +51,7 @@ describe('HomeScreen', () => {
       // Wait for useEffect updates and button to render
       await waitFor(() => getByText(buttonText));
       const button = getByText(buttonText);
+      expect(button).toBeTruthy(); // Ensure the button is rendered
       act(() => {
         fireEvent.press(button);
       });
