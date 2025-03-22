@@ -376,3 +376,33 @@ describe('CampusMap accessibility customization', () => {
     });
   });
 });
+
+describe('Toggle buttons functionality', () => {
+  test('toggles opening hours text on press', async () => {
+    setLocationMock();
+    const { getByTestId, getByText, queryByText } = renderCampusMap();
+
+    await waitFor(() => expect(getByTestId('marker-1')).toBeTruthy());
+    fireEvent.press(getByTestId('marker-1'));
+
+    const toggleBtn = await waitFor(() => getByText('Hide Opening Hours'));
+    expect(toggleBtn).toBeTruthy();
+
+    fireEvent.press(toggleBtn);
+
+    expect(getByText('Show Opening Hours')).toBeTruthy();
+    expect(queryByText('Loading...')).toBeNull();
+  });
+
+  test('toggles shuttle markers on press', async () => {
+    setLocationMock();
+    const { getByText } = renderCampusMap();
+
+    const shuttleToggle = await waitFor(() => getByText('Hide Shuttles'));
+    expect(shuttleToggle).toBeTruthy();
+
+    fireEvent.press(shuttleToggle);
+
+    expect(getByText('Show Shuttles')).toBeTruthy();
+  });
+});
