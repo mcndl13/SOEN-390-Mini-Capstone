@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, StatusBar, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, StatusBar, Animated, ScrollView } from 'react-native';
 import MapView, {
   Marker,
   Polygon,
@@ -97,6 +97,7 @@ const CampusMap: React.FC = () => {
   const [openingHours, setOpeningHours] = useState<string>('Loading...');
   const [showOpeningHours, setShowOpeningHours] = useState<boolean>(true);
   const [mapReady, setMapReady] = useState<boolean>(false);
+  const mapRef = React.useRef<MapView>(null);
   
   // Animation values
   const slideAnimation = useState(new Animated.Value(0))[0];
@@ -243,6 +244,7 @@ const CampusMap: React.FC = () => {
       
       {region ? (
         <MapView
+          ref={mapRef}
           style={styles.map}
           region={region}
           testID="mapView"
@@ -252,6 +254,7 @@ const CampusMap: React.FC = () => {
           showsCompass={true}
           showsScale={true}
           onMapReady={() => setMapReady(true)}
+          onPress={() => selectedBuilding && closeInfo()}
         >
           {buildings.map((building) => (
             <Marker
@@ -285,9 +288,19 @@ const CampusMap: React.FC = () => {
                   longitude: bus.Longitude,
                 }}
                 title={`Shuttle ${bus.ID}`}
-                pinColor={isBlackAndWhite ? "black" : "#1E88E5"}
                 testID={`marker-${bus.ID}`}
-              />
+              >
+                <View style={[
+                  styles.customIconMarker,
+                  isBlackAndWhite ? styles.markerBW : styles.shuttleMarker
+                ]}>
+                  <Ionicons 
+                    name="bus" 
+                    size={20} 
+                    color="white" 
+                  />
+                </View>
+              </Marker>
             ))}
 
           {showShuttles &&
@@ -301,9 +314,19 @@ const CampusMap: React.FC = () => {
                 title={
                   station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'
                 }
-                pinColor={isBlackAndWhite ? "black" : "#4CAF50"}
                 testID={`marker-${station.ID}`}
-              />
+              >
+                <View style={[
+                  styles.customIconMarker,
+                  isBlackAndWhite ? styles.markerBW : styles.stationMarker
+                ]}>
+                  <Ionicons 
+                    name="bus-outline" 
+                    size={20} 
+                    color="white" 
+                  />
+                </View>
+              </Marker>
             ))}
         </MapView>
       ) : (
@@ -419,49 +442,54 @@ const CampusMap: React.FC = () => {
           
           <View style={styles.separator} />
           
-          <View style={styles.sectionContainer}>
-            <View style={styles.sectionHeader}>
-              <Ionicons 
-                name="information-circle" 
-                size={20} 
-                color={isBlackAndWhite ? "#000" : "#912338"} 
-              />
-              <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
-                Description
+          <ScrollView style={styles.scrollableContent}>
+            <View style={styles.sectionContainer}>
+              <View style={styles.sectionHeader}>
+                <Ionicons 
+                  name="information-circle" 
+                  size={20} 
+                  color={isBlackAndWhite ? "#000" : "#912338"} 
+                />
+                <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
+                  Description
+                </Text>
+              </View>
+              <Text style={[styles.description, isLargeText && styles.largeText]}>
+                {selectedBuilding.description || "No description available."}
               </Text>
             </View>
-            <Text style={[styles.description, isLargeText && styles.largeText]}>
-              {selectedBuilding.description || "No description available."}
-            </Text>
-          </View>
-          
-          <TouchableOpacity
-            style={styles.hoursToggle}
-            onPress={() => setShowOpeningHours(!showOpeningHours)}
-          >
-            <View style={styles.sectionHeader}>
-              <Ionicons 
-                name="time" 
-                size={20} 
-                color={isBlackAndWhite ? "#000" : "#912338"} 
-              />
-              <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
-                Opening Hours
-              </Text>
-              <Ionicons 
-                name={showOpeningHours ? "chevron-up" : "chevron-down"} 
-                size={20} 
-                color={isBlackAndWhite ? "#000" : "#757575"} 
-                style={styles.toggleIcon}
-              />
-            </View>
-          </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.hoursToggle}
+              onPress={() => setShowOpeningHours(!showOpeningHours)}
+            >
+              <View style={styles.sectionHeader}>
+                <Ionicons 
+                  name="time" 
+                  size={20} 
+                  color={isBlackAndWhite ? "#000" : "#912338"} 
+                />
+                <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
+                  Opening Hours
+                </Text>
+                <Ionicons 
+                  name={showOpeningHours ? "chevron-up" : "chevron-down"} 
+                  size={20} 
+                  color={isBlackAndWhite ? "#000" : "#757575"} 
+                  style={styles.toggleIcon}
+                />
+              </View>
+            </TouchableOpacity>
 
-          {showOpeningHours && (
-            <Text style={[styles.hoursText, isLargeText && styles.largeText]}>
-              {openingHours}
-            </Text>
-          )}
+            {showOpeningHours && (
+              <Text style={[styles.hoursText, isLargeText && styles.largeText]}>
+                {openingHours}
+              </Text>
+            )}
+            
+            {/* Add extra padding at the bottom for better scrolling */}
+            <View style={styles.scrollPadding} />
+          </ScrollView>
         </Animated.View>
       )}
     </View>
@@ -490,12 +518,15 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 130,
     left: 20,
     right: 20,
     backgroundColor: 'white',
     borderRadius: 16,
-    padding: 20,
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 0,
+    maxHeight: 450,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
@@ -564,7 +595,7 @@ const styles = StyleSheet.create({
   },
   campusSelector: {
     position: 'absolute',
-    bottom: 90,
+    bottom: 30,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -640,6 +671,20 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
+  customIconMarker: {
+    width: 30,
+    height: 30,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: 'white',
+  },
   markerInner: {
     width: 16,
     height: 16,
@@ -651,25 +696,17 @@ const styles = StyleSheet.create({
   markerBW: {
     backgroundColor: '#000000',
   },
-  busMarker: {
-    backgroundColor: 'white',
-    borderRadius: 18,
-    padding: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+  shuttleMarker: {
+    backgroundColor: '#1E88E5',
   },
   stationMarker: {
-    backgroundColor: 'white',
-    borderRadius: 18,
-    padding: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    backgroundColor: '#4CAF50',
+  },
+  scrollableContent: {
+    maxHeight: 300,
+  },
+  scrollPadding: {
+    height: 20,
   },
 });
 
