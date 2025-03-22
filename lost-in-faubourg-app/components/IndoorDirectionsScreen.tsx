@@ -88,8 +88,9 @@ const styles = StyleSheet.create({
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 10,
     backgroundColor: "#912338",
+    paddingTop: 45,
+    paddingBottom : 0,
   },
   headerButton: {
     padding: 10,
@@ -100,4 +101,9 @@ const styles = StyleSheet.create({
     color: "white",
 
   },
+  webView: {
+    flex: 1, 
+    paddingBottom : 30, 
+    backgroundColor: "#912338", 
+  }
 });
