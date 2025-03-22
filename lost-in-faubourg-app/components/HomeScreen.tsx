@@ -11,8 +11,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const [hasPermission, setHasPermission] = useState(false);
 
   const requestLocationPermission = async () => {
-    const { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
+    const permissionResponse = await Location.requestForegroundPermissionsAsync();
+    if (!permissionResponse || permissionResponse.status !== "granted") {
       Alert.alert("Permission Denied", "Allow location access to use maps.");
       return false;
     }

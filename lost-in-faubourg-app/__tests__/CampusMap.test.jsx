@@ -5,6 +5,17 @@ import * as Location from 'expo-location';
 import { polygons } from '../components/polygonCoordinates';
 import { AccessibilityContext } from '../components/AccessibilitySettings';
 
+process.env.EXPO_OS = 'ios';
+
+// Override console.warn to ignore "No Place ID found" warnings.
+const originalConsoleWarn = console.warn;
+console.warn = (message, ...args) => {
+  if (typeof message === 'string' && message.includes('No Place ID found')) {
+    return;
+  }
+  originalConsoleWarn(message, ...args);
+};
+
 // --- Mocks ---
 jest.mock('react-native-maps', () => {
   const React = require('react');
