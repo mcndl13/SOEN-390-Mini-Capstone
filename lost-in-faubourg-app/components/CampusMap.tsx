@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, StatusBar, Animated } from 'react-native';
 import MapView, {
   Marker,
   Polygon,
@@ -7,6 +7,7 @@ import MapView, {
   MapStyleElement,
 } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { Ionicons } from '@expo/vector-icons';
 import { polygons } from './polygonCoordinates';
 import { AccessibilityContext } from './AccessibilitySettings';
 import { startShuttleTracking, ShuttleData } from '../services/shuttleService';
@@ -95,7 +96,11 @@ const CampusMap: React.FC = () => {
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
   const [openingHours, setOpeningHours] = useState<string>('Loading...');
   const [showOpeningHours, setShowOpeningHours] = useState<boolean>(true);
-  const [showDescription, setshowDescription] = useState<boolean>(true);
+  const [mapReady, setMapReady] = useState<boolean>(false);
+  
+  // Animation values
+  const slideAnimation = useState(new Animated.Value(0))[0];
+  const fadeAnimation = useState(new Animated.Value(0))[0];
 
   const buildings = createBuildings();
 
@@ -114,7 +119,28 @@ const CampusMap: React.FC = () => {
           stylers: [{ saturation: -100 }],
         },
       ]
-    : [];
+    : [
+        {
+          featureType: 'water',
+          elementType: 'geometry',
+          stylers: [{ color: '#e9e9e9' }, { lightness: 17 }],
+        },
+        {
+          featureType: 'landscape',
+          elementType: 'geometry',
+          stylers: [{ color: '#f5f5f5' }, { lightness: 20 }],
+        },
+        {
+          featureType: 'road.highway',
+          elementType: 'geometry.fill',
+          stylers: [{ color: '#ffffff' }, { lightness: 17 }],
+        },
+        {
+          featureType: 'poi',
+          elementType: 'geometry',
+          stylers: [{ color: '#f5f5f5' }, { lightness: 21 }],
+        },
+      ];
 
   useEffect(() => {
     requestLocationPermission(setLocation, setRegion);
@@ -148,6 +174,28 @@ const CampusMap: React.FC = () => {
     fetchOpeningHours();
   }, [selectedBuilding]);
 
+  useEffect(() => {
+    if (selectedBuilding) {
+      // Animate in the info panel
+      Animated.parallel([
+        Animated.timing(slideAnimation, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnimation, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Reset animation values when deselecting
+      slideAnimation.setValue(0);
+      fadeAnimation.setValue(0);
+    }
+  }, [selectedBuilding]);
+
   const switchToCampus = (campusCoords: LocationCoords, campusName: string) => {
     setRegion({
       latitude: campusCoords.latitude,
@@ -163,32 +211,48 @@ const CampusMap: React.FC = () => {
     setShowShuttles(!showShuttles);
   };
 
+  const recenterMap = () => {
+    if (location) {
+      setRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
+  };
+
+  const closeInfo = () => {
+    Animated.timing(fadeAnimation, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setSelectedBuilding(null);
+    });
+  };
+
+  const infoContainerTranslateY = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [100, 0],
+  });
+
   return (
-    <View
-      style={[
-        styles.container,
-        isBlackAndWhite && { filter: 'grayscale(100%)' },
-      ]}
-    >
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      
       {region ? (
         <MapView
           style={styles.map}
           region={region}
           testID="mapView"
           customMapStyle={mapStyle}
+          showsUserLocation={true}
+          showsMyLocationButton={false}
+          showsCompass={true}
+          showsScale={true}
+          onMapReady={() => setMapReady(true)}
         >
-          {location && (
-            <Marker
-              coordinate={{
-                latitude: location.latitude,
-                longitude: location.longitude,
-              }}
-              title="You are here"
-              pinColor={isBlackAndWhite ? 'black' : 'blue'}
-              testID="marker-current-location"
-            />
-          )}
-
           {buildings.map((building) => (
             <Marker
               key={building.id}
@@ -196,7 +260,7 @@ const CampusMap: React.FC = () => {
                 latitude: building.latitude,
                 longitude: building.longitude,
               }}
-              pinColor={isBlackAndWhite ? 'black' : 'red'}
+              pinColor={isBlackAndWhite ? 'black' : '#912338'}
               onPress={() => setSelectedBuilding(building)}
               testID={`marker-${building.id}`}
             />
@@ -206,9 +270,9 @@ const CampusMap: React.FC = () => {
             <Polygon
               key={index}
               coordinates={polygon.boundaries}
-              fillColor={isBlackAndWhite ? '#000000cc' : '#912338cc'}
-              strokeColor={isBlackAndWhite ? '#000000' : '#912338cc'}
-              strokeWidth={isBlackAndWhite ? 2 : 1}
+              fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
+              strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
+              strokeWidth={2}
             />
           ))}
 
@@ -221,16 +285,9 @@ const CampusMap: React.FC = () => {
                   longitude: bus.Longitude,
                 }}
                 title={`Shuttle ${bus.ID}`}
+                pinColor={isBlackAndWhite ? "black" : "#1E88E5"}
                 testID={`marker-${bus.ID}`}
-              >
-                <View style={styles.busMarker}>
-                  <Image
-                    source={require('../assets/images/transportModes/busBlack.png')}
-                    style={styles.busIcon}
-                    resizeMode="contain"
-                  />
-                </View>
-              </Marker>
+              />
             ))}
 
           {showShuttles &&
@@ -244,263 +301,375 @@ const CampusMap: React.FC = () => {
                 title={
                   station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'
                 }
+                pinColor={isBlackAndWhite ? "black" : "#4CAF50"}
                 testID={`marker-${station.ID}`}
-              >
-                <View style={styles.stationMarker}>
-                  <Image
-                    source={require('../assets/images/transportModes/busStation.png')}
-                    style={styles.stationIcon}
-                    resizeMode="contain"
-                  />
-                </View>
-              </Marker>
+              />
             ))}
         </MapView>
       ) : (
-        <Text style={[styles.infoText, isLargeText && styles.largeText]}>
-          Loading Map...
-        </Text>
-      )}
-
-      {selectedBuilding && (
-        <View style={styles.infoContainer}>
-          <BuildingInfo
-            building={selectedBuilding}
-            isBlackAndWhite={isBlackAndWhite}
-            isLargeText={isLargeText}
-          />
-
-          <View style={styles.horizontalRule} />
-
-          {/* Toggle Button */}
-          <TouchableOpacity
-            onPress={() => setShowOpeningHours(!showOpeningHours)}
-          >
-            <Text style={[isLargeText && styles.largeText]}>
-              {showOpeningHours ? 'Hide Opening Hours' : 'Show Opening Hours'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Conditionally Show Opening Hours */}
-          {showOpeningHours && (
-            <Text style={[styles.description, isLargeText && styles.largeText]}>
-              {openingHours}
-            </Text>
-          )}
+        <View style={styles.loadingContainer}>
+          <Text style={[styles.loadingText, isLargeText && styles.largeText]}>
+            Loading Map...
+          </Text>
         </View>
       )}
 
-      <CampusButtons
-        selectedCampus={selectedCampus}
-        switchToCampus={switchToCampus}
-        isBlackAndWhite={isBlackAndWhite}
-        isLargeText={isLargeText}
-      />
+      {/* Map Controls */}
+      <View style={styles.mapControls}>
+        <TouchableOpacity 
+          style={styles.mapControlButton} 
+          onPress={recenterMap}
+        >
+          <Ionicons 
+            name="locate" 
+            size={24} 
+            color={isBlackAndWhite ? "#000" : "#912338"} 
+          />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.mapControlButton} 
+          onPress={toggleShuttles}
+        >
+          <Ionicons 
+            name="bus" 
+            size={24} 
+            color={isBlackAndWhite ? "#000" : showShuttles ? "#1E88E5" : "#757575"} 
+          />
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity
-        style={styles.shuttleToggleButton}
-        onPress={toggleShuttles}
-      >
-        <Text style={styles.shuttleToggleText}>
-          {showShuttles ? 'Hide Shuttles' : 'Show Shuttles'}
-        </Text>
-      </TouchableOpacity>
+      {/* Campus Selection Pills */}
+      <View style={styles.campusSelector}>
+        <TouchableOpacity
+          style={[
+            styles.campusPill,
+            selectedCampus === 'SGW' && (isBlackAndWhite ? styles.selectedPillBW : styles.selectedPill),
+          ]}
+          onPress={() => switchToCampus(SGW_COORDS, 'SGW')}
+        >
+          <Text
+            style={[
+              styles.campusPillText,
+              selectedCampus === 'SGW' && styles.selectedPillText,
+              isLargeText && styles.largeText,
+            ]}
+          >
+            SGW Campus
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.campusPill,
+            selectedCampus === 'Loyola' && (isBlackAndWhite ? styles.selectedPillBW : styles.selectedPill),
+          ]}
+          onPress={() => switchToCampus(LOYOLA_COORDS, 'Loyola')}
+        >
+          <Text
+            style={[
+              styles.campusPillText,
+              selectedCampus === 'Loyola' && styles.selectedPillText,
+              isLargeText && styles.largeText,
+            ]}
+          >
+            Loyola Campus
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Building Info Card */}
+      {selectedBuilding && (
+        <Animated.View 
+          style={[
+            styles.infoCard,
+            {
+              transform: [{ translateY: infoContainerTranslateY }],
+              opacity: fadeAnimation,
+            },
+            isBlackAndWhite && styles.infoCardBW
+          ]}
+        >
+          <TouchableOpacity 
+            style={styles.closeButton} 
+            onPress={closeInfo}
+          >
+            <Ionicons 
+              name="close" 
+              size={24} 
+              color={isBlackAndWhite ? "#000" : "#912338"} 
+            />
+          </TouchableOpacity>
+          
+          <Text style={[styles.buildingName, isLargeText && styles.largeText]}>
+            {selectedBuilding.name}
+          </Text>
+          
+          <View style={styles.addressContainer}>
+            <Ionicons 
+              name="location" 
+              size={18} 
+              color={isBlackAndWhite ? "#000" : "#912338"} 
+              style={styles.addressIcon} 
+            />
+            <Text style={[styles.address, isLargeText && styles.largeText]}>
+              {selectedBuilding.address}
+            </Text>
+          </View>
+          
+          <View style={styles.separator} />
+          
+          <View style={styles.sectionContainer}>
+            <View style={styles.sectionHeader}>
+              <Ionicons 
+                name="information-circle" 
+                size={20} 
+                color={isBlackAndWhite ? "#000" : "#912338"} 
+              />
+              <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
+                Description
+              </Text>
+            </View>
+            <Text style={[styles.description, isLargeText && styles.largeText]}>
+              {selectedBuilding.description || "No description available."}
+            </Text>
+          </View>
+          
+          <TouchableOpacity
+            style={styles.hoursToggle}
+            onPress={() => setShowOpeningHours(!showOpeningHours)}
+          >
+            <View style={styles.sectionHeader}>
+              <Ionicons 
+                name="time" 
+                size={20} 
+                color={isBlackAndWhite ? "#000" : "#912338"} 
+              />
+              <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
+                Opening Hours
+              </Text>
+              <Ionicons 
+                name={showOpeningHours ? "chevron-up" : "chevron-down"} 
+                size={20} 
+                color={isBlackAndWhite ? "#000" : "#757575"} 
+                style={styles.toggleIcon}
+              />
+            </View>
+          </TouchableOpacity>
+
+          {showOpeningHours && (
+            <Text style={[styles.hoursText, isLargeText && styles.largeText]}>
+              {openingHours}
+            </Text>
+          )}
+        </Animated.View>
+      )}
     </View>
   );
 };
 
-const BuildingInfo: React.FC<{
-  building: Building;
-  isBlackAndWhite: boolean;
-  isLargeText: boolean;
-}> = ({ building, isBlackAndWhite, isLargeText }) => (
-  <View style={[isBlackAndWhite && styles.blackAndWhiteContainer]}>
-    <Text style={[styles.buildingName, isLargeText && styles.largeText]}>
-      {building.name}
-    </Text>
-    <Text style={[styles.description, isLargeText && styles.largeText]}>
-      {building.address}
-    </Text>
-    <View style={styles.horizontalRule} />
-    <Text style={[styles.infoText, isLargeText && styles.largeText]}>
-      Description
-    </Text>
-    <Text style={[styles.description, isLargeText && styles.largeText]}>
-      {building.description}
-    </Text>
-  </View>
-);
-
-const CampusButtons: React.FC<{
-  selectedCampus: string | null;
-  switchToCampus: (coords: LocationCoords, name: string) => void;
-  isBlackAndWhite: boolean;
-  isLargeText: boolean;
-}> = ({ selectedCampus, switchToCampus, isBlackAndWhite, isLargeText }) => (
-  <View style={styles.buttonContainer}>
-    <TouchableOpacity
-      style={[
-        styles.circularButton,
-        selectedCampus === 'SGW' && styles.selectedButton,
-        isBlackAndWhite && styles.blackAndWhiteButton,
-      ]}
-      onPress={() => switchToCampus(SGW_COORDS, 'SGW')}
-    >
-      <Text
-        style={[
-          styles.buttonText,
-          selectedCampus === 'SGW' && styles.selectedButtonText,
-          isLargeText && styles.largeText,
-          isBlackAndWhite && styles.blackAndWhiteText,
-        ]}
-      >
-        SGW Campus
-      </Text>
-    </TouchableOpacity>
-
-    <TouchableOpacity
-      style={[
-        styles.circularButton,
-        selectedCampus === 'Loyola' && styles.selectedButton,
-        isBlackAndWhite && styles.blackAndWhiteButton,
-      ]}
-      onPress={() => switchToCampus(LOYOLA_COORDS, 'Loyola')}
-    >
-      <Text
-        style={[
-          styles.buttonText,
-          selectedCampus === 'Loyola' && styles.selectedButtonText,
-          isLargeText && styles.largeText,
-          isBlackAndWhite && styles.blackAndWhiteText,
-        ]}
-      >
-        Loyola Campus
-      </Text>
-    </TouchableOpacity>
-  </View>
-);
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
   },
   map: {
     width: '100%',
     height: '100%',
   },
-  infoContainer: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#333',
+    fontWeight: '500',
+  },
+  infoCard: {
     position: 'absolute',
-    bottom: 140,
+    bottom: 20,
     left: 20,
     right: 20,
     backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 10,
+    borderRadius: 16,
+    padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
-  infoText: {
-    fontSize: 16,
+  infoCardBW: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#000000',
+    borderWidth: 1,
+  },
+  buildingName: {
+    fontSize: 22,
     fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  addressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  addressIcon: {
+    marginRight: 6,
+  },
+  address: {
+    fontSize: 16,
+    color: '#666',
+    flex: 1,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginVertical: 16,
+  },
+  sectionContainer: {
+    marginBottom: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 8,
   },
   description: {
     fontSize: 16,
+    color: '#666',
+    lineHeight: 22,
   },
-  buildingName: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  hoursToggle: {
+    paddingVertical: 8,
   },
-  buttonContainer: {
+  toggleIcon: {
+    marginLeft: 'auto',
+  },
+  hoursText: {
+    fontSize: 16,
+    color: '#666',
+    lineHeight: 22,
+    marginTop: 8,
+  },
+  campusSelector: {
     position: 'absolute',
-    bottom: 80,
+    bottom: 90,
     left: 0,
     right: 0,
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 10,
-  },
-  circularButton: {
-    backgroundColor: 'white',
-    width: 150,
-    height: 50,
-    borderRadius: 50,
     justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 16,
+    zIndex: 1,
+  },
+  campusPill: {
+    backgroundColor: 'white',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    marginHorizontal: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 4, height: 6 },
-    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
     shadowRadius: 4,
+    elevation: 2,
   },
-  buttonText: {
-    color: 'black',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  selectedButton: {
+  selectedPill: {
     backgroundColor: '#912338',
   },
-  selectedButtonText: {
+  selectedPillBW: {
+    backgroundColor: '#000000',
+  },
+  campusPillText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  selectedPillText: {
     color: 'white',
+  },
+  mapControls: {
+    position: 'absolute',
+    top: 50,
+    right: 16,
+    zIndex: 1,
+  },
+  mapControlButton: {
+    backgroundColor: 'white',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   largeText: {
     fontSize: 20,
   },
-  blackAndWhiteContainer: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#000000',
-    borderWidth: 1,
-  },
-  blackAndWhiteButton: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#000000',
-    borderWidth: 1,
-  },
-  blackAndWhiteText: {
-    color: '#000000',
-  },
-  shuttleToggleButton: {
+  closeButton: {
     position: 'absolute',
-    top: 40,
-    right: 20,
-    backgroundColor: '#912338',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    top: 16,
+    right: 16,
+    zIndex: 10,
   },
-  shuttleToggleText: {
-    color: 'white',
-    fontWeight: 'bold',
+  customMarker: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  markerInner: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+  },
+  markerColor: {
+    backgroundColor: '#912338',
+  },
+  markerBW: {
+    backgroundColor: '#000000',
   },
   busMarker: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  busIcon: {
-    width: 30,
-    height: 30,
+    backgroundColor: 'white',
+    borderRadius: 18,
+    padding: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   stationMarker: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  stationIcon: {
-    width: 25,
-    height: 25,
-  },
-  horizontalRule: {
-    borderBottomColor: '#912338',
-    borderBottomWidth: 1,
-    marginVertical: 10,
+    backgroundColor: 'white',
+    borderRadius: 18,
+    padding: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
 });
 
