@@ -1037,7 +1037,7 @@ export default function DirectionsScreen() {
             </Text>
             
             <View style={styles.modeContainer}>
-            {['DRIVING', 'WALKING', 'BICYCLING', 'TRANSIT'].map(mode => (
+            {['DRIVING', 'TRANSIT', 'WALKING', 'BICYCLING'].map(mode => (
                 <TouchableOpacity
                   key={mode}
                   style={[
@@ -1051,13 +1051,7 @@ export default function DirectionsScreen() {
                     size={22} 
                     color={travelMode === mode ? 'white' : (isBlackAndWhite ? 'black' : '#912338')}
                   />
-                  <Text style={[
-                    styles.modeButtonText,
-                    travelMode === mode && styles.activeModeButtonText,
-                    isLargeText && styles.largeText
-                  ]}>
-                    {mode.charAt(0) + mode.slice(1).toLowerCase()}
-                  </Text>
+                  
                 </TouchableOpacity>
               ))}
             </View>
