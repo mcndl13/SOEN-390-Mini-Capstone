@@ -5,6 +5,17 @@ import * as Location from 'expo-location';
 import { polygons } from '../components/polygonCoordinates';
 import { AccessibilityContext } from '../components/AccessibilitySettings';
 
+process.env.EXPO_OS = 'ios';
+
+// Override console.warn to ignore "No Place ID found" warnings.
+const originalConsoleWarn = console.warn;
+console.warn = (message, ...args) => {
+  if (typeof message === 'string' && message.includes('No Place ID found')) {
+    return;
+  }
+  originalConsoleWarn(message, ...args);
+};
+
 // --- Mocks ---
 jest.mock('react-native-maps', () => {
   const React = require('react');
@@ -363,5 +374,35 @@ describe('CampusMap accessibility customization', () => {
       expect(userMarker).toBeTruthy();
       expect(userMarker.props.pinColor).toBe('black');
     });
+  });
+});
+
+describe('Toggle buttons functionality', () => {
+  test('toggles opening hours text on press', async () => {
+    setLocationMock();
+    const { getByTestId, getByText, queryByText } = renderCampusMap();
+
+    await waitFor(() => expect(getByTestId('marker-1')).toBeTruthy());
+    fireEvent.press(getByTestId('marker-1'));
+
+    const toggleBtn = await waitFor(() => getByText('Hide Opening Hours'));
+    expect(toggleBtn).toBeTruthy();
+
+    fireEvent.press(toggleBtn);
+
+    expect(getByText('Show Opening Hours')).toBeTruthy();
+    expect(queryByText('Loading...')).toBeNull();
+  });
+
+  test('toggles shuttle markers on press', async () => {
+    setLocationMock();
+    const { getByText } = renderCampusMap();
+
+    const shuttleToggle = await waitFor(() => getByText('Hide Shuttles'));
+    expect(shuttleToggle).toBeTruthy();
+
+    fireEvent.press(shuttleToggle);
+
+    expect(getByText('Show Shuttles')).toBeTruthy();
   });
 });
