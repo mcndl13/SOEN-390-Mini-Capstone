@@ -8,6 +8,9 @@ import {
   TextInput,
   ActivityIndicator,
   Keyboard,
+  StatusBar,
+  Animated,
+  ScrollView,
 } from 'react-native';
 import MapView, { 
   Marker, 
@@ -64,19 +67,19 @@ interface QuickSearchOption {
 
 // Define quick search options
 const QUICK_SEARCH_OPTIONS: QuickSearchOption[] = [
-  { id: 'library', name: 'Library', icon: '📚' },
-  { id: 'restaurant', name: 'Restaurant', icon: '🍽️' },
-  { id: 'cafe', name: 'Cafe', icon: '☕' },
+  { id: 'library', name: 'Library', icon: 'book' },
+  { id: 'restaurant', name: 'Restaurant', icon: 'restaurant' },
+  { id: 'cafe', name: 'Cafe', icon: 'cafe' },
 ];
 
 // POI type mapping for icons
 const POI_TYPE_ICONS: Record<string, string> = {
-  'library': '📚',
-  'restaurant': '🍽️',
-  'cafe': '☕',
-  'gym': '💪',
-  'bookstore': '📖',
-  'default': '📍'
+  'library': 'book',
+  'restaurant': 'restaurant',
+  'cafe': 'cafe',
+  'gym': 'fitness',
+  'bookstore': 'book-outline',
+  'default': 'location'
 };
 
 export default function POIScreen() {
@@ -87,10 +90,15 @@ export default function POIScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState<boolean>(false);
 
   const mapRef = useRef<MapView | null>(null);
   const searchInputRef = useRef<TextInput | null>(null);
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  
+  // Animation values for POI info panel
+  const slideAnimation = useState(new Animated.Value(0))[0];
+  const fadeAnimation = useState(new Animated.Value(0))[0];
   
   // Black and white map style for accessibility
   const mapStyle: MapStyleElement[] = isBlackAndWhite ? [
@@ -106,7 +114,28 @@ export default function POIScreen() {
       "elementType": "labels.text.stroke",
       "stylers": [{ "saturation": -100 }]
     }
-  ] : [];
+  ] : [
+    {
+      "featureType": "water",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#e9e9e9" }, { "lightness": 17 }]
+    },
+    {
+      "featureType": "landscape",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#f5f5f5" }, { "lightness": 20 }]
+    },
+    {
+      "featureType": "road.highway",
+      "elementType": "geometry.fill",
+      "stylers": [{ "color": "#ffffff" }, { "lightness": 17 }]
+    },
+    {
+      "featureType": "poi",
+      "elementType": "geometry",
+      "stylers": [{ "color": "#f5f5f5" }, { "lightness": 21 }]
+    }
+  ];
   
   // Message timeout effect
   useEffect(() => {
@@ -152,6 +181,29 @@ export default function POIScreen() {
       }
     })();
   }, []);
+
+  // Animation effect for selected POI
+  useEffect(() => {
+    if (selectedPOI) {
+      // Animate in the info panel
+      Animated.parallel([
+        Animated.timing(slideAnimation, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(fadeAnimation, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      // Reset animation values when deselecting
+      slideAnimation.setValue(0);
+      fadeAnimation.setValue(0);
+    }
+  }, [selectedPOI]);
 
   // Fetch POIs from Google Places API
   const fetchPOIsNearby = async (location: Coordinates, query: string) => {
@@ -273,27 +325,47 @@ export default function POIScreen() {
       setMessage('Your location is not available');
       return;
     }
+
+    closeInfo();
     
-    // Looking at the DirectionsScreen, it expects a direct latitude/longitude object
-    navigation.navigate('Directions', {
-      origin: {
-        latitude: userLocation.latitude,
-        longitude: userLocation.longitude
-      },
-      destination: {
-        latitude: poi.coordinates.latitude,
-        longitude: poi.coordinates.longitude
-      }
-    });
-    
-    // After navigation, show a message to help the user
+    // Short delay to allow the info panel to close smoothly
     setTimeout(() => {
-      setMessage('Tap "Trace route" to see directions');
-    }, 500);
+      navigation.navigate('Directions', {
+        origin: {
+          latitude: userLocation.latitude,
+          longitude: userLocation.longitude,
+          name: 'My Location'
+        },
+        destination: {
+          latitude: poi.coordinates.latitude,
+          longitude: poi.coordinates.longitude,
+          name: poi.name
+        },
+        travelMode: 'WALKING' // Set walking as the default travel mode
+      });
+    }, 100);
   };
+
+  // Close POI info panel
+  const closeInfo = () => {
+    Animated.timing(fadeAnimation, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setSelectedPOI(null);
+    });
+  };
+
+  const infoContainerTranslateY = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [100, 0],
+  });
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      
       {/* Message Banner */}
       {message && (
         <View style={styles.messageBanner}>
@@ -310,16 +382,20 @@ export default function POIScreen() {
         provider={PROVIDER_DEFAULT}
         initialRegion={INITIAL_POSITION}
         showsUserLocation={true}
-        showsMyLocationButton={true}
+        showsMyLocationButton={false}
+        showsCompass={true}
+        showsScale={true}
         customMapStyle={mapStyle}
+        onMapReady={() => setMapReady(true)}
+        onPress={() => selectedPOI && closeInfo()}
       >
         {/* Polygons for Concordia buildings */}
         {polygons.map((polygon, idx) => (
           <Polygon
             key={idx}
             coordinates={polygon.boundaries}
-            fillColor={isBlackAndWhite ? "#333333cc" : "#912338cc"}
-            strokeColor={isBlackAndWhite ? "#333333cc" : "#912338cc"}
+            fillColor={isBlackAndWhite ? "#00000033" : "#91233833"}
+            strokeColor={isBlackAndWhite ? "#000000" : "#912338"}
             strokeWidth={2}
           />
         ))}
@@ -334,24 +410,16 @@ export default function POIScreen() {
             onPress={() => setSelectedPOI(poi)}
             pinColor={isBlackAndWhite ? "black" : undefined}
           >
-            <View style={styles.markerContainer}>
-              <Text style={styles.markerIcon}>
-                {POI_TYPE_ICONS[poi.type] || POI_TYPE_ICONS.default}
-              </Text>
+            <View style={[
+              styles.customIconMarker,
+              isBlackAndWhite ? styles.markerBW : styles.markerColor
+            ]}>
+              <Ionicons
+                name={POI_TYPE_ICONS[poi.type] || POI_TYPE_ICONS.default}
+                size={18}
+                color="white"
+              />
             </View>
-            <Callout tooltip onPress={() => getDirections(poi)}>
-              <View style={styles.calloutContainer}>
-                <Text style={[styles.calloutTitle, isLargeText && { fontSize: 16 }]}>{poi.name}</Text>
-                <Text style={[styles.calloutAddress, isLargeText && { fontSize: 14 }]}>{poi.address}</Text>
-                {poi.rating !== 'N/A' && (
-                  <Text style={[styles.calloutRating, isLargeText && { fontSize: 14 }]}>Rating: {poi.rating} ⭐</Text>
-                )}
-                <View style={styles.directionsButton}>
-                  <Ionicons name="navigate" size={isLargeText ? 18 : 16} color="white" style={styles.directionsIcon} />
-                  <Text style={[styles.directionsText, isLargeText && { fontSize: 14 }]}>Get Directions</Text>
-                </View>
-              </View>
-            </Callout>
           </Marker>
         ))}
       </MapView>
@@ -376,6 +444,7 @@ export default function POIScreen() {
             ref={searchInputRef}
             style={[styles.searchInput, isLargeText && { fontSize: 18 }]}
             placeholder="Search for places..."
+            placeholderTextColor="#999999"
             value={searchQuery}
             onChangeText={setSearchQuery}
             onSubmitEditing={handleSearch}
@@ -386,30 +455,15 @@ export default function POIScreen() {
             onPress={handleSearch}
             disabled={isLoading}
           >
-            <Ionicons name="search" size={24} color="white" />
+            <Ionicons name="search" size={22} color="white" />
           </TouchableOpacity>
         </View>
       </View>
       
-      {/* Quick Search Buttons */}
-      <View style={styles.quickSearchContainer}>
-        {QUICK_SEARCH_OPTIONS.map((option) => (
-          <TouchableOpacity
-            key={option.id}
-            style={styles.quickSearchButton}
-            onPress={() => handleQuickSearch(option.id)}
-            disabled={isLoading}
-          >
-            <Text style={styles.quickSearchIcon}>{option.icon}</Text>
-            <Text style={[styles.quickSearchText, isLargeText && { fontSize: 16 }]}>{option.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      
-      {/* Current Location Button */}
-      {userLocation && (
+      {/* Map Controls */}
+      <View style={styles.mapControls}>
         <TouchableOpacity 
-          style={[styles.myLocationButton, isBlackAndWhite && { backgroundColor: "#333" }]}
+          style={styles.mapControlButton} 
           onPress={() => {
             if (userLocation && mapRef.current) {
               mapRef.current.animateToRegion({
@@ -420,8 +474,142 @@ export default function POIScreen() {
             }
           }}
         >
-          <Ionicons name="locate" size={22} color="white" />
+          <Ionicons 
+            name="locate" 
+            size={22} 
+            color={isBlackAndWhite ? "#000" : "#912338"} 
+          />
         </TouchableOpacity>
+      </View>
+      
+      {/* Quick Search Buttons */}
+      <View style={styles.quickSearchContainer}>
+        {QUICK_SEARCH_OPTIONS.map((option) => (
+          <TouchableOpacity
+            key={option.id}
+            style={[
+              styles.quickSearchButton,
+              searchQuery === option.id && (isBlackAndWhite ? styles.selectedPillBW : styles.selectedPill)
+            ]}
+            onPress={() => handleQuickSearch(option.id)}
+            disabled={isLoading}
+          >
+            <Ionicons 
+              name={option.icon} 
+              size={18} 
+              color={searchQuery === option.id ? "white" : isBlackAndWhite ? "#000" : "#333"} 
+              style={styles.quickSearchIcon} 
+            />
+            <Text 
+              style={[
+                styles.quickSearchText, 
+                isLargeText && { fontSize: 16 },
+                searchQuery === option.id && styles.selectedPillText
+              ]}
+            >
+              {option.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      
+      {/* POI Info Card */}
+      {selectedPOI && (
+        <Animated.View 
+          style={[
+            styles.infoCard,
+            {
+              transform: [{ translateY: infoContainerTranslateY }],
+              opacity: fadeAnimation
+            },
+            isBlackAndWhite && styles.infoCardBW
+          ]}
+        >
+          <TouchableOpacity 
+            style={styles.closeButton} 
+            onPress={closeInfo}
+          >
+            <Ionicons 
+              name="close" 
+              size={24} 
+              color={isBlackAndWhite ? "#000" : "#912338"} 
+            />
+          </TouchableOpacity>
+          
+          <Text style={[styles.poiName, isLargeText && styles.largeText]}>
+            {selectedPOI.name}
+          </Text>
+          
+          <View style={styles.addressContainer}>
+            <Ionicons 
+              name="location" 
+              size={18} 
+              color={isBlackAndWhite ? "#000" : "#912338"} 
+              style={styles.addressIcon} 
+            />
+            <Text style={[styles.address, isLargeText && styles.largeText]}>
+              {selectedPOI.address}
+            </Text>
+          </View>
+          
+          <View style={styles.separator} />
+          
+          <ScrollView style={styles.scrollableContent}>
+            {selectedPOI.rating !== 'N/A' && (
+              <View style={styles.sectionContainer}>
+                <View style={styles.sectionHeader}>
+                  <Ionicons 
+                    name="star" 
+                    size={20} 
+                    color={isBlackAndWhite ? "#000" : "#FFC107"} 
+                  />
+                  <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
+                    Rating
+                  </Text>
+                </View>
+                <Text style={[styles.ratingText, isLargeText && styles.largeText]}>
+                  {selectedPOI.rating} / 5
+                </Text>
+              </View>
+            )}
+            
+            <View style={styles.sectionContainer}>
+              <View style={styles.sectionHeader}>
+                <Ionicons 
+                  name="information-circle" 
+                  size={20} 
+                  color={isBlackAndWhite ? "#000" : "#912338"} 
+                />
+                <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
+                  Description
+                </Text>
+              </View>
+              <Text style={[styles.description, isLargeText && styles.largeText]}>
+                {selectedPOI.description || "No description available."}
+              </Text>
+            </View>
+            
+            {/* Add extra padding at the bottom for better scrolling */}
+            <View style={styles.scrollPadding} />
+          </ScrollView>
+          
+          <TouchableOpacity
+            style={[
+              styles.directionsButton,
+              isBlackAndWhite && styles.directionsButtonBW
+            ]}
+            onPress={() => getDirections(selectedPOI)}
+          >
+            <Ionicons 
+              name="navigate" 
+              size={20} 
+              color="white" 
+            />
+            <Text style={[styles.directionsText, isLargeText && { fontSize: 16 }]}>
+              Get Directions
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
       )}
     </View>
   );
@@ -430,11 +618,11 @@ export default function POIScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f5f5f5',
   },
   map: {
-    width,
-    height,
+    width: '100%',
+    height: '100%',
   },
   // Loading indicator
   loadingContainer: {
@@ -506,62 +694,47 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 8,
     borderBottomRightRadius: 8,
   },
-  // Marker styles
-  markerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 36,
-    height: 36,
+  // Map controls
+  mapControls: {
+    position: 'absolute',
+    top: Constants.statusBarHeight + 70,
+    right: 16,
+    zIndex: 1,
   },
-  markerIcon: {
-    fontSize: 24,
-    textAlign: 'center',
-  },
-  // Callout styles
-  calloutContainer: {
-    width: 220,
-    padding: 12,
+  mapControlButton: {
     backgroundColor: 'white',
-    borderRadius: 8,
-    shadowColor: 'black',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  calloutTitle: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  calloutAddress: {
-    fontSize: 12,
-    marginBottom: 5,
-    color: '#555',
-  },
-  calloutRating: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#666',
-    marginBottom: 8,
-  },
-  directionsButton: {
-    backgroundColor: '#912338',
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    marginTop: 5,
+    alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  directionsIcon: {
-    marginRight: 5,
+  // Marker styles
+  customIconMarker: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: 'white',
   },
-  directionsText: {
-    fontSize: 12,
-    color: 'white',
-    fontWeight: '600',
+  markerColor: {
+    backgroundColor: '#912338',
+  },
+  markerBW: {
+    backgroundColor: '#000000',
   },
   // Quick search options
   quickSearchContainer: {
@@ -575,10 +748,10 @@ const styles = StyleSheet.create({
   },
   quickSearchButton: {
     backgroundColor: 'white',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginHorizontal: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 25,
+    marginHorizontal: 6,
     alignItems: 'center',
     flexDirection: 'row',
     shadowColor: 'black',
@@ -587,30 +760,134 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 3,
   },
+  selectedPill: {
+    backgroundColor: '#912338',
+  },
+  selectedPillBW: {
+    backgroundColor: '#000000',
+  },
   quickSearchIcon: {
-    fontSize: 18,
-    marginRight: 5,
+    marginRight: 8,
   },
   quickSearchText: {
     fontSize: 14,
     fontWeight: '500',
     color: '#333',
   },
-  // My location button
-  myLocationButton: {
+  selectedPillText: {
+    color: 'white',
+  },
+  // POI Info Card
+  infoCard: {
     position: 'absolute',
     bottom: 90,
+    left: 20,
+    right: 20,
+    backgroundColor: 'white',
+    borderRadius: 16,
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 70,
+    maxHeight: 350,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  infoCardBW: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#000000',
+    borderWidth: 1,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 10,
+  },
+  poiName: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  addressContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  addressIcon: {
+    marginRight: 6,
+    marginTop: 2,
+  },
+  address: {
+    fontSize: 16,
+    color: '#666',
+    flex: 1,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#E0E0E0',
+    marginVertical: 16,
+  },
+  scrollableContent: {
+    maxHeight: 170,
+  },
+  sectionContainer: {
+    marginBottom: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginLeft: 8,
+  },
+  description: {
+    fontSize: 16,
+    color: '#666',
+    lineHeight: 22,
+  },
+  ratingText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  directionsButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
     right: 20,
     backgroundColor: '#912338',
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: 'black',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 4,
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  directionsButtonBW: {
+    backgroundColor: '#000000',
+  },
+  directionsText: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  largeText: {
+    fontSize: 20,
+  },
+  scrollPadding: {
+    height: 20,
   },
 });

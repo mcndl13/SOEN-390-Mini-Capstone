@@ -55,6 +55,7 @@ type DirectionsParams = {
     latitude: number;
     longitude: number;
   };
+  travelMode?: MapViewDirectionsMode;
 };
 
 // Coordinates for the two campuses
@@ -276,23 +277,31 @@ export default function DirectionsScreen() {
       duration: 300,
       useNativeDriver: true,
     }).start();
-
+  
     // Only proceed if we have both origin and destination in params
     if (route.params?.origin && route.params?.destination) {
-      // Set both values first
+      // Immediately show directions to prevent the search container from flashing
+      setShowDirections(true);
+      
+      // Set both values after showing directions
       setOrigin(route.params.origin);
       setDestination(route.params.destination);
       
+      // Set travel mode if provided in params
+      if (route.params.travelMode) {
+        setTravelMode(route.params.travelMode);
+      }
+
+      setExpandedDirections(true);
+      setDirectionsHeight(height * 0.7);
+      
       // Then use setTimeout to ensure state updates have been processed
       setTimeout(() => {
-        // Now it's safe to trace the route
+        // Now it's safe to process the route
         if (mapRef.current) {
-          // Skip the traceRoute function entirely and do its work directly
-          // This avoids the alert checks in the original function
+          // Get finalized coordinates
           const finalOrigin = route.params.origin ? snapToNearestBuilding(route.params.origin) : INITIAL_POSITION;
           const finalDestination = route.params.destination ? snapToNearestBuilding(route.params.destination) : INITIAL_POSITION;
-          
-          setShowDirections(true);
           
           // Check if shuttle route applies
           const shuttleApplicable = isShuttleRouteApplicable();
@@ -304,7 +313,7 @@ export default function DirectionsScreen() {
             animated: true,
           });
         }
-      }, 500);
+      }, 300); // Reduced timeout for better responsiveness
     } else if (route.params?.origin) {
       setOrigin(route.params.origin);
     } else if (route.params?.destination) {
@@ -556,6 +565,8 @@ export default function DirectionsScreen() {
     if (result) {
       setDistance(result.distance);
       setDuration(result.duration);
+      setExpandedDirections(true);
+      setDirectionsHeight(height * 0.7);
     }
     fetchDetailedDirections(origin, destination, travelMode);
   };
