@@ -742,7 +742,7 @@ export default function DirectionsScreen() {
     const icons: Record<MapViewDirectionsMode, string> = {
       'DRIVING': 'car-outline',
       'WALKING': 'walk-outline',
-      'CYCLING': 'bicycle-outline',
+      'BICYCLING': 'bicycle-outline',
       'TRANSIT': 'bus-outline'
     };
     return icons[mode] || 'navigate-outline';
@@ -1037,7 +1037,7 @@ export default function DirectionsScreen() {
             </Text>
             
             <View style={styles.modeContainer}>
-            {['DRIVING', 'WALKING', 'CYCLING', 'TRANSIT'].map(mode => (
+            {['DRIVING', 'WALKING', 'BICYCLING', 'TRANSIT'].map(mode => (
                 <TouchableOpacity
                   key={mode}
                   style={[
