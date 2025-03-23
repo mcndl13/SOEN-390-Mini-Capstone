@@ -31,6 +31,27 @@ const renderWithContext = (isBlackAndWhite: boolean, isLargeText: boolean) => {
   );
 };
 
+// NEW: Helper functions to reduce duplication
+const defaultCoords = { latitude: 45.4953534, longitude: -73.578549 };
+
+const setPermissions = (status: string) => {
+  Location.requestForegroundPermissionsAsync.mockResolvedValue({ status });
+};
+
+const setLocationSuccess = (coords = defaultCoords) => {
+  Location.getCurrentPositionAsync.mockResolvedValue({ coords });
+};
+
+const setLocationFailure = (errorMsg: string) => {
+  Location.getCurrentPositionAsync.mockRejectedValue(new Error(errorMsg));
+};
+
+const triggerSearch = (getByPlaceholderText: any, query: string) => {
+  const searchInput = getByPlaceholderText('Search for places...');
+  fireEvent.changeText(searchInput, query);
+  fireEvent(searchInput, 'submitEditing');
+};
+
 describe('POIScreen', () => {
   test('mapStyle is black and white when isBlackAndWhite is true', () => {
     const { getByTestId } = renderWithContext(true, false);
@@ -53,12 +74,8 @@ describe('POIScreen', () => {
   });
 
   test('displays loading indicator when fetching location', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({ status: 'OK', results: [] }),
@@ -72,9 +89,7 @@ describe('POIScreen', () => {
   });
 
   test('displays error message when location permission is denied', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'denied',
-    });
+    setPermissions('denied');
 
     const { getByText } = renderWithContext(false, false);
 
@@ -84,12 +99,8 @@ describe('POIScreen', () => {
   });
 
   test('displays error message when location cannot be determined', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockRejectedValue(
-      new Error('Location error'),
-    );
+    setPermissions('granted');
+    setLocationFailure('Location error');
 
     const { getByText } = renderWithContext(false, false);
 
@@ -99,31 +110,21 @@ describe('POIScreen', () => {
   });
 
   test('fetches POIs on search submission', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
 
     const { getByPlaceholderText, getByTestId } = renderWithContext(
       false,
       false,
     );
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, 'cafe');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, 'cafe');
 
     await waitFor(() => expect(getByTestId('mapView')).toBeTruthy());
   });
 
   test('displays message when no POIs are found', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
 
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -132,20 +133,14 @@ describe('POIScreen', () => {
     );
 
     const { getByPlaceholderText, getByText } = renderWithContext(false, false);
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, 'cafe');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, 'cafe');
 
     await waitFor(() => expect(getByText('No places found')).toBeTruthy());
   });
 
   test('displays POIs on the map', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
 
     global.fetch = jest.fn(() =>
       Promise.resolve({
@@ -170,9 +165,7 @@ describe('POIScreen', () => {
       false,
       false,
     );
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, 'cafe');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, 'cafe');
 
     await waitFor(() => expect(getByTestId('mapView')).toBeTruthy());
   });
@@ -189,19 +182,13 @@ describe('POIScreen additional coverage', () => {
   });
 
   test('displays error message when POI fetch fails', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
 
     global.fetch = jest.fn(() => Promise.reject(new Error('API error')));
 
     const { getByPlaceholderText, getByText } = renderWithContext(false, false);
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, 'museum');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, 'museum');
 
     await waitFor(() =>
       expect(getByText('Failed to fetch places')).toBeTruthy(),
@@ -209,12 +196,8 @@ describe('POIScreen additional coverage', () => {
   });
 
   test('displays correct icons for various POI types (covers determinePoiType)', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () =>
@@ -277,9 +260,7 @@ describe('POIScreen additional coverage', () => {
       false,
       false,
     );
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, 'test');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, 'test');
 
     const mapView = await waitFor(() => getByTestId('mapView'));
     const withinMap = within(mapView);
@@ -296,12 +277,8 @@ describe('POIScreen additional coverage', () => {
 
 describe('Additional POIScreen tests', () => {
   test('displays multiple POIs markers on the map', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () =>
@@ -332,9 +309,7 @@ describe('Additional POIScreen tests', () => {
       false,
       false,
     );
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, 'park');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, 'park');
     await waitFor(() => {
       const mapView = getByTestId('mapView');
       const withinMap = within(mapView);
@@ -344,20 +319,14 @@ describe('Additional POIScreen tests', () => {
   });
 
   test('handles empty search query gracefully', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
     global.fetch = jest.fn();
     const { getByPlaceholderText, queryByText } = renderWithContext(
       false,
       false,
     );
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, '');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, '');
     await waitFor(() => {
       expect(global.fetch).not.toHaveBeenCalled();
       expect(queryByText('Please enter a search term')).toBeNull();
@@ -365,21 +334,15 @@ describe('Additional POIScreen tests', () => {
   });
 
   test('displays error message when POI fetch returns non OK status', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({ status: 'FAIL', results: [] }),
       }),
     );
     const { getByPlaceholderText, getByText } = renderWithContext(false, false);
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, 'library');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, 'library');
     await waitFor(() =>
       expect(getByText('Error fetching places')).toBeTruthy(),
     );
@@ -388,29 +351,19 @@ describe('Additional POIScreen tests', () => {
 
 describe('Increased coverage tests', () => {
   test('does not fetch POIs for whitespace-only query', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
     global.fetch = jest.fn();
     const { getByPlaceholderText } = renderWithContext(false, false);
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, '    ');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, '    ');
     await waitFor(() => {
       expect(global.fetch).not.toHaveBeenCalled();
     });
   });
 
   test('displays POIs with incomplete data', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () =>
@@ -431,9 +384,7 @@ describe('Increased coverage tests', () => {
       false,
       false,
     );
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, 'cafe');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, 'cafe');
     await waitFor(() => {
       expect(getByTestId('mapView')).toBeTruthy();
       const withinMap = within(getByTestId('mapView'));
@@ -444,12 +395,8 @@ describe('Increased coverage tests', () => {
 
 describe('Additional missing lines coverage', () => {
   test('displays correct icons for various POI types (covers determinePoiType)', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () =>
@@ -512,9 +459,7 @@ describe('Additional missing lines coverage', () => {
       false,
       false,
     );
-    const searchInput = getByPlaceholderText('Search for places...');
-    fireEvent.changeText(searchInput, 'test');
-    fireEvent(searchInput, 'submitEditing');
+    triggerSearch(getByPlaceholderText, 'test');
     await waitFor(() => expect(getByTestId('mapView')).toBeTruthy());
     const mapView = getByTestId('mapView');
     const { getByText: getByTextWithin } = within(mapView);
@@ -527,12 +472,8 @@ describe('Additional missing lines coverage', () => {
   });
 
   test('shows success message when POIs are found (covers line 115)', async () => {
-    Location.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
-    });
-    Location.getCurrentPositionAsync.mockResolvedValue({
-      coords: { latitude: 45.4953534, longitude: -73.578549 },
-    });
+    setPermissions('granted');
+    setLocationSuccess();
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () =>
