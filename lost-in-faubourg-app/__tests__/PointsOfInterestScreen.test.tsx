@@ -31,7 +31,6 @@ const renderWithContext = (isBlackAndWhite: boolean, isLargeText: boolean) => {
   );
 };
 
-// NEW: Helper functions to reduce duplication
 const defaultCoords = { latitude: 45.4953534, longitude: -73.578549 };
 
 const setPermissions = (status: string) => {
@@ -50,6 +49,78 @@ const triggerSearch = (getByPlaceholderText: any, query: string) => {
   const searchInput = getByPlaceholderText('Search for places...');
   fireEvent.changeText(searchInput, query);
   fireEvent(searchInput, 'submitEditing');
+};
+
+const setIconsFetchResponse = () => {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      json: () =>
+        Promise.resolve({
+          status: 'OK',
+          results: [
+            {
+              place_id: '1',
+              name: 'Library Test',
+              types: ['library'],
+              geometry: { location: { lat: 45.496, lng: -73.579 } },
+              vicinity: 'Library Ave',
+              rating: 4.2,
+            },
+            {
+              place_id: '2',
+              name: 'Bookstore Test',
+              types: ['book_store'],
+              geometry: { location: { lat: 45.497, lng: -73.58 } },
+              vicinity: 'Book St',
+              rating: 4.0,
+            },
+            {
+              place_id: '3',
+              name: 'Restaurant Test',
+              types: ['restaurant'],
+              geometry: { location: { lat: 45.498, lng: -73.581 } },
+              vicinity: 'Food Rd',
+              rating: 4.3,
+            },
+            {
+              place_id: '4',
+              name: 'Bar Test',
+              types: ['bar'],
+              geometry: { location: { lat: 45.499, lng: -73.582 } },
+              vicinity: 'Bar Blvd',
+              rating: 4.1,
+            },
+            {
+              place_id: '5',
+              name: 'Gym Test',
+              types: ['gym'],
+              geometry: { location: { lat: 45.5, lng: -73.583 } },
+              vicinity: 'Fitness Ln',
+              rating: 4.5,
+            },
+            {
+              place_id: '6',
+              name: 'Unknown Test',
+              types: ['unknown'],
+              geometry: { location: { lat: 45.501, lng: -73.584 } },
+              vicinity: 'Mystery Rd',
+              rating: 3.9,
+            },
+          ],
+        }),
+    }),
+  );
+};
+
+const verifyPoiIcons = async (withinMap: any) => {
+  await waitFor(async () => {
+    expect(await withinMap.findByText('📚')).toBeTruthy();
+    expect(await withinMap.findByText('📖')).toBeTruthy();
+    expect(await withinMap.findByText('🍽️')).toBeTruthy();
+    expect(await withinMap.findByText('☕')).toBeTruthy();
+    expect(await withinMap.findByText('💪')).toBeTruthy();
+    expect(await withinMap.findByText('📍')).toBeTruthy();
+  });
 };
 
 describe('POIScreen', () => {
@@ -195,67 +266,12 @@ describe('POIScreen additional coverage', () => {
     );
   });
 
+  // Modified test to use helper functions
   test('displays correct icons for various POI types (covers determinePoiType)', async () => {
     setPermissions('granted');
     setLocationSuccess();
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () =>
-          Promise.resolve({
-            status: 'OK',
-            results: [
-              {
-                place_id: '1',
-                name: 'Library Test',
-                types: ['library'],
-                geometry: { location: { lat: 45.496, lng: -73.579 } },
-                vicinity: 'Library Ave',
-                rating: 4.2,
-              },
-              {
-                place_id: '2',
-                name: 'Bookstore Test',
-                types: ['book_store'],
-                geometry: { location: { lat: 45.497, lng: -73.58 } },
-                vicinity: 'Book St',
-                rating: 4.0,
-              },
-              {
-                place_id: '3',
-                name: 'Restaurant Test',
-                types: ['restaurant'],
-                geometry: { location: { lat: 45.498, lng: -73.581 } },
-                vicinity: 'Food Rd',
-                rating: 4.3,
-              },
-              {
-                place_id: '4',
-                name: 'Bar Test',
-                types: ['bar'],
-                geometry: { location: { lat: 45.499, lng: -73.582 } },
-                vicinity: 'Bar Blvd',
-                rating: 4.1,
-              },
-              {
-                place_id: '5',
-                name: 'Gym Test',
-                types: ['gym'],
-                geometry: { location: { lat: 45.5, lng: -73.583 } },
-                vicinity: 'Fitness Ln',
-                rating: 4.5,
-              },
-              {
-                place_id: '6',
-                name: 'Unknown Test',
-                types: ['unknown'],
-                geometry: { location: { lat: 45.501, lng: -73.584 } },
-                vicinity: 'Mystery Rd',
-                rating: 3.9,
-              },
-            ],
-          }),
-      }),
-    );
+    setIconsFetchResponse();
+
     const { getByPlaceholderText, getByTestId } = renderWithContext(
       false,
       false,
@@ -264,14 +280,7 @@ describe('POIScreen additional coverage', () => {
 
     const mapView = await waitFor(() => getByTestId('mapView'));
     const withinMap = within(mapView);
-    await waitFor(async () => {
-      expect(await withinMap.findByText('📚')).toBeTruthy();
-      expect(await withinMap.findByText('📖')).toBeTruthy();
-      expect(await withinMap.findByText('🍽️')).toBeTruthy();
-      expect(await withinMap.findByText('☕')).toBeTruthy();
-      expect(await withinMap.findByText('💪')).toBeTruthy();
-      expect(await withinMap.findByText('📍')).toBeTruthy();
-    });
+    await verifyPoiIcons(withinMap);
   });
 });
 
@@ -394,83 +403,8 @@ describe('Increased coverage tests', () => {
 });
 
 describe('Additional missing lines coverage', () => {
-  test('displays correct icons for various POI types (covers determinePoiType)', async () => {
-    setPermissions('granted');
-    setLocationSuccess();
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        json: () =>
-          Promise.resolve({
-            status: 'OK',
-            results: [
-              {
-                place_id: '1',
-                name: 'Library Test',
-                types: ['library'],
-                geometry: { location: { lat: 45.496, lng: -73.579 } },
-                vicinity: 'Library Ave',
-                rating: 4.2,
-              },
-              {
-                place_id: '2',
-                name: 'Bookstore Test',
-                types: ['book_store'],
-                geometry: { location: { lat: 45.497, lng: -73.58 } },
-                vicinity: 'Book St',
-                rating: 4.0,
-              },
-              {
-                place_id: '3',
-                name: 'Restaurant Test',
-                types: ['restaurant'],
-                geometry: { location: { lat: 45.498, lng: -73.581 } },
-                vicinity: 'Food Rd',
-                rating: 4.3,
-              },
-              {
-                place_id: '4',
-                name: 'Bar Test',
-                types: ['bar'],
-                geometry: { location: { lat: 45.499, lng: -73.582 } },
-                vicinity: 'Bar Blvd',
-                rating: 4.1,
-              },
-              {
-                place_id: '5',
-                name: 'Gym Test',
-                types: ['gym'],
-                geometry: { location: { lat: 45.5, lng: -73.583 } },
-                vicinity: 'Fitness Ln',
-                rating: 4.5,
-              },
-              {
-                place_id: '6',
-                name: 'Unknown Test',
-                types: ['unknown'],
-                geometry: { location: { lat: 45.501, lng: -73.584 } },
-                vicinity: 'Mystery Rd',
-                rating: 3.9,
-              },
-            ],
-          }),
-      }),
-    );
-    const { getByPlaceholderText, getByTestId } = renderWithContext(
-      false,
-      false,
-    );
-    triggerSearch(getByPlaceholderText, 'test');
-    await waitFor(() => expect(getByTestId('mapView')).toBeTruthy());
-    const mapView = getByTestId('mapView');
-    const { getByText: getByTextWithin } = within(mapView);
-    expect(getByTextWithin('📚')).toBeTruthy();
-    expect(getByTextWithin('📖')).toBeTruthy();
-    expect(getByTextWithin('🍽️')).toBeTruthy();
-    expect(getByTextWithin('☕')).toBeTruthy();
-    expect(getByTextWithin('💪')).toBeTruthy();
-    expect(getByTextWithin('📍')).toBeTruthy();
-  });
-
+  // Removed duplicate test for "displays correct icons for various POI types (covers determinePoiType)"
+  // ...existing code for other tests remains unchanged...
   test('shows success message when POIs are found (covers line 115)', async () => {
     setPermissions('granted');
     setLocationSuccess();
