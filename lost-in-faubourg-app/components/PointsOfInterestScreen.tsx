@@ -312,6 +312,7 @@ export default function POIScreen() {
         showsUserLocation={true}
         showsMyLocationButton={true}
         customMapStyle={mapStyle}
+        testID="mapView"
       >
         {/* Polygons for Concordia buildings */}
         {polygons.map((polygon, idx) => (
@@ -346,7 +347,7 @@ export default function POIScreen() {
                 {poi.rating !== 'N/A' && (
                   <Text style={[styles.calloutRating, isLargeText && { fontSize: 14 }]}>Rating: {poi.rating} ⭐</Text>
                 )}
-                <View style={styles.directionsButton}>
+                <View style={styles.directionsButton} testID="getDirectionsButton">
                   <Ionicons name="navigate" size={isLargeText ? 18 : 16} color="white" style={styles.directionsIcon} />
                   <Text style={[styles.directionsText, isLargeText && { fontSize: 14 }]}>Get Directions</Text>
                 </View>
@@ -401,7 +402,7 @@ export default function POIScreen() {
             disabled={isLoading}
           >
             <Text style={styles.quickSearchIcon}>{option.icon}</Text>
-            <Text style={[styles.quickSearchText, isLargeText && { fontSize: 16 }]}>{option.name}</Text>
+            <Text style={[styles.quickSearchText, isLargeText && { fontSize: 16 }]} testID='quickSearchText'>{option.name}</Text>
           </TouchableOpacity>
         ))}
       </View>
