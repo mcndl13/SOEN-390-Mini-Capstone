@@ -11,6 +11,7 @@ import {
   PanResponder,
   Animated,
   Alert,
+  StatusBar,
 } from 'react-native';
 import MapView, { Marker, Polygon, PROVIDER_DEFAULT, MapStyleElement } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -22,6 +23,7 @@ import { useRoute, RouteProp } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import 'react-native-get-random-values';
 import { GOOGLE_MAPS_API_KEY } from '@env';
+import { Ionicons } from '@expo/vector-icons';
 
 import { AccessibilityContext } from './AccessibilitySettings';
 import { polygons } from '../components/polygonCoordinates';
@@ -65,46 +67,83 @@ function InputAutocomplete({
   placeholder,
   onPlaceSelected,
   currentValue,
+  isLargeText,
+  isBlackAndWhite,
 }: {
   label: string;
   placeholder: string;
   onPlaceSelected: (data: any, details: any) => void;
   currentValue?: string;
+  isLargeText?: boolean;
+  isBlackAndWhite?: boolean;
 }) {
-  // Minimal custom styling for Google Autocomplete
+  // Modern styling for Google Autocomplete
   const googleAutocompleteStyles = {
-    container: { flex: 0 },
+    container: { flex: 0, marginBottom: 6 },
     textInputContainer: {
       width: '100%',
       backgroundColor: 'transparent',
       borderTopWidth: 0,
       borderBottomWidth: 0,
-      paddingTop: 5,
-      paddingBottom: 10,
+      paddingVertical: 2,
     },
     textInput: {
       height: 40,
-      color: '#5d5d5d',
-      fontSize: 16,
-      borderWidth: 0.5,
-      borderColor: '#912338',
-      borderRadius: 15,
-      paddingHorizontal: 10,
+      color: isBlackAndWhite ? '#000000' : '#333333',
+      fontSize: isLargeText ? 18 : 16,
+      borderWidth: 1,
+      borderColor: isBlackAndWhite ? '#000000' : '#912338',
+      borderRadius: 12,
+      paddingHorizontal: 12,
+      backgroundColor: 'white',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+      elevation: 2,
     },
-    listView: {},
-    description: { fontWeight: 'bold' },
-    predefinedPlacesDescription: { color: '#1faadb' },
+    listView: {
+      marginTop: 5,
+      borderRadius: 8,
+      overflow: 'hidden',
+    },
+    description: { 
+      fontWeight: '500',
+      color: isBlackAndWhite ? '#000000' : '#333333', 
+      fontSize: isLargeText ? 16 : 14,
+    },
+    predefinedPlacesDescription: { 
+      color: isBlackAndWhite ? '#000000' : '#912338' 
+    },
+    row: {
+      backgroundColor: 'white',
+      padding: 13,
+      height: 'auto',
+      borderBottomWidth: 1,
+      borderBottomColor: '#f0f0f0',
+    },
   };
 
   return (
-    <>
-      <Text>{label}</Text>
+    <View style={styles.inputContainer}>
+      <Text style={[
+        styles.inputLabel, 
+        isLargeText && styles.largeText,
+        isBlackAndWhite && styles.blackAndWhiteText
+      ]}>
+        {label}
+      </Text>
       {currentValue ? (
         <View style={[
           googleAutocompleteStyles.textInput, 
-          { justifyContent: 'center', paddingHorizontal: 10 }
+          { justifyContent: 'center', paddingHorizontal: 16 }
         ]}>
-          <Text>{currentValue}</Text>
+          <Text style={[
+            { fontSize: isLargeText ? 18 : 16 },
+            isBlackAndWhite && styles.blackAndWhiteText
+          ]}>
+            {currentValue}
+          </Text>
         </View>
       ) : (
         <GooglePlacesAutocomplete
@@ -119,12 +158,15 @@ function InputAutocomplete({
             components: 'country:ca', // Limit to Canada for better results
           }}
           styles={googleAutocompleteStyles}
+          textInputProps={{
+            placeholderTextColor: "#999999"
+          }}
           enablePoweredByContainer={false}
           minLength={2}
           debounce={300}
         />
       )}
-    </>
+    </View>
   );
 }
 
@@ -137,10 +179,12 @@ export default function DirectionsScreen() {
   const [origin, setOrigin] = useState<{
     latitude: number;
     longitude: number;
+    name?: string;
   } | null>(null);
   const [destination, setDestination] = useState<{
     latitude: number;
     longitude: number;
+    name?: string;
   } | null>(null);
 
   // We still fetch userLocation if you want to show the user's position,
@@ -159,12 +203,12 @@ export default function DirectionsScreen() {
   
   // States for expandable directions panel
   const [expandedDirections, setExpandedDirections] = useState<boolean>(false);
-  const [directionsHeight, setDirectionsHeight] = useState<number>(150);
+  const [directionsHeight, setDirectionsHeight] = useState<number>(180);
   
   // State for route tabs
   const [activeRouteTab, setActiveRouteTab] = useState<'standard' | 'shuttle'>('standard');
 
-  // Keep track of travel mode: DRIVING, WALKING, BICYCLING, TRANSIT
+  // Keep track of travel mode: DRIVING, WALKING, CYCLING, TRANSIT
   const [travelMode, setTravelMode] =
     useState<MapViewDirectionsMode>('DRIVING');
 
@@ -180,6 +224,7 @@ export default function DirectionsScreen() {
   
   // Create an animated value for the directions panel height
   const panY = useRef(new Animated.Value(0)).current;
+  const fadeInAnim = useRef(new Animated.Value(0)).current;
 
   // Set up pan responder for swipe gestures on the handle only
   const panResponder = useRef(
@@ -200,7 +245,7 @@ export default function DirectionsScreen() {
             useNativeDriver: false,
           }).start();
           setExpandedDirections(true);
-          setDirectionsHeight(height * 0.6);
+          setDirectionsHeight(height * 0.7);
         } 
         // If swiped down and expanded
         else if (gestureState.dy > 20 && expandedDirections) {
@@ -210,7 +255,7 @@ export default function DirectionsScreen() {
             useNativeDriver: false,
           }).start();
           setExpandedDirections(false);
-          setDirectionsHeight(150);
+          setDirectionsHeight(180);
         } 
         // Return to original position for small movements
         else {
@@ -225,6 +270,13 @@ export default function DirectionsScreen() {
 
   // Handle navigation parameters
   useEffect(() => {
+    // Animate toast message appearance
+    Animated.timing(fadeInAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+
     // Only proceed if we have both origin and destination in params
     if (route.params?.origin && route.params?.destination) {
       // Set both values first
@@ -237,8 +289,8 @@ export default function DirectionsScreen() {
         if (mapRef.current) {
           // Skip the traceRoute function entirely and do its work directly
           // This avoids the alert checks in the original function
-          const finalOrigin = snapToNearestBuilding(route.params.origin);
-          const finalDestination = snapToNearestBuilding(route.params.destination);
+          const finalOrigin = route.params.origin ? snapToNearestBuilding(route.params.origin) : INITIAL_POSITION;
+          const finalDestination = route.params.destination ? snapToNearestBuilding(route.params.destination) : INITIAL_POSITION;
           
           setShowDirections(true);
           
@@ -263,9 +315,23 @@ export default function DirectionsScreen() {
   // Toast message timeout effect
   useEffect(() => {
     if (toastMessage) {
+      // First fade in
+      Animated.timing(fadeInAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      
+      // Then set a timer to fade out and clear
       const timer = setTimeout(() => {
-        setToastMessage(null);
-      }, 3000);
+        Animated.timing(fadeInAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start(() => {
+          setToastMessage(null);
+        });
+      }, 2000);
       
       return () => clearTimeout(timer);
     }
@@ -354,11 +420,11 @@ export default function DirectionsScreen() {
     
     // Determine where to set the position using alternating logic
     if (nextPointIsOrigin) {
-      setOrigin(snappedPosition);
+      setOrigin({...snappedPosition, name: label});
       setToastMessage(`${label} set as origin`);
       setNextPointIsOrigin(false); // Next one will be destination
     } else {
-      setDestination(snappedPosition);
+      setDestination({...snappedPosition, name: label});
       setToastMessage(`${label} set as destination`);
       setNextPointIsOrigin(true); // Next one will be origin
     }
@@ -392,7 +458,7 @@ export default function DirectionsScreen() {
       );
     } else {
       // Use regular user location
-      setSmartLocation(userLocation, "Your location");
+      setSmartLocation(userLocation, "My Location");
     }
   };
 
@@ -614,6 +680,7 @@ export default function DirectionsScreen() {
   const toggleShuttles = () => {
     setShowShuttles(!showShuttles);
   };
+  
   // Reset origin and destination with a visual reset too
   const resetOriginAndDestination = () => {
     setOrigin(null);
@@ -633,27 +700,6 @@ export default function DirectionsScreen() {
     mapRef.current?.animateToRegion(INITIAL_POSITION, 1000);
   };
 
-  // Test directions with hardcoded values (for debugging)
-  const testDirections = () => {
-    const testOrigin = { latitude: 45.4953534, longitude: -73.578549 }; // SGW
-    const testDest = { latitude: 45.4582, longitude: -73.6405 }; // Loyola
-    
-    setOrigin(testOrigin);
-    setDestination(testDest);
-    
-    // Wait a moment for state to update
-    setTimeout(() => {
-      if (mapRef.current) {
-        mapRef.current.fitToCoordinates([testOrigin, testDest], {
-          edgePadding,
-          animated: true,
-        });
-        setShowDirections(true);
-        setShowShuttleRoute(true);
-      }
-    }, 500);
-  };
-
   // Add map style for black and white mode
   const mapStyle: MapStyleElement[] = isBlackAndWhite ? [
     {
@@ -668,41 +714,70 @@ export default function DirectionsScreen() {
       "elementType": "labels.text.stroke",
       "stylers": [{ "saturation": -100 }]
     }
-  ] : [];
+  ] : [
+    {
+      featureType: 'water',
+      elementType: 'geometry',
+      stylers: [{ color: '#e9e9e9' }, { lightness: 17 }],
+    },
+    {
+      featureType: 'landscape',
+      elementType: 'geometry',
+      stylers: [{ color: '#f5f5f5' }, { lightness: 20 }],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry.fill',
+      stylers: [{ color: '#ffffff' }, { lightness: 17 }],
+    },
+    {
+      featureType: 'poi',
+      elementType: 'geometry',
+      stylers: [{ color: '#f5f5f5' }, { lightness: 21 }],
+    },
+  ];
 
-  const getImageSource = (mode: string, travelMode: string) => {
-    const images = {
-      DRIVING: travelMode === 'DRIVING' ? require('../assets/images/transportModes/carWhite.png') : require('../assets/images/transportModes/carBlack.png'),
-      WALKING: travelMode === 'WALKING' ? require('../assets/images/transportModes/walkWhite.png') : require('../assets/images/transportModes/walkBlack.png'),
-      BICYCLING: travelMode === 'BICYCLING' ? require('../assets/images/transportModes/bikeWhite.png') : require('../assets/images/transportModes/bikeBlack.png'),
-      TRANSIT: travelMode === 'TRANSIT' ? require('../assets/images/transportModes/busWhite.png') : require('../assets/images/transportModes/busBlack.png'),
+  // Get appropriate icon for mode button
+  const getModeIcon = (mode: MapViewDirectionsMode): string => {
+    const icons: Record<MapViewDirectionsMode, string> = {
+      'DRIVING': 'car-outline',
+      'WALKING': 'walk-outline',
+      'CYCLING': 'bicycle-outline',
+      'TRANSIT': 'bus-outline'
     };
-    return images[mode];
-  };
-  
-  const getTextStyle = (mode: string, travelMode: string, isLargeText: boolean, isBlackAndWhite: boolean) => {
-    return [
-      styles.modeButtonText,
-      travelMode === mode && styles.activeModeButtonText,
-      isLargeText && styles.largeText,
-      isBlackAndWhite && styles.blackAndWhiteText,
-    ];
+    return icons[mode] || 'navigate-outline';
   };
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      
       {/* Toast Message */}
       {toastMessage && (
-        <View style={styles.toastContainer}>
+        <Animated.View 
+          style={[
+            styles.toastContainer,
+            { opacity: fadeInAnim }
+          ]}
+        >
           <Text style={styles.toastText}>{toastMessage}</Text>
-        </View>
+        </Animated.View>
       )}
       
       {/* Building Detection Badge */}
       {userLocation && checkUserInBuilding() && (
         <View style={styles.buildingInfoBadge}>
-          <Text style={styles.buildingInfoText}>
-            You are in a Concordia building
+          <Ionicons 
+            name="location" 
+            size={16} 
+            color={isBlackAndWhite ? "#000" : "#912338"} 
+            style={styles.buildingIcon} 
+          />
+          <Text style={[
+            styles.buildingInfoText,
+            isLargeText && styles.largeText
+          ]}>
+            Inside a Concordia building
           </Text>
         </View>
       )}
@@ -714,39 +789,58 @@ export default function DirectionsScreen() {
         initialRegion={INITIAL_POSITION}
         customMapStyle={mapStyle}
         onRegionChangeComplete={onRegionChange}
+        showsUserLocation={true}
+        showsMyLocationButton={false}
+        showsCompass={true}
+        showsScale={true}
       >
         {/* Polygons for Concordia buildings */}
         {polygons.map((polygon, idx) => (
           <Polygon
             key={idx}
             coordinates={polygon.boundaries}
-            fillColor={isBlackAndWhite ? "#000000aa" : "#912338cc"}
-            strokeColor={isBlackAndWhite ? "#000000" : "#912338cc"}
+            fillColor={isBlackAndWhite ? "#00000033" : "#91233833"}
+            strokeColor={isBlackAndWhite ? "#000000" : "#912338"}
             strokeWidth={2}
           />
         ))}
 
-        {/* Markers with adjusted colors */}
-        {userLocation && (
-          <Marker
-            coordinate={userLocation}
-            title="My Location"
-            pinColor={isBlackAndWhite ? "black" : "blue"}
-          />
-        )}
+        {/* Origin and destination markers */}
         {origin && (
           <Marker 
             coordinate={origin} 
             title="Origin" 
             pinColor={isBlackAndWhite ? "black" : "green"} 
-          />
+          >
+            <View style={[
+              styles.customIconMarker,
+              isBlackAndWhite ? styles.markerBW : styles.originMarker
+            ]}>
+              <Ionicons 
+                name="locate" 
+                size={18} 
+                color="white" 
+              />
+            </View>
+          </Marker>
         )}
         {destination && (
           <Marker 
             coordinate={destination} 
             title="Destination" 
             pinColor={isBlackAndWhite ? "black" : "red"} 
-          />
+          >
+            <View style={[
+              styles.customIconMarker,
+              isBlackAndWhite ? styles.markerBW : styles.destinationMarker
+            ]}>
+              <Ionicons 
+                name="flag" 
+                size={18} 
+                color="white" 
+              />
+            </View>
+          </Marker>
         )}
 
         {/* Shuttle bus markers */}
@@ -762,12 +856,14 @@ export default function DirectionsScreen() {
               testID={`marker-${bus.ID}`}
               tracksViewChanges={false}
             >
-              {/* Custom marker for bus icon */}
-              <View style={styles.busMarker}>
-                <Image
-                  source={require('../assets/images/transportModes/busBlack.png')} //bus icon
-                  style={styles.busIcon}
-                  resizeMode="contain"
+              <View style={[
+                styles.customIconMarker,
+                isBlackAndWhite ? styles.markerBW : styles.shuttleMarker
+              ]}>
+                <Ionicons 
+                  name="bus" 
+                  size={20} 
+                  color="white" 
                 />
               </View>
             </Marker>
@@ -786,12 +882,14 @@ export default function DirectionsScreen() {
               testID={`marker-${station.ID}`}
               tracksViewChanges={false}
             >
-              {/* Custom marker for station icon */}
-              <View style={styles.stationMarker}>
-                <Image
-                  source={require('../assets/images/transportModes/busStation.png')}
-                  style={styles.stationIcon}
-                  resizeMode="contain"
+              <View style={[
+                styles.customIconMarker,
+                isBlackAndWhite ? styles.markerBW : styles.stationMarker
+              ]}>
+                <Ionicons 
+                  name="bus-outline" 
+                  size={20} 
+                  color="white" 
                 />
               </View>
             </Marker>
@@ -803,7 +901,7 @@ export default function DirectionsScreen() {
             origin={origin}
             destination={destination}
             apikey={GOOGLE_MAPS_API_KEY}
-            strokeColor={isBlackAndWhite ? "#000000" : "#6644ff"}
+            strokeColor={isBlackAndWhite ? "#000000" : "#912338"}
             strokeWidth={isBlackAndWhite ? 4 : 3}
             mode={travelMode}
             onReady={traceRouteOnReady}
@@ -812,137 +910,168 @@ export default function DirectionsScreen() {
         )}
       </MapView>
 
-      {/* Shuttle Toggle Button */}
-      <TouchableOpacity
-        style={styles.shuttleToggleButton}
-        onPress={toggleShuttles}
-      >
-        <Text style={styles.shuttleToggleText}>
-          {showShuttles ? 'Hide Shuttles' : 'Show Shuttles'}
-        </Text>
-      </TouchableOpacity>
+      {/* Map Controls */}
+      <View style={styles.mapControls}>
+        <TouchableOpacity 
+          style={styles.mapControlButton} 
+          onPress={() => {
+            if (userLocation) {
+              moveTo(userLocation);
+            }
+          }}
+        >
+          <Ionicons 
+            name="locate" 
+            size={24} 
+            color={isBlackAndWhite ? "#000" : "#912338"} 
+          />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.mapControlButton} 
+          onPress={toggleShuttles}
+        >
+          <Ionicons 
+            name="bus" 
+            size={24} 
+            color={isBlackAndWhite ? "#000" : showShuttles ? "#1E88E5" : "#757575"} 
+          />
+        </TouchableOpacity>
+      </View>
 
       {/* Conditionally Render the Search Bar */}
-      {/* Search Container with accessibility styles */}
       {!showDirections && (
         <View style={[
           styles.searchContainer,
           isBlackAndWhite && styles.blackAndWhiteContainer
         ]}>
-          <Text style={[styles.label, isLargeText && styles.largeText]}>Origin</Text>
+          
           <InputAutocomplete
-            placeholder="Enter origin"
-            styles={{
-              textInput: [
-                styles.textInput,
-                isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteInput
-              ]
-            }}
+            label="Origin"
+            placeholder="Enter starting point"
             onPlaceSelected={(data, details = null) => onPlaceSelected(data, details, 'origin')}
-            query={{
-              key: GOOGLE_MAPS_API_KEY,
-              language: 'en'
-            }}
             currentValue={origin ? `${formatLocationName(origin)}` : undefined}
+            isLargeText={isLargeText}
+            isBlackAndWhite={isBlackAndWhite}
           />
           
-          <Text style={[styles.label, isLargeText && styles.largeText]}>Destination</Text>
           <InputAutocomplete
+            label="Destination"
             placeholder="Enter destination"
-            styles={{
-              textInput: [
-                styles.textInput,
-                isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteInput
-              ]
-            }}
             onPlaceSelected={(data, details = null) => onPlaceSelected(data, details, 'destination')}
-            query={{
-              key: GOOGLE_MAPS_API_KEY,
-              language: 'en'
-            }}
             currentValue={destination ? `${formatLocationName(destination)}` : undefined}
+            isLargeText={isLargeText}
+            isBlackAndWhite={isBlackAndWhite}
           />
 
-          {/* Location Buttons Row */}
-          <View style={styles.locationButtonsRow}>
-            <TouchableOpacity
-              style={styles.useLocationButton}
-              onPress={setCurrentLocationAsPoint}
-            >
-              <Text style={styles.useLocationButtonText}>Use My Location</Text>
-            </TouchableOpacity>
+          {/* Quick Actions Section */}
+          <View style={styles.quickActionsSection}>
+            <Text style={[
+              styles.sectionHeader,
+              isLargeText && styles.largeText
+            ]}>
+              Quick Actions
+            </Text>
             
-            <TouchableOpacity
-              style={styles.clearButton}
-              onPress={clearPoints}
-            >
-              <Text style={styles.clearButtonText}>Clear Points</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Campus Buttons */}
-          <View style={styles.campusButtonsContainer}>
-            <TouchableOpacity
-              style={[
-                styles.campusButton, 
-                isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteText
-              ]}
-              onPress={() => setCampusPoint(SGW_COORDS, "SGW Campus")}
-            >
-              <Text style={styles.campusButtonText}>SGW Campus</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.campusButton, 
-                isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteText
-              ]}
-              onPress={() => setCampusPoint(LOYOLA_COORDS, "Loyola Campus")}
-            >
-              <Text style={styles.campusButtonText}>Loyola Campus</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Travel Mode Buttons */}
-          <View style={styles.modeContainer}>
-            {['DRIVING', 'WALKING', 'BICYCLING', 'TRANSIT'].map(mode => (
+            {/* Location Buttons Row */}
+            <View style={styles.locationButtonsRow}>
               <TouchableOpacity
-                key={mode}
-                style={[
-                  styles.modeButton,
-                  travelMode === mode && styles.activeModeButton,
-                  isBlackAndWhite && styles.blackAndWhiteButton,
-                  travelMode === mode && isBlackAndWhite && styles.blackAndWhiteActiveButton
-                ]}
-                onPress={() => setTravelMode(mode)}
+                style={styles.actionButton}
+                onPress={setCurrentLocationAsPoint}
               >
-                <Image
-                  source={getImageSource(mode, travelMode)}
-                  style={styles.modeButtonIcon}
+                <Ionicons 
+                  name="locate" 
+                  size={18} 
+                  color="white"
+                  style={styles.actionButtonIcon} 
                 />
-                <Text style={getTextStyle(mode, travelMode, isLargeText, isBlackAndWhite)}>
-                  {mode.charAt(0) + mode.slice(1).toLowerCase()}
-                </Text>
+                <Text style={styles.actionButtonText}>My Location</Text>
               </TouchableOpacity>
-            ))}
+              
+              <TouchableOpacity
+                style={[styles.actionButton, styles.clearButton]}
+                onPress={clearPoints}
+              >
+                <Ionicons 
+                  name="trash-outline" 
+                  size={18} 
+                  color="white"
+                  style={styles.actionButtonIcon} 
+                />
+                <Text style={styles.actionButtonText}>Clear Points</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Campus Shortcuts Section */}
+          <View style={styles.quickActionsSection}>
+            <View style={styles.campusButtonsContainer}>
+              <TouchableOpacity
+                style={styles.campusPill}
+                onPress={() => setCampusPoint(SGW_COORDS, "SGW Campus")}
+              >
+                <Text style={[
+                  styles.campusPillText,
+                  isLargeText && styles.largeText
+                ]}>SGW</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.campusPill}
+                onPress={() => setCampusPoint(LOYOLA_COORDS, "Loyola Campus")}
+              >
+                <Text style={[
+                  styles.campusPillText,
+                  isLargeText && styles.largeText
+                ]}>Loyola</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Travel Mode Section */}
+          <View style={styles.quickActionsSection}>
+            <Text style={[
+              styles.sectionHeader,
+              isLargeText && styles.largeText
+            ]}>
+              Travel Mode
+            </Text>
+            
+            <View style={styles.modeContainer}>
+            {['DRIVING', 'WALKING', 'CYCLING', 'TRANSIT'].map(mode => (
+                <TouchableOpacity
+                  key={mode}
+                  style={[
+                    styles.modeButton,
+                    travelMode === mode && styles.activeModeButton
+                  ]}
+                  onPress={() => setTravelMode(mode as MapViewDirectionsMode)}
+                >
+                  <Ionicons 
+                    name={getModeIcon(mode as MapViewDirectionsMode)} 
+                    size={22} 
+                    color={travelMode === mode ? 'white' : (isBlackAndWhite ? 'black' : '#912338')}
+                  />
+                  <Text style={[
+                    styles.modeButtonText,
+                    travelMode === mode && styles.activeModeButtonText,
+                    isLargeText && styles.largeText
+                  ]}>
+                    {mode.charAt(0) + mode.slice(1).toLowerCase()}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           <TouchableOpacity 
-            style={[
-              styles.traceButton,
-              isBlackAndWhite && styles.blackAndWhiteButton
-            ]} 
+            style={styles.traceButton} 
             onPress={traceRoute}
           >
             <Text style={[
-              styles.buttonText,
-              isLargeText && styles.largeText,
-              isBlackAndWhite && styles.blackAndWhiteText
+              styles.traceButtonText,
+              isLargeText && styles.largeText
             ]}>
-              Trace route
+              Find Route
             </Text>
           </TouchableOpacity>
         </View>
@@ -951,10 +1080,7 @@ export default function DirectionsScreen() {
       {/* Back Button when directions are showing */}
       {showDirections && (
         <TouchableOpacity 
-          style={[
-            styles.backButton, 
-            isBlackAndWhite && styles.blackAndWhiteContainer
-          ]}
+          style={styles.backButton}
           onPress={() => {
             setShowDirections(false);
             setShowShuttleRoute(false);
@@ -963,12 +1089,16 @@ export default function DirectionsScreen() {
             setToastMessage('Returned to search view');
           }}
         >
+          <Ionicons 
+            name="arrow-back" 
+            size={22} 
+            color="white" 
+          />
           <Text style={[
             styles.backButtonText, 
-            isLargeText && styles.largeText,
-            isBlackAndWhite && styles.blackAndWhiteText
+            isLargeText && styles.largeText
           ]}>
-            Back to Search
+            Back
           </Text>
         </TouchableOpacity>
       )}
@@ -977,8 +1107,7 @@ export default function DirectionsScreen() {
       {steps.length > 0 && (
         <View style={[
           styles.directionsContainer, 
-          { height: directionsHeight },  
-          isBlackAndWhite && styles.blackAndWhiteText
+          { height: directionsHeight }
         ]}>
           {/* Handle for expanding/collapsing with PanResponder for swipe gestures */}
           <Animated.View 
@@ -988,42 +1117,67 @@ export default function DirectionsScreen() {
             ]}
             {...panResponder.panHandlers}
           >
-            <View style={[
-              styles.dragIndicator, 
-              isBlackAndWhite && styles.blackAndWhiteText
-            ]} />
+            <View style={styles.dragIndicator} />
           </Animated.View>
           
-          <View style={[
-            styles.directionsHeaderRow, 
-            isBlackAndWhite && styles.blackAndWhiteText
-          ]}>
-            <Text style={[
-              styles.directionsHeader, 
-              isLargeText && styles.largeText,
-              isBlackAndWhite && styles.blackAndWhiteText
-            ]}>
-              Directions
-            </Text>
+          <View style={styles.directionsHeaderRow}>
+            <View style={styles.directionsHeaderLeft}>
+              <Ionicons 
+                name="navigate" 
+                size={22} 
+                color={isBlackAndWhite ? "#000" : "#912338"} 
+                style={styles.directionsIcon}
+              />
+              <Text style={[
+                styles.directionsHeader, 
+                isLargeText && styles.largeText
+              ]}>
+                Directions
+              </Text>
+            </View>
             <TouchableOpacity 
-              style={[
-                styles.expandButton, 
-                isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteText
-              ]}
+              style={styles.expandButton}
               onPress={() => {
                 setExpandedDirections(!expandedDirections);
-                setDirectionsHeight(expandedDirections ? 150 : height * 0.6);
+                setDirectionsHeight(expandedDirections ? 180 : height * 0.7);
               }} 
             >
-              <Text style={[
-                styles.expandButtonText, 
-                isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteText
-              ]}>
-                {expandedDirections ? 'Collapse' : 'Expand'}
-              </Text>
+              <Ionicons 
+                name={expandedDirections ? "chevron-down" : "chevron-up"} 
+                size={22} 
+                color={isBlackAndWhite ? "#000" : "#666"} 
+              />
             </TouchableOpacity>
+          </View>
+          
+          {/* Route summary */}
+          <View style={styles.routeSummary}>
+            <View style={styles.routePoints}>
+              <View style={styles.routePointRow}>
+                <View style={[styles.routePointDot, styles.originDot]} />
+                <Text style={[styles.routePointText, isLargeText && styles.largeText]} numberOfLines={1}>
+                  {origin ? formatLocationName(origin) : "Origin"}
+                </Text>
+              </View>
+              <View style={styles.routeLineConnector} />
+              <View style={styles.routePointRow}>
+                <View style={[styles.routePointDot, styles.destinationDot]} />
+                <Text style={[styles.routePointText, isLargeText && styles.largeText]} numberOfLines={1}>
+                  {destination ? formatLocationName(destination) : "Destination"}
+                </Text>
+              </View>
+            </View>
+            <View style={styles.routeMetrics}>
+              <View style={styles.routeMetricItem}>
+                <Ionicons name="time-outline" size={18} color="#666" />
+                <Text style={styles.routeMetricText}>{Math.round(duration)} min</Text>
+              </View>
+              <View style={styles.routeMetricDivider} />
+              <View style={styles.routeMetricItem}>
+                <Ionicons name="navigate-outline" size={18} color="#666" />
+                <Text style={styles.routeMetricText}>{distance.toFixed(1)} km</Text>
+              </View>
+            </View>
           </View>
           
           {/* Content container with scrollable area */}
@@ -1037,9 +1191,16 @@ export default function DirectionsScreen() {
                 ]}
                 onPress={() => setActiveRouteTab('standard')}
               >
+                <Ionicons 
+                  name={getModeIcon(travelMode)} 
+                  size={18} 
+                  color={activeRouteTab === 'standard' ? (isBlackAndWhite ? "#000" : "#912338") : "#666"} 
+                  style={styles.routeTabIcon}
+                />
                 <Text style={[
                   styles.routeTabText,
-                  activeRouteTab === 'standard' && styles.activeRouteTabText
+                  activeRouteTab === 'standard' && styles.activeRouteTabText,
+                  isLargeText && styles.largeText
                 ]}>Standard Route</Text>
               </TouchableOpacity>
               
@@ -1051,9 +1212,16 @@ export default function DirectionsScreen() {
                   ]}
                   onPress={() => setActiveRouteTab('shuttle')}
                 >
+                  <Ionicons 
+                    name="bus" 
+                    size={18} 
+                    color={activeRouteTab === 'shuttle' ? (isBlackAndWhite ? "#000" : "#912338") : "#666"} 
+                    style={styles.routeTabIcon}
+                  />
                   <Text style={[
                     styles.routeTabText,
-                    activeRouteTab === 'shuttle' && styles.activeRouteTabText
+                    activeRouteTab === 'shuttle' && styles.activeRouteTabText,
+                    isLargeText && styles.largeText
                   ]}>Shuttle Option</Text>
                 </TouchableOpacity>
               )}
@@ -1064,23 +1232,67 @@ export default function DirectionsScreen() {
               {/* Shuttle route details */}
               {showShuttleRoute && activeRouteTab === 'shuttle' && (
                 <View style={styles.shuttleRouteContainer}>
-                  <Text style={styles.shuttleRouteHeader}>Concordia Shuttle Option</Text>
-                  <Text style={styles.shuttleRouteText}>Take the Concordia Shuttle between campuses (30 minutes)</Text>
-                  <Text style={styles.shuttleRouteText}>Shuttle runs every 30 minutes on weekdays</Text>
-                  <Text style={styles.shuttleRouteText}>This direct route is usually faster than public transit!</Text>
+                  <View style={styles.shuttleRouteHeader}>
+                    <Ionicons 
+                      name="school" 
+                      size={20} 
+                      color={isBlackAndWhite ? "#000" : "#912338"} 
+                      style={styles.shuttleHeaderIcon}
+                    />
+                    <Text style={[
+                      styles.shuttleRouteHeaderText,
+                      isLargeText && styles.largeText
+                    ]}>Concordia Shuttle Service</Text>
+                  </View>
+                  
+                  <View style={styles.shuttleInfoCard}>
+                    <View style={styles.shuttleInfoItem}>
+                      <Ionicons 
+                        name="information-circle-outline" 
+                        size={18} 
+                        color="#666" 
+                        style={styles.shuttleInfoIcon}
+                      />
+                      <Text style={[styles.shuttleRouteText, isLargeText && styles.largeText]}>
+                        Take the Concordia Shuttle between campuses
+                      </Text>
+                    </View>
+                    <View style={styles.shuttleInfoItem}>
+                      <Ionicons 
+                        name="time-outline" 
+                        size={18} 
+                        color="#666" 
+                        style={styles.shuttleInfoIcon}
+                      />
+                      <Text style={[styles.shuttleRouteText, isLargeText && styles.largeText]}>
+                        Runs every 30 minutes on weekdays
+                      </Text>
+                    </View>
+                    <View style={styles.shuttleInfoItem}>
+                      <Ionicons 
+                        name="speedometer-outline" 
+                        size={18} 
+                        color="#666" 
+                        style={styles.shuttleInfoIcon}
+                      />
+                      <Text style={[styles.shuttleRouteText, isLargeText && styles.largeText]}>
+                        Usually faster than public transit
+                      </Text>
+                    </View>
+                  </View>
                   
                   <View style={styles.shuttleDetailRow}>
                     <View style={styles.shuttleDetailItem}>
                       <Text style={styles.shuttleDetailLabel}>Duration</Text>
-                      <Text style={styles.shuttleDetailValue}>~30 min</Text>
+                      <Text style={[styles.shuttleDetailValue, isLargeText && styles.largeText]}>~30 min</Text>
                     </View>
                     <View style={styles.shuttleDetailItem}>
                       <Text style={styles.shuttleDetailLabel}>Distance</Text>
-                      <Text style={styles.shuttleDetailValue}>~6.8 km</Text>
+                      <Text style={[styles.shuttleDetailValue, isLargeText && styles.largeText]}>~6.8 km</Text>
                     </View>
                     <View style={styles.shuttleDetailItem}>
                       <Text style={styles.shuttleDetailLabel}>Cost</Text>
-                      <Text style={styles.shuttleDetailValue}>Free</Text>
+                      <Text style={[styles.shuttleDetailValue, isLargeText && styles.largeText]}>Free</Text>
                     </View>
                   </View>
                   
@@ -1088,6 +1300,7 @@ export default function DirectionsScreen() {
                     style={styles.shuttleScheduleButton}
                     onPress={() => Linking.openURL('https://www.concordia.ca/maps/shuttle-bus.html#depart')}
                   >
+                    <Ionicons name="calendar-outline" size={16} color="white" style={styles.buttonIcon} />
                     <Text style={styles.shuttleScheduleButtonText}>View Schedule</Text>
                   </TouchableOpacity>
                 </View>
@@ -1096,22 +1309,79 @@ export default function DirectionsScreen() {
               {/* Standard route details */}
               {activeRouteTab === 'standard' && (
                 <>
-                  <Text style={styles.regularRouteHeader}>Route Steps</Text>
-                  {steps.map((step, index) => (
-                    <Text style={styles.stepText} key={index}>
-                      {index + 1}. {stripHtml(step.html_instructions)}
+                  <View style={styles.directionsStepsHeader}>
+                    <Ionicons 
+                      name="list" 
+                      size={18} 
+                      color={isBlackAndWhite ? "#000" : "#912338"} 
+                    />
+                    <Text style={[
+                      styles.directionsStepsTitle, 
+                      isLargeText && styles.largeText
+                    ]}>
+                      Turn-by-turn Directions
                     </Text>
-                  ))}
+                  </View>
+                  
+                  <View style={styles.stepsList}>
+                    {steps.map((step, index) => (
+                      <View style={styles.stepItem} key={index}>
+                        <View style={styles.stepNumberContainer}>
+                          <Text style={styles.stepNumber}>{index + 1}</Text>
+                        </View>
+                        <Text style={[
+                          styles.stepText, 
+                          isLargeText && styles.largeText
+                        ]}>
+                          {stripHtml(step.html_instructions)}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
                   
                   {/* Show additional info only for standard route */}
                   <View style={styles.routeDetailsContainer}>
-                    <Text style={styles.routeDetailsHeader}>Route Details</Text>
-                    <Text style={styles.routeDetailsText}>Distance: {distance.toFixed(1)} km</Text>
-                    <Text style={styles.routeDetailsText}>Duration: {Math.round(duration)} min</Text>
-                    <Text style={styles.routeDetailsText}>Travel Mode: {travelMode}</Text>
+                    <Text style={[
+                      styles.routeDetailsHeader,
+                      isLargeText && styles.largeText
+                    ]}>
+                      Route Summary
+                    </Text>
+                    <View style={styles.routeDetailsList}>
+                      <View style={styles.routeDetailItem}>
+                        <Ionicons name="navigate-outline" size={18} color="#666" />
+                        <Text style={[
+                          styles.routeDetailsText,
+                          isLargeText && styles.largeText
+                        ]}>
+                          Distance: {distance.toFixed(1)} km
+                        </Text>
+                      </View>
+                      <View style={styles.routeDetailItem}>
+                        <Ionicons name="time-outline" size={18} color="#666" />
+                        <Text style={[
+                          styles.routeDetailsText,
+                          isLargeText && styles.largeText
+                        ]}>
+                          Duration: {Math.round(duration)} minutes
+                        </Text>
+                      </View>
+                      <View style={styles.routeDetailItem}>
+                        <Ionicons name={getModeIcon(travelMode)} size={18} color="#666" />
+                        <Text style={[
+                          styles.routeDetailsText,
+                          isLargeText && styles.largeText
+                        ]}>
+                          Travel Mode: {travelMode.charAt(0) + travelMode.slice(1).toLowerCase()}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 </>
               )}
+              
+              {/* Add extra padding at bottom for better scrolling */}
+              <View style={styles.scrollPadding} />
             </ScrollView>
           </View>
         </View>
@@ -1120,144 +1390,295 @@ export default function DirectionsScreen() {
   );
 }
 
-//--------------------------------------
-// Styles
-//--------------------------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#f5f5f5',
   },
   map: {
     width,
     height,
   },
+  // Updated search container styles
   searchContainer: {
     position: 'absolute',
-    width: '90%',
+    width: '85%',
     backgroundColor: 'white',
     shadowColor: 'black',
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 4,
-    padding: 20,
-    borderRadius: 8,
-    top: Constants.statusBarHeight,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    padding: 15,
+    borderRadius: 16,
+    top: Constants.statusBarHeight + 10,
+    alignSelf: 'center',
+    maxHeight: height * 0.7,
   },
+  inputContainer: {
+    marginBottom: 2,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#555',
+    marginBottom: 8,
+  },
+  // Quick actions section styles
+  quickActionsSection: {
+    marginVertical: 4,
+  },
+  sectionHeader: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#555',
+    marginBottom: 6,
+  },
+  // Updated location buttons
+  locationButtonsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 5,
+  },
+  actionButton: {
+    backgroundColor: '#0088ff',
+    flexDirection: 'row',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    flex: 1,
+    marginHorizontal: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  clearButton: {
+    backgroundColor: '#912338',
+  },
+  actionButtonIcon: {
+    marginRight: 8,
+  },
+  actionButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  // Updated campus buttons
   campusButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 8,
   },
-  campusButton: {
+  campusPill: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    marginLeft: 8,
-    marginRight: 8,
-    paddingVertical: 10,
+    backgroundColor: 'white',
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 25,
+    marginHorizontal: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
     alignItems: 'center',
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderColor: '#912338',
   },
-  campusButtonText: {
-    color: '#333',
+  campusPillText: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#333',
   },
+  // Updated travel mode buttons
   modeContainer: {
     flexDirection: 'row',
-    marginTop: 8,
+    justifyContent: 'space-between',
   },
   modeButton: {
     flex: 1,
-    backgroundColor: '#fff',
-    marginRight: 8,
-    borderRadius: 15,
-    borderWidth: 0.5,
+    flexDirection: 'column',
+    backgroundColor: 'white',
+    marginHorizontal: 4,
+    borderRadius: 12,
+    borderWidth: 1,
     borderColor: '#912338',
     paddingVertical: 10,
     alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
   activeModeButton: {
     backgroundColor: '#912338',
   },
-  modeButtonIcon: {
-    width: 32,
-    height: 25,
-  },
   modeButtonText: {
     color: '#333',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
+    marginTop: 4,
   },
   activeModeButtonText: {
-    color: '#fff',
+    color: 'white',
   },
+  // Updated trace button
   traceButton: {
-    backgroundColor: '#fff',
-    paddingVertical: 12,
-    marginTop: 16,
-    borderRadius: 15,
-    borderWidth: 0.5,
-    borderColor: '#912338',
-  },
-  buttonText: {
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-  // Shuttle styles
-  shuttleToggleButton: {
-    position: 'absolute',
-    top: 10,
-    right: 20,
     backgroundColor: '#912338',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    zIndex: 999,
+    paddingVertical: 12,
+    marginTop: 12,
+    borderRadius: 12,
+    alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 2, height: 2 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    elevation: 5,
   },
-  shuttleToggleText: {
+  traceButtonText: {
     color: 'white',
     fontWeight: '600',
-    fontSize: 12,
+    fontSize: 16,
+    textAlign: 'center',
   },
-  busMarker: {
-    width: 40,
-    height: 40,
+  // Map controls
+  mapControls: {
+    position: 'absolute',
+    top: 50,
+    right: 16,
+    zIndex: 1,
+  },
+  mapControlButton: {
+    backgroundColor: 'white',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
-  busIcon: {
-    width: 30,
-    height: 30,
+  // Custom markers
+  customIconMarker: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  markerBW: {
+    backgroundColor: '#000000',
+  },
+  originMarker: {
+    backgroundColor: '#4CAF50', // Green
+  },
+  destinationMarker: {
+    backgroundColor: '#F44336', // Red
+  },
+  shuttleMarker: {
+    backgroundColor: '#1E88E5', // Blue
   },
   stationMarker: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
+    backgroundColor: '#4CAF50', // Green
+  },
+  // Building detection badge
+  buildingInfoBadge: {
+    position: 'absolute',
+    top: Constants.statusBarHeight + 10,
+    left: 20,
+    backgroundColor: 'white',
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    zIndex: 999,
   },
-  stationIcon: {
-    width: 25,
-    height: 25,
+  buildingIcon: {
+    marginRight: 6,
   },
-  // Updated directions container styles
+  buildingInfoText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+  },
+  // Toast message styles
+  toastContainer: {
+    position: 'absolute',
+    bottom: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    zIndex: 9999,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+  },
+  toastText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  // Back button
+  backButton: {
+    position: 'absolute',
+    top: Constants.statusBarHeight + 10,
+    left: 20,
+    backgroundColor: '#912338',
+    flexDirection: 'row',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 25,
+    alignItems: 'center',
+    zIndex: 1000,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  backButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+    marginLeft: 6,
+  },
+  // Directions drawer styles
   directionsContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.2,
@@ -1267,8 +1688,7 @@ const styles = StyleSheet.create({
   dragHandleContainer: {
     width: '100%',
     alignItems: 'center',
-    paddingTop: 10,
-    paddingBottom: 5,
+    paddingVertical: 12,
   },
   dragIndicator: {
     width: 40,
@@ -1280,43 +1700,113 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingBottom: 10,
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+  },
+  directionsHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  directionsIcon: {
+    marginRight: 8,
   },
   directionsHeader: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
   },
   expandButton: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
+    padding: 8,
   },
-  expandButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
+  // Route summary
+  routeSummary: {
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
+  routePoints: {
+    marginBottom: 10,
+  },
+  routePointRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  routePointDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 12,
+  },
+  originDot: {
+    backgroundColor: '#4CAF50', // Green
+  },
+  destinationDot: {
+    backgroundColor: '#F44336', // Red
+  },
+  routeLineConnector: {
+    width: 2,
+    height: 20,
+    backgroundColor: '#ddd',
+    marginLeft: 5,
+  },
+  routePointText: {
+    fontSize: 14,
+    color: '#333',
+    flex: 1,
+  },
+  routeMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 10,
+  },
+  routeMetricItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  routeMetricDivider: {
+    width: 1,
+    height: 20,
+    backgroundColor: '#ddd',
+  },
+  routeMetricText: {
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#555',
+  },
+  // Content container
   contentContainer: {
     flex: 1,
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
   },
   scrollableContent: {
     flex: 1,
   },
-  // Route tabs styles
+  // Route tabs
   routeTabsContainer: {
     flexDirection: 'row',
-    marginBottom: 15,
+    marginVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   routeTab: {
-    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 10,
     paddingHorizontal: 15,
-    marginRight: 10,
+    marginRight: 15,
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
+  },
+  routeTabIcon: {
+    marginRight: 8,
   },
   activeRouteTab: {
     borderBottomColor: '#912338',
@@ -1324,7 +1814,7 @@ const styles = StyleSheet.create({
   routeTabText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#555',
+    color: '#666',
   },
   activeRouteTabText: {
     color: '#912338',
@@ -1332,55 +1822,53 @@ const styles = StyleSheet.create({
   },
   // Shuttle route styles
   shuttleRouteContainer: {
-    backgroundColor: '#f2f2f2',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
     borderLeftWidth: 3,
     borderLeftColor: '#912338',
   },
   shuttleRouteHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  shuttleHeaderIcon: {
+    marginRight: 8,
+  },
+  shuttleRouteHeaderText: {
     fontWeight: 'bold',
     fontSize: 16,
-    marginBottom: 5,
-    color: '#912338',
+    color: '#333',
+  },
+  shuttleInfoCard: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 12,
+    marginVertical: 10,
+  },
+  shuttleInfoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  shuttleInfoIcon: {
+    marginRight: 10,
   },
   shuttleRouteText: {
     fontSize: 14,
-    marginBottom: 5,
+    color: '#555',
   },
-  regularRouteHeader: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 5,
-  },
-  shuttleScheduleButton: {
-    backgroundColor: '#912338',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-    marginTop: 5,
-  },
-  shuttleScheduleButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 12,
-  },
-  stepText: {
-    marginBottom: 8,
-    fontSize: 14,
-  },
-  // Shuttle detail styles
   shuttleDetailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 10,
-    paddingVertical: 10,
+    paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: '#eee',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: '#eee',
+    marginVertical: 10,
   },
   shuttleDetailItem: {
     alignItems: 'center',
@@ -1389,148 +1877,113 @@ const styles = StyleSheet.create({
   shuttleDetailLabel: {
     fontSize: 12,
     color: '#666',
-    marginBottom: 4,
-  },
-
-  largeText: {
-    fontSize: 18, // Increase base font size
-  },
-  blackAndWhiteContainer: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#000000',
-  },
-  blackAndWhiteButton: {
-    backgroundColor: '#FFFFFF',
-    borderColor: '#000000',
-    borderWidth: 1,
-  },
-  blackAndWhiteActiveButton: {
-    backgroundColor: '#000000',
-  },
-  blackAndWhiteText: {
-    color: '#000000',
-  },
-  blackAndWhiteInput: {
-    backgroundColor: '#FFFFFF',
-    color: '#000000',
-    borderColor: '#000000',
-  },
-  label: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  textInput: {
-    fontSize: 16,
+    marginBottom: 5,
   },
   shuttleDetailValue: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
   },
+  shuttleScheduleButton: {
+    backgroundColor: '#912338',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginTop: 8,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  shuttleScheduleButtonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  // Direction steps styles
+  directionsStepsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  directionsStepsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginLeft: 8,
+  },
+  stepsList: {
+    marginBottom: 20,
+  },
+  stepItem: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  stepNumberContainer: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#912338',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+    marginTop: 2,
+  },
+  stepNumber: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  stepText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#555',
+    lineHeight: 20,
+  },
   // Route details styles
   routeDetailsContainer: {
-    marginTop: 15,
-    paddingTop: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-    marginBottom: 20,
+    marginVertical: 10,
+    padding: 15,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
   },
   routeDetailsHeader: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 8,
+    color: '#333',
+    marginBottom: 12,
+  },
+  routeDetailsList: {
+    marginTop: 5,
+  },
+  routeDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   routeDetailsText: {
     fontSize: 14,
-    marginBottom: 5,
     color: '#555',
+    marginLeft: 10,
   },
-  // Geometry integration styles
-  locationButtonsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+  scrollPadding: {
+    height: 30,
   },
-  useLocationButton: {
-    backgroundColor: '#0088ff',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 15,
-    flex: 1,
-    marginRight: 5,
-    alignItems: 'center',
+  // General
+  largeText: {
+    fontSize: 18, // Increase base font size
   },
-  useLocationButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
+  blackAndWhiteText: {
+    color: '#000000',
   },
-  clearButton: {
-    backgroundColor: '#912338',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 15,
-    flex: 1,
-    marginLeft: 5,
-    alignItems: 'center',
-  },
-  clearButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  // Back button for directions view
-  backButton: {
-    position: 'absolute',
-    top: Constants.statusBarHeight + 10,
-    left: 20,
-    backgroundColor: '#912338',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 20,
-    zIndex: 1000,
-  },
-  backButtonText: {
-    color: 'white',
-    fontWeight: '600',
-  },
-  buildingInfoBadge: {
-    position: 'absolute',
-    top: 10,
-    left: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
-    zIndex: 999,
-  },
-  buildingInfoText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
-  // Toast message styles
-  toastContainer: {
-    position: 'absolute',
-    bottom: 100,
-    left: 20,
-    right: 20,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    zIndex: 9999,
-    alignItems: 'center',
-  },
-  toastText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '500',
-    textAlign: 'center',
+  blackAndWhiteContainer: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#000000',
   },
 });
