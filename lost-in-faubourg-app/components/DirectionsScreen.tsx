@@ -780,7 +780,7 @@ export default function DirectionsScreen() {
         <View style={styles.buildingInfoBadge}>
           <Ionicons 
             name="location" 
-            size={16} 
+            size={20} 
             color={isBlackAndWhite ? "#000" : "#912338"} 
             style={styles.buildingIcon} 
           />
@@ -788,7 +788,7 @@ export default function DirectionsScreen() {
             styles.buildingInfoText,
             isLargeText && styles.largeText
           ]}>
-            Inside a Concordia building
+            Concordia Building
           </Text>
         </View>
       )}
@@ -1096,7 +1096,7 @@ export default function DirectionsScreen() {
         >
           <Ionicons 
             name="arrow-back" 
-            size={22} 
+            size={20} 
             color="white" 
           />
           <Text style={[
@@ -1416,7 +1416,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     padding: 15,
     borderRadius: 16,
-    top: Constants.statusBarHeight + 10,
+    top: Constants.statusBarHeight + 70,
     alignSelf: 'center',
     maxHeight: height * 0.7,
   },
@@ -1554,7 +1554,7 @@ const styles = StyleSheet.create({
   // Map controls
   mapControls: {
     position: 'absolute',
-    top: 50,
+    top: 20,
     right: 16,
     zIndex: 1,
   },
@@ -1605,8 +1605,8 @@ const styles = StyleSheet.create({
   // Building detection badge
   buildingInfoBadge: {
     position: 'absolute',
-    top: Constants.statusBarHeight + 10,
-    left: 20,
+    top: Constants.statusBarHeight,
+    alignSelf: 'center',
     backgroundColor: 'white',
     flexDirection: 'row',
     alignItems: 'center',
@@ -1654,7 +1654,7 @@ const styles = StyleSheet.create({
   // Back button
   backButton: {
     position: 'absolute',
-    top: Constants.statusBarHeight + 10,
+    top: Constants.statusBarHeight,
     left: 20,
     backgroundColor: '#912338',
     flexDirection: 'row',

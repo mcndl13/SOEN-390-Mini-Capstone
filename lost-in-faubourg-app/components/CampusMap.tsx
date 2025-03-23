@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
   },
   mapControls: {
     position: 'absolute',
-    top: 50,
+    top: 20,
     right: 16,
     zIndex: 1,
   },
