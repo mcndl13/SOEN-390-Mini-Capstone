@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     },
     settingsButton: {
         position: 'absolute',
-        top: 60,
+        top: 54,
         right: 10, // Moved more towards the left
         padding: 10,
         zIndex: 1,

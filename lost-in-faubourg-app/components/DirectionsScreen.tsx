@@ -1416,7 +1416,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     padding: 15,
     borderRadius: 16,
-    top: Constants.statusBarHeight + 70,
+    top: Constants.statusBarHeight + 80,
     alignSelf: 'center',
     maxHeight: height * 0.7,
   },
