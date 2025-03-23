@@ -7,20 +7,42 @@ import { makeRedirectUri } from "expo-auth-session";
 import { getCalendarEvents } from "../services/calendarService";
 import { useNavigation } from "@react-navigation/native";
 import { GOOGLE_MAPS_API_KEY } from "@env";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 
 WebBrowser.maybeCompleteAuthSession();
-
 interface CalendarEvent {
   summary: string;
   start: string;
   location?: string;
 }
 
+// Define your app's root stack parameter list
+type RootStackParamList = {
+  Home: undefined;
+  Directions: {
+    origin: {
+      latitude: number;
+      longitude: number;
+      name: string;
+    };
+    destination: {
+      latitude: number;
+      longitude: number;
+      name: string;
+    };
+  };
+  CampusMap: undefined;
+  CalendarIntegration: undefined;
+  IndoorDirections: undefined;
+  PointsOfInterest: undefined;
+};
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 export default function CalendarIntegrationScreen() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [userInfo, setUserInfo] = useState<{ name: string } | null>(null);
-  const navigation = useNavigation();
-
+  const navigation = useNavigation<NavigationProp>();
   // Generate URI for redirect
   const redirectUri = makeRedirectUri();
 
