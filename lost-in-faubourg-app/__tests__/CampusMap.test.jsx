@@ -7,7 +7,6 @@ import { AccessibilityContext } from '../components/AccessibilitySettings';
 
 // --- Mocks ---
 jest.mock('react-native-maps', () => {
-  const React = require('react');
   const { View } = require('react-native');
   const PropTypes = require('prop-types');
 
@@ -41,9 +40,19 @@ jest.mock('expo-location', () => ({
 
 jest.mock('react-native-maps', () => {
   const { View } = require('react-native');
+  const PropTypes = require('prop-types');
   const MockMapView = (props) => <View {...props}>{props.children}</View>;
+  MockMapView.propTypes = {
+    children: PropTypes.node,
+  };
   const MockMarker = (props) => <View {...props}>{props.children}</View>;
+  MockMarker.propTypes = {
+    children: PropTypes.node,
+  };
   const MockPolygon = (props) => <View {...props}>{props.children}</View>;
+  MockPolygon.propTypes = {
+    children: PropTypes.node,
+  };
   return {
     __esModule: true,
     default: MockMapView,
@@ -305,19 +314,24 @@ describe('CampusMap additional tests', () => {
 });
 
 describe('CampusMap accessibility customization', () => {
-  const CustomAccessibilityProvider = ({ children }) => (
+  const CustomAccessibilityProvider = ({ children }) => {
+  const contextValue = useMemo(() => ({
+    isBlackAndWhite: true,
+    isLargeText: false,
+    setIsBlackAndWhite: jest.fn(),
+    setIsLargeText: jest.fn(),
+  }), []);
+  
+    return (
     <AccessibilityContext.Provider
-      value={{
-        isBlackAndWhite: true,
-        isLargeText: false,
-        setIsBlackAndWhite: jest.fn(),
-        setIsLargeText: jest.fn(),
-      }}
+      value={contextValue}
     >
       {children}
     </AccessibilityContext.Provider>
-  );
-
+)};
+CustomAccessibilityProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
   test('renders polygons in black and white mode', async () => {
     setLocationMock();
     const { getByTestId } = render(
