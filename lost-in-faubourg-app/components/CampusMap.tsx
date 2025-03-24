@@ -353,6 +353,7 @@ const CampusMap: React.FC = () => {
         <TouchableOpacity 
           style={styles.mapControlButton} 
           onPress={toggleShuttles}
+          testID='shuttlesBtn'
         >
           <Ionicons 
             name="bus" 

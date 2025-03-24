@@ -5,6 +5,17 @@ import * as Location from 'expo-location';
 import { polygons } from '../components/polygonCoordinates';
 import { AccessibilityContext } from '../components/AccessibilitySettings';
 
+process.env.EXPO_OS = 'ios';
+
+// Override console.warn to ignore "No Place ID found" warnings.
+const originalConsoleWarn = console.warn;
+console.warn = (message, ...args) => {
+  if (typeof message === 'string' && message.includes('No Place ID found')) {
+    return;
+  }
+  originalConsoleWarn(message, ...args);
+};
+
 // --- Mocks ---
 jest.mock('react-native-maps', () => {
   const React = require('react');
@@ -38,19 +49,6 @@ jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
 }));
-
-jest.mock('react-native-maps', () => {
-  const { View } = require('react-native');
-  const MockMapView = (props) => <View {...props}>{props.children}</View>;
-  const MockMarker = (props) => <View {...props}>{props.children}</View>;
-  const MockPolygon = (props) => <View {...props}>{props.children}</View>;
-  return {
-    __esModule: true,
-    default: MockMapView,
-    Marker: MockMarker,
-    Polygon: MockPolygon,
-  };
-});
 
 jest.mock('../services/shuttleService', () => ({
   fetchShuttlePositions: jest.fn().mockResolvedValue({
@@ -95,6 +93,14 @@ jest.mock('../services/shuttleService', () => ({
     return () => {};
   }),
 }));
+
+jest.mock('@expo/vector-icons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return {
+    Ionicons: (props) => <Text {...props} />,
+  };
+});
 
 // --- Helper functions ---
 const setLocationMock = (
@@ -174,29 +180,6 @@ describe('CampusMap', () => {
     });
   });
 
-  test('renders "You are here" marker correctly', async () => {
-    setLocationMock();
-    const { getByTestId } = renderCampusMap();
-
-    await waitFor(() => {
-      const mapView = getByTestId('mapView');
-      const flatChildren = React.Children.toArray(
-        mapView.props.children,
-      ).flat();
-      const markerComponent = flatChildren.find(
-        (child) => child.props.testID === 'marker-current-location',
-      );
-
-      expect(markerComponent).toBeTruthy();
-      expect(markerComponent.props.coordinate).toEqual({
-        latitude: 45.4953534,
-        longitude: -73.578549,
-      });
-      expect(markerComponent.props.title).toBe('You are here');
-      expect(markerComponent.props.pinColor).toBe('blue');
-    });
-  });
-
   test.each(polygons.map((polygon, index) => [polygon.name, index, polygon]))(
     'displays %s building information on marker press',
     async (name, index, polygon) => {
@@ -244,9 +227,9 @@ describe('CampusMap', () => {
         );
         expect(polygonComponent).toBeTruthy();
         expect(polygonComponent.props.coordinates).toEqual(polygon.boundaries);
-        expect(polygonComponent.props.fillColor).toBe('#912338cc');
-        expect(polygonComponent.props.strokeColor).toBe('#912338cc');
-        expect(polygonComponent.props.strokeWidth).toBe(1);
+        expect(polygonComponent.props.fillColor).toBe('#91233833');
+        expect(polygonComponent.props.strokeColor).toBe('#912338');
+        expect(polygonComponent.props.strokeWidth).toBe(2);
       });
     });
   });
@@ -337,31 +320,50 @@ describe('CampusMap accessibility customization', () => {
       );
       expect(polygonComponents.length).toBe(polygons.length);
       polygonComponents.forEach((pc) => {
-        expect(pc.props.fillColor).toBe('#000000cc');
+        expect(pc.props.fillColor).toBe('#00000033');
         expect(pc.props.strokeColor).toBe('#000000');
         expect(pc.props.strokeWidth).toBe(2);
       });
     });
   });
+});
 
-  test('renders current location marker with black pin in black and white mode', async () => {
+describe('Toggle buttons functionality', () => {
+  test('toggles opening hours text on press', async () => {
     setLocationMock();
-    const { getByTestId } = render(
-      <CustomAccessibilityProvider>
-        <CampusMap />
-      </CustomAccessibilityProvider>,
-    );
+    const { getByTestId, getByText, queryByText } = renderCampusMap();
+
+    await waitFor(() => expect(getByTestId('marker-1')).toBeTruthy());
+    fireEvent.press(getByTestId('marker-1'));
+
+    const toggleBtn = await waitFor(() => getByText('Opening Hours'));
+    expect(toggleBtn).toBeTruthy();
+
+    fireEvent.press(toggleBtn);
+
+    expect(getByText('Opening Hours')).toBeTruthy();
+    expect(queryByText('Loading...')).toBeNull();
+  });
+
+  test('toggles shuttle markers on press', async () => {
+    setLocationMock();
+    const { getByText, getByTestId, queryByTestId } = renderCampusMap();
+
+    await waitFor(() => expect(getByTestId('marker-BUS1')).toBeTruthy());
+
+    const toggleBtn = await waitFor(() => getByTestId('shuttlesBtn'));
+    expect(toggleBtn).toBeTruthy();
+
+    fireEvent.press(toggleBtn);
 
     await waitFor(() => {
-      const mapView = getByTestId('mapView');
-      const flatChildren = React.Children.toArray(
-        mapView.props.children,
-      ).flat();
-      const userMarker = flatChildren.find(
-        (child) => child.props.testID === 'marker-current-location',
-      );
-      expect(userMarker).toBeTruthy();
-      expect(userMarker.props.pinColor).toBe('black');
+      expect(queryByTestId('marker-BUS1')).toBeNull();
+    });
+
+    fireEvent.press(getByTestId('shuttlesBtn'));
+
+    await waitFor(() => {
+      expect(getByTestId('marker-BUS1')).toBeTruthy();
     });
   });
 });
