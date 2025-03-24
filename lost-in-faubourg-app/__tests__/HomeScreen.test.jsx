@@ -1,21 +1,39 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import HomeScreen from '../components/HomeScreen';
 import { Linking } from 'react-native';
+import * as Location from 'expo-location';
 
 const mockNavigation = { navigate: jest.fn() };
 
-const renderHomeScreen = () =>
-  render(<HomeScreen navigation={mockNavigation} />);
+jest.mock('expo-location', () => ({
+  requestForegroundPermissionsAsync: jest.fn(),
+}));
+
+const renderHomeScreen = () => {
+  return render(<HomeScreen navigation={mockNavigation} />);
+};
 
 describe('HomeScreen', () => {
+  beforeAll(() => {
+    Location.requestForegroundPermissionsAsync.mockResolvedValue({
+      status: 'granted',
+    });
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('renders correctly', () => {
+  test('renders correctly', async () => {
     const { toJSON } = renderHomeScreen();
-    expect(toJSON()).toMatchSnapshot();
+    await waitFor(() => {
+      expect(toJSON()).toMatchSnapshot();
+    });
   });
 
   const navigationTests = [
@@ -28,17 +46,26 @@ describe('HomeScreen', () => {
 
   test.each(navigationTests)(
     'navigates to $target when "$buttonText" button is pressed',
-    ({ buttonText, target }) => {
+    async ({ buttonText, target }) => {
       const { getByText } = renderHomeScreen();
+      // Wait for useEffect updates and button to render
+      await waitFor(() => getByText(buttonText));
       const button = getByText(buttonText);
-      fireEvent.press(button);
-      expect(mockNavigation.navigate).toHaveBeenCalledWith(target);
+      expect(button).toBeTruthy(); // Ensure the button is rendered
+      act(() => {
+        fireEvent.press(button);
+      });
+      await waitFor(() => {
+        expect(mockNavigation.navigate).toHaveBeenCalledWith(target);
+      });
     },
   );
 
-  test('renders title correctly', () => {
+  test('renders title correctly', async () => {
     const { getByText } = renderHomeScreen();
-    expect(getByText('Welcome')).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText('Welcome')).toBeTruthy();
+    });
   });
 
   test('opens shuttle schedule on button press', async () => {
@@ -46,8 +73,11 @@ describe('HomeScreen', () => {
       .spyOn(Linking, 'openURL')
       .mockImplementation(async () => {});
     const { getByText } = renderHomeScreen();
+    await waitFor(() => getByText('Shuttle Schedule'));
     const button = getByText('Shuttle Schedule');
-    fireEvent.press(button);
+    act(() => {
+      fireEvent.press(button);
+    });
     await waitFor(() => {
       expect(openURLSpy).toHaveBeenCalledWith(
         'https://www.concordia.ca/maps/shuttle-bus.html#depart',
