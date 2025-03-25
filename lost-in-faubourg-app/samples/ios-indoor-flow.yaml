@@ -1,10 +1,18 @@
 appId: Expo Go
 ---
-- tapOn: "Type start destination"
-- inputText: "H849"
-- tapOn: "h849 (Building: Hall, Floor 8)"
-- tapOn: "h849 (Building: Hall, Floor 8)"
-- tapOn: "Type end destination"
-- inputText: "H833"
-- tapOn: "h833 (Building: Hall, Floor 8)"
-- tapOn: "h833 (Building: Hall, Floor 8)"
+- tapOn: "Hall Building"
+- tapOn:
+    text: "Search locations & navigate..."
+    index: 0
+- inputText: "H150"
+- tapOn:
+    point: "50%,18%"
+- tapOn: "Directions"
+- tapOn:
+    point: "50%,23%"
+- tapOn:
+    point: "74%,18%"
+- tapOn: "Done"
+- tapOn:
+    point: "45%,92%"
+- tapOn: "Hall 9"
