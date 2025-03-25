@@ -1,0 +1,20 @@
+appId: Expo Go
+---
+- tapOn:
+    point: "45%,92%"
+- tapOn: "Hall 9"
+- tapOn:
+    text: "Search locations & navigate..."
+    index: 0
+- inputText: "H967"
+- tapOn:
+    point: "50%,18%"
+- tapOn: "Directions"
+- inputText: "H921"
+- tapOn:
+    point: "50%,18%"
+- tapOn:
+    point: "50%,23%"
+- tapOn:
+    point: "74%,18%"
+- tapOn: "Done"
