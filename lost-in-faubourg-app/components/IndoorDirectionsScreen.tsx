@@ -121,11 +121,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
-  webView: {
-    flex: 1,
-    paddingBottom: 30,
-    backgroundColor: '#912338',
-  },
 });
 
 export default IndoorDirectionsScreen;
