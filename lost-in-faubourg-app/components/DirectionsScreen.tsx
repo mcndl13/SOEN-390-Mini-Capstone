@@ -11,6 +11,7 @@ import {
   PanResponder,
   Animated,
   Alert,
+  ImageSourcePropType,
 } from 'react-native';
 import MapView, { Marker, Polygon, PROVIDER_DEFAULT, MapStyleElement } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -19,7 +20,6 @@ import MapViewDirections, {
   MapViewDirectionsMode,
 } from 'react-native-maps-directions';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import * as Location from 'expo-location';
 import 'react-native-get-random-values';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 
@@ -29,48 +29,33 @@ import {
   startShuttleTracking,
   ShuttleData,
 } from '../services/shuttleService';
-import { isUserInBuilding } from '../utils/geometry';
+import MapService, { Coordinates, SGW_COORDS, LOYOLA_COORDS, INITIAL_POSITION } from '../services/MapService';
 
 const { width, height } = Dimensions.get('window');
-const ASPECT_RATIO = width / height;
-const LATITUDE_DELTA = 0.02;
-const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
-
-// Default map region near SGW
-const INITIAL_POSITION = {
-  latitude: 45.4953534,
-  longitude: -73.578549,
-  latitudeDelta: LATITUDE_DELTA,
-  longitudeDelta: LONGITUDE_DELTA,
-};
 
 type DirectionsParams = {
-  origin?: {
-    latitude: number;
-    longitude: number;
-  };
-  destination?: {
-    latitude: number;
-    longitude: number;
-  };
+  origin?: Coordinates;
+  destination?: Coordinates;
 };
 
-// Coordinates for the two campuses
-const SGW_COORDS = { latitude: 45.4953534, longitude: -73.578549 };
-const LOYOLA_COORDS = { latitude: 45.4582, longitude: -73.6405 };
-
 // Reusable Input Autocomplete component
+interface InputAutocompleteProps {
+  label: string;
+  placeholder: string;
+  onPlaceSelected: (data: any, details: any) => void;
+  currentValue?: string;
+  styles?: Record<string, any>;
+  query?: Record<string, any>;
+}
+
 function InputAutocomplete({
   label,
   placeholder,
   onPlaceSelected,
   currentValue,
-}: {
-  label: string;
-  placeholder: string;
-  onPlaceSelected: (data: any, details: any) => void;
-  currentValue?: string;
-}) {
+  styles: customStyles,
+  query,
+}: InputAutocompleteProps) {
   // Minimal custom styling for Google Autocomplete
   const googleAutocompleteStyles = {
     container: { flex: 0 },
@@ -113,12 +98,12 @@ function InputAutocomplete({
           onPress={(data, details = null) => {
             onPlaceSelected && onPlaceSelected(data, details);
           }}
-          query={{
+          query={query || {
             key: GOOGLE_MAPS_API_KEY,
             language: 'en',
             components: 'country:ca', // Limit to Canada for better results
           }}
-          styles={googleAutocompleteStyles}
+          styles={customStyles || googleAutocompleteStyles}
           enablePoweredByContainer={false}
           minLength={2}
           debounce={300}
@@ -128,27 +113,18 @@ function InputAutocomplete({
   );
 }
 
-export function stripHtml(input: string): string {
-  return input.replace(/<[^>]*>?/gm, '');
+interface TransportModeImages {
+  [key: string]: ImageSourcePropType;
 }
 
 export default function DirectionsScreen() {
+  // Get the map service singleton instance
+  const mapService = MapService.getInstance();
+  
   const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
-  const [origin, setOrigin] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [destination, setDestination] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-
-  // We still fetch userLocation if you want to show the user's position,
-  // but no button for "Use My Location" (optional).
-  const [userLocation, setUserLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [origin, setOrigin] = useState<Coordinates | null>(null);
+  const [destination, setDestination] = useState<Coordinates | null>(null);
+  const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
 
   const route = useRoute<RouteProp<Record<string, DirectionsParams>, string>>();
   const [showDirections, setShowDirections] = useState(false);
@@ -176,10 +152,13 @@ export default function DirectionsScreen() {
   // Toast message state for user feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<MapView | null>(null);
   
   // Create an animated value for the directions panel height
   const panY = useRef(new Animated.Value(0)).current;
+
+  // State to track whether next point should be origin or destination
+  const [nextPointIsOrigin, setNextPointIsOrigin] = useState<boolean>(true);
 
   // Set up pan responder for swipe gestures on the handle only
   const panResponder = useRef(
@@ -228,8 +207,8 @@ export default function DirectionsScreen() {
     // Only proceed if we have both origin and destination in params
     if (route.params?.origin && route.params?.destination) {
       // Set both values first
-      setOrigin(route.params.origin);
-      setDestination(route.params.destination);
+      setOrigin(route.params.origin as Coordinates);
+      setDestination(route.params.destination as Coordinates);
       
       // Then use setTimeout to ensure state updates have been processed
       setTimeout(() => {
@@ -237,13 +216,13 @@ export default function DirectionsScreen() {
         if (mapRef.current) {
           // Skip the traceRoute function entirely and do its work directly
           // This avoids the alert checks in the original function
-          const finalOrigin = snapToNearestBuilding(route.params.origin);
-          const finalDestination = snapToNearestBuilding(route.params.destination);
+          const finalOrigin = mapService.snapToNearestBuilding(route.params.origin as Coordinates);
+          const finalDestination = mapService.snapToNearestBuilding(route.params.destination as Coordinates);
           
           setShowDirections(true);
           
           // Check if shuttle route applies
-          const shuttleApplicable = isShuttleRouteApplicable();
+          const shuttleApplicable = mapService.isShuttleRouteApplicable(finalOrigin, finalDestination);
           setShowShuttleRoute(shuttleApplicable);
           
           // Fit map to show both points
@@ -254,9 +233,9 @@ export default function DirectionsScreen() {
         }
       }, 500);
     } else if (route.params?.origin) {
-      setOrigin(route.params.origin);
+      setOrigin(route.params.origin as Coordinates);
     } else if (route.params?.destination) {
-      setDestination(route.params.destination);
+      setDestination(route.params.destination as Coordinates);
     }
   }, [route.params]);
 
@@ -281,21 +260,16 @@ export default function DirectionsScreen() {
     }
   }, [showShuttleRoute]);
 
-  // Request location permission & get user location on mount (optional)
+  // Request location permission & get user location on mount
   useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-        return;
+    const getUserLocation = async () => {
+      const location = await mapService.getCurrentLocation();
+      if (location) {
+        setUserLocation(location);
       }
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      const coords = currentLocation.coords;
-      setUserLocation({
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-      });
-    })();
+    };
+    
+    getUserLocation();
   }, []);
 
   // Initialize shuttle tracking
@@ -312,7 +286,7 @@ export default function DirectionsScreen() {
   }, []);
 
   // Helper to animate camera
-  const moveTo = async (position: { latitude: number; longitude: number }) => {
+  const moveTo = async (position: Coordinates) => {
     const camera = await mapRef.current?.getCamera();
     if (camera) {
       camera.center = position;
@@ -332,25 +306,10 @@ export default function DirectionsScreen() {
     setZoomLevel(zoom);
   };
 
-  // Function to check if user is in a building and provide specific guidance
-  const checkUserInBuilding = () => {
-    if (!userLocation) return null;
-    
-    const buildingCenter = isUserInBuilding(userLocation);
-    if (buildingCenter) {
-      // User is in a building, we can provide specific guidance
-      return buildingCenter;
-    }
-    return null;
-  };
-
-  // State to track whether next point should be origin or destination
-  const [nextPointIsOrigin, setNextPointIsOrigin] = useState<boolean>(true);
-
   // Updated smart location setter with alternating logic
-  const setSmartLocation = (position: { latitude: number; longitude: number }, label: string) => {
+  const setSmartLocation = (position: Coordinates, label: string) => {
     // Snap the location to nearest building if appropriate
-    const snappedPosition = snapToNearestBuilding(position);
+    const snappedPosition = mapService.snapToNearestBuilding(position);
     
     // Determine where to set the position using alternating logic
     if (nextPointIsOrigin) {
@@ -367,7 +326,7 @@ export default function DirectionsScreen() {
     moveTo(snappedPosition);
   };
 
-  // Update this to use our smart location setter
+  // Use current location as a point
   const setCurrentLocationAsPoint = () => {
     // First check if user location is available
     if (!userLocation) {
@@ -379,7 +338,7 @@ export default function DirectionsScreen() {
     }
     
     // Check if user is in a building
-    const buildingCenter = checkUserInBuilding();
+    const buildingCenter = mapService.checkUserInBuilding(userLocation);
     
     if (buildingCenter) {
       // If user is in a building, use the building center for better accuracy
@@ -394,83 +353,6 @@ export default function DirectionsScreen() {
       // Use regular user location
       setSmartLocation(userLocation, "Your location");
     }
-  };
-
-  // Function to snap points to nearest building when appropriate
-  const snapToNearestBuilding = (point: { latitude: number; longitude: number }) => {
-    // This will return either the center of a building if the point is inside a building,
-    // or the original point if not in any building
-    return isUserInBuilding(point) || point;
-  };
-
-  // Helper function to format location names
-  const formatLocationName = (location: { latitude: number; longitude: number; name?: string }) => {
-    if (location.name) {
-      return location.name;
-    }
-    // Check if it's one of the campuses
-    if (Math.abs(location.latitude - SGW_COORDS.latitude) < 0.001 && 
-        Math.abs(location.longitude - SGW_COORDS.longitude) < 0.001) {
-      return "SGW Campus";
-    }
-    
-    if (Math.abs(location.latitude - LOYOLA_COORDS.latitude) < 0.001 && 
-        Math.abs(location.longitude - LOYOLA_COORDS.longitude) < 0.001) {
-      return "Loyola Campus";
-    }
-    
-    // Check if it's the user's current location
-    if (userLocation && 
-        Math.abs(location.latitude - userLocation.latitude) < 0.0001 && 
-        Math.abs(location.longitude - userLocation.longitude) < 0.0001) {
-      return "My Current Location";
-    }
-    
-    // Otherwise show coordinates
-    return `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
-  };
-  
-
-  interface Coordinates {
-    latitude: number;
-    longitude: number;
-  }
-
-  const distanceBetween = (point1: Coordinates, point2: Coordinates): number => {
-    if (!point1 || !point2) return 9999;
-
-    const R = 6371; // Radius of the earth in km
-    const dLat = deg2rad(point2.latitude - point1.latitude);
-    const dLon = deg2rad(point2.longitude - point1.longitude);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(point1.latitude)) * Math.cos(deg2rad(point2.latitude)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c; // Distance in km
-    return distance;
-  };
-
-  const deg2rad = (deg: number) => {
-    return deg * (Math.PI/180);
-  };
-
-  // Enhanced isShuttleRouteApplicable function
-  const isShuttleRouteApplicable = () => {
-    if (!origin || !destination) return false;
-    
-    // Use the snapped coordinates for better accuracy
-    const finalOrigin = snapToNearestBuilding(origin);
-    const finalDestination = snapToNearestBuilding(destination);
-    
-    // Check if origin or destination is near either campus
-    const isOriginNearSGW = distanceBetween(finalOrigin, SGW_COORDS) < 0.5; // 500m radius
-    const isOriginNearLoyola = distanceBetween(finalOrigin, LOYOLA_COORDS) < 0.5;
-    const isDestNearSGW = distanceBetween(finalDestination, SGW_COORDS) < 0.5;
-    const isDestNearLoyola = distanceBetween(finalDestination, LOYOLA_COORDS) < 0.5;
-    
-    // Shuttle is applicable if route is between campuses
-    return (isOriginNearSGW && isDestNearLoyola) || (isOriginNearLoyola && isDestNearSGW);
   };
 
   // Padding around route
@@ -496,28 +378,14 @@ export default function DirectionsScreen() {
 
   // Fetch step-by-step instructions separately
   const fetchDetailedDirections = async (
-    orig: { latitude: number; longitude: number } | null,
-    dest: { latitude: number; longitude: number } | null,
+    orig: Coordinates | null,
+    dest: Coordinates | null,
     mode: string,
   ) => {
     try {
-      if (!orig || !dest) return;
-      const url =
-        `https://maps.googleapis.com/maps/api/directions/json?` +
-        `origin=${orig.latitude},${orig.longitude}&` +
-        `destination=${dest.latitude},${dest.longitude}&` +
-        `mode=${mode.toLowerCase()}&` +
-        `key=${GOOGLE_MAPS_API_KEY}`;
-
-      const res = await fetch(url);
-      if (!process.env.JEST_WORKER_ID) {
-        console.log('Response status:', res.status);
-      }
-      const data = await res.json();
-      if (!process.env.JEST_WORKER_ID) {
-        console.log('Directions API response:', data.status);
-      }
-
+      const data = await mapService.fetchDirections(orig, dest, mode);
+      if (!data) return;
+      
       if (data.routes?.length) {
         const firstRoute = data.routes[0];
         const leg = firstRoute.legs?.[0];
@@ -548,13 +416,13 @@ export default function DirectionsScreen() {
     
     // Check if either origin or destination is in a building
     // and use building centers for more accurate routing
-    const finalOrigin = snapToNearestBuilding(origin);
-    const finalDestination = snapToNearestBuilding(destination);
+    const finalOrigin = mapService.snapToNearestBuilding(origin);
+    const finalDestination = mapService.snapToNearestBuilding(destination);
     
     setShowDirections(true);
     
     // Check if shuttle route applies using the final coordinates
-    const shuttleApplicable = isShuttleRouteApplicable();
+    const shuttleApplicable = mapService.isShuttleRouteApplicable(finalOrigin, finalDestination);
     setShowShuttleRoute(shuttleApplicable);
     
     mapRef.current?.fitToCoordinates([finalOrigin, finalDestination], {
@@ -570,19 +438,19 @@ export default function DirectionsScreen() {
       return;
     }
     
-    const position = {
+    const position: Coordinates = {
       latitude: details.geometry.location.lat,
       longitude: details.geometry.location.lng,
     };
     
     // Snap the location to the nearest building if needed
-    const snappedPosition = snapToNearestBuilding(position);
+    const snappedPosition = mapService.snapToNearestBuilding(position);
     
     // Extract the place name from details (or fallback to the description)
     const placeName = details.name || data?.description || '';
     
     // Create a new object that includes the name
-    const newLocation = { ...snappedPosition, name: placeName };
+    const newLocation: Coordinates = { ...snappedPosition, name: placeName };
     
     if (flag === 'origin') {
       setOrigin(newLocation);
@@ -594,19 +462,9 @@ export default function DirectionsScreen() {
     
     moveTo(snappedPosition);
   };
-  
-  // Simple helper to remove HTML tags
-  // Safely removes HTML tags without relying on DOMParser
-  const stripHtml = (html = '') => {
-    if (!html) return '';
-    return html.replace(/<[^>]*>?/gm, ''); // Use a regex to strip tags
-  };
 
-  // UPDATED: Set campus location as either origin or destination based on what's already filled
-  const setCampusPoint = (campusCoords: {
-    latitude: number;
-    longitude: number;
-  }, campusName: string) => {
+  // Set campus location as either origin or destination based on what's already filled
+  const setCampusPoint = (campusCoords: Coordinates, campusName: string) => {
     setSmartLocation(campusCoords, campusName);
   };
 
@@ -614,6 +472,7 @@ export default function DirectionsScreen() {
   const toggleShuttles = () => {
     setShowShuttles(!showShuttles);
   };
+  
   // Reset origin and destination with a visual reset too
   const resetOriginAndDestination = () => {
     setOrigin(null);
@@ -635,8 +494,8 @@ export default function DirectionsScreen() {
 
   // Test directions with hardcoded values (for debugging)
   const testDirections = () => {
-    const testOrigin = { latitude: 45.4953534, longitude: -73.578549 }; // SGW
-    const testDest = { latitude: 45.4582, longitude: -73.6405 }; // Loyola
+    const testOrigin: Coordinates = { latitude: 45.4953534, longitude: -73.578549 }; // SGW
+    const testDest: Coordinates = { latitude: 45.4582, longitude: -73.6405 }; // Loyola
     
     setOrigin(testOrigin);
     setDestination(testDest);
@@ -670,8 +529,8 @@ export default function DirectionsScreen() {
     }
   ] : [];
 
-  const getImageSource = (mode: string, travelMode: string) => {
-    const images = {
+  const getImageSource = (mode: string, travelMode: string): ImageSourcePropType => {
+    const images: TransportModeImages = {
       DRIVING: travelMode === 'DRIVING' ? require('../assets/images/transportModes/carWhite.png') : require('../assets/images/transportModes/carBlack.png'),
       WALKING: travelMode === 'WALKING' ? require('../assets/images/transportModes/walkWhite.png') : require('../assets/images/transportModes/walkBlack.png'),
       BICYCLING: travelMode === 'BICYCLING' ? require('../assets/images/transportModes/bikeWhite.png') : require('../assets/images/transportModes/bikeBlack.png'),
@@ -699,7 +558,7 @@ export default function DirectionsScreen() {
       )}
       
       {/* Building Detection Badge */}
-      {userLocation && checkUserInBuilding() && (
+      {userLocation && mapService.checkUserInBuilding(userLocation) && (
         <View style={styles.buildingInfoBadge}>
           <Text style={styles.buildingInfoText}>
             You are in a Concordia building
@@ -844,8 +703,7 @@ export default function DirectionsScreen() {
               key: GOOGLE_MAPS_API_KEY,
               language: 'en'
             }}
-            currentValue={origin ? `${formatLocationName(origin)}` : undefined}
-          />
+            currentValue={origin ? mapService.formatLocationName(origin, userLocation) : undefined} label={''}          />
           
           <Text style={[styles.label, isLargeText && styles.largeText]}>Destination</Text>
           <InputAutocomplete
@@ -862,8 +720,7 @@ export default function DirectionsScreen() {
               key: GOOGLE_MAPS_API_KEY,
               language: 'en'
             }}
-            currentValue={destination ? `${formatLocationName(destination)}` : undefined}
-          />
+            currentValue={destination ? mapService.formatLocationName(destination, userLocation) : undefined} label={''}          />
 
           {/* Location Buttons Row */}
           <View style={styles.locationButtonsRow}>
@@ -887,8 +744,7 @@ export default function DirectionsScreen() {
             <TouchableOpacity
               style={[
                 styles.campusButton, 
-                isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteText
+                isBlackAndWhite && styles.blackAndWhiteContainer
               ]}
               onPress={() => setCampusPoint(SGW_COORDS, "SGW Campus")}
             >
@@ -897,8 +753,7 @@ export default function DirectionsScreen() {
             <TouchableOpacity
               style={[
                 styles.campusButton, 
-                isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteText
+                isBlackAndWhite && styles.blackAndWhiteContainer
               ]}
               onPress={() => setCampusPoint(LOYOLA_COORDS, "Loyola Campus")}
             >
@@ -908,7 +763,7 @@ export default function DirectionsScreen() {
 
           {/* Travel Mode Buttons */}
           <View style={styles.modeContainer}>
-            {['DRIVING', 'WALKING', 'BICYCLING', 'TRANSIT'].map(mode => (
+            {(['DRIVING', 'WALKING', 'BICYCLING', 'TRANSIT'] as MapViewDirectionsMode[]).map(mode => (
               <TouchableOpacity
                 key={mode}
                 style={[
@@ -978,7 +833,7 @@ export default function DirectionsScreen() {
         <View style={[
           styles.directionsContainer, 
           { height: directionsHeight },  
-          isBlackAndWhite && styles.blackAndWhiteText
+          isBlackAndWhite && styles.blackAndWhiteContainer
         ]}>
           {/* Handle for expanding/collapsing with PanResponder for swipe gestures */}
           <Animated.View 
@@ -990,13 +845,13 @@ export default function DirectionsScreen() {
           >
             <View style={[
               styles.dragIndicator, 
-              isBlackAndWhite && styles.blackAndWhiteText
+              isBlackAndWhite && styles.blackAndWhiteContainer
             ]} />
           </Animated.View>
           
           <View style={[
             styles.directionsHeaderRow, 
-            isBlackAndWhite && styles.blackAndWhiteText
+            isBlackAndWhite && styles.blackAndWhiteContainer
           ]}>
             <Text style={[
               styles.directionsHeader, 
@@ -1008,8 +863,7 @@ export default function DirectionsScreen() {
             <TouchableOpacity 
               style={[
                 styles.expandButton, 
-                isLargeText && styles.largeText,
-                isBlackAndWhite && styles.blackAndWhiteText
+                isBlackAndWhite && styles.blackAndWhiteContainer
               ]}
               onPress={() => {
                 setExpandedDirections(!expandedDirections);
@@ -1099,7 +953,7 @@ export default function DirectionsScreen() {
                   <Text style={styles.regularRouteHeader}>Route Steps</Text>
                   {steps.map((step, index) => (
                     <Text style={styles.stepText} key={index}>
-                      {index + 1}. {stripHtml(step.html_instructions)}
+                      {index + 1}. {mapService.stripHtml(step.html_instructions)}
                     </Text>
                   ))}
                   

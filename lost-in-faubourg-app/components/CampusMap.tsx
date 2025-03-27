@@ -12,6 +12,7 @@ import { AccessibilityContext } from './AccessibilitySettings';
 import { startShuttleTracking, ShuttleData } from '../services/shuttleService';
 import { getOpeningHours } from '../services/openingHoursService';
 
+// Types
 interface LocationCoords {
   latitude: number;
   longitude: number;
@@ -26,98 +27,267 @@ interface Building {
   description: string | undefined;
 }
 
+// Constants
 const SGW_COORDS: LocationCoords = {
   latitude: 45.4953534,
   longitude: -73.578549,
 };
+
 const LOYOLA_COORDS: LocationCoords = {
   latitude: 45.4582,
   longitude: -73.6405,
 };
 
-const getPolygonCenter = (boundaries: LocationCoords[]): LocationCoords => {
-  let latSum = 0,
-    lonSum = 0;
-  boundaries.forEach((coord) => {
-    latSum += coord.latitude;
-    lonSum += coord.longitude;
-  });
-  return {
-    latitude: latSum / boundaries.length,
-    longitude: lonSum / boundaries.length,
-  };
-};
-
-const createBuildings = () => {
-  return polygons.map((polygon, index) => ({
-    id: index + 1,
-    name: polygon.name,
-    latitude: getPolygonCenter(polygon.boundaries).latitude,
-    longitude: getPolygonCenter(polygon.boundaries).longitude,
-    address: `${polygon.address} - Concordia University`,
-    description: polygon.description,
-  }));
-};
-
-const requestLocationPermission = async (
-  setLocation: React.Dispatch<
-    React.SetStateAction<Location.LocationObjectCoords | null>
-  >,
-  setRegion: React.Dispatch<React.SetStateAction<Region | null>>,
-) => {
-  let { status } = await Location.requestForegroundPermissionsAsync();
-  if (status !== 'granted') {
-    console.log('Permission to access location was denied');
-    return;
+// ===== Factory Pattern Implementation =====
+class MapComponentFactory {
+  // Create buildings using factory method
+  static createBuildings(): Building[] {
+    return polygons.map((polygon, index) => ({
+      id: index + 1,
+      name: polygon.name,
+      latitude: this.getPolygonCenter(polygon.boundaries).latitude,
+      longitude: this.getPolygonCenter(polygon.boundaries).longitude,
+      address: `${polygon.address} - Concordia University`,
+      description: polygon.description,
+    }));
   }
 
-  let currentLocation = await Location.getCurrentPositionAsync({});
-  setLocation(currentLocation.coords);
-  setRegion({
-    latitude: currentLocation.coords.latitude,
-    longitude: currentLocation.coords.longitude,
-    latitudeDelta: 0.005,
-    longitudeDelta: 0.005,
-  });
-};
+  // Helper method to calculate polygon center
+  static getPolygonCenter(boundaries: LocationCoords[]): LocationCoords {
+    let latSum = 0,
+      lonSum = 0;
+    boundaries.forEach((coord) => {
+      latSum += coord.latitude;
+      lonSum += coord.longitude;
+    });
+    return {
+      latitude: latSum / boundaries.length,
+      longitude: lonSum / boundaries.length,
+    };
+  }
 
+  // Create campus region based on coordinates
+  static createCampusRegion(campusCoords: LocationCoords): Region {
+    return {
+      latitude: campusCoords.latitude,
+      longitude: campusCoords.longitude,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    };
+  }
+
+  // Create campus-specific configuration
+  static createMapConfiguration(campusName: string) {
+    switch (campusName) {
+      case 'SGW':
+        return {
+          coords: SGW_COORDS,
+          zoomLevel: 0.005,
+          defaultBuildings: this.createBuildings().filter(building => 
+            // Filter logic for SGW buildings
+            building.latitude > 45.49 && building.latitude < 45.50
+          ),
+        };
+      case 'Loyola':
+        return {
+          coords: LOYOLA_COORDS,
+          zoomLevel: 0.005,
+          defaultBuildings: this.createBuildings().filter(building => 
+            // Filter logic for Loyola buildings
+            building.latitude > 45.45 && building.latitude < 45.46
+          ),
+        };
+      default:
+        return {
+          coords: SGW_COORDS,
+          zoomLevel: 0.005,
+          defaultBuildings: this.createBuildings(),
+        };
+    }
+  }
+
+  // Create shuttle markers
+  static createShuttleMarkers(shuttleData: ShuttleData | null, showShuttles: boolean) {
+    if (!showShuttles || !shuttleData) return { buses: [], stations: [] };
+    
+    return {
+      buses: shuttleData.buses,
+      stations: shuttleData.stations
+    };
+  }
+
+  // Create map style based on accessibility settings
+  static createMapStyle(isBlackAndWhite: boolean): MapStyleElement[] {
+    return isBlackAndWhite
+      ? [
+          {
+            elementType: 'geometry',
+            stylers: [{ saturation: -100 }],
+          },
+          {
+            elementType: 'labels.text.fill',
+            stylers: [{ saturation: -100 }],
+          },
+          {
+            elementType: 'labels.text.stroke',
+            stylers: [{ saturation: -100 }],
+          },
+        ]
+      : [];
+  }
+
+  // Request location permission
+  static async requestLocationPermission(
+    setLocation: React.Dispatch<
+      React.SetStateAction<Location.LocationObjectCoords | null>
+    >,
+    setRegion: React.Dispatch<React.SetStateAction<Region | null>>,
+  ) {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      console.log('Permission to access location was denied');
+      return;
+    }
+
+    let currentLocation = await Location.getCurrentPositionAsync({});
+    setLocation(currentLocation.coords);
+    setRegion({
+      latitude: currentLocation.coords.latitude,
+      longitude: currentLocation.coords.longitude,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    });
+  }
+}
+
+// ===== Component Definitions =====
+
+// Building Info Component
+const BuildingInfo: React.FC<{
+  building: Building;
+  isBlackAndWhite: boolean;
+  isLargeText: boolean;
+  openingHours: string;
+  showOpeningHours: boolean;
+  setShowOpeningHours: React.Dispatch<React.SetStateAction<boolean>>;
+}> = ({ 
+  building, 
+  isBlackAndWhite, 
+  isLargeText,
+  openingHours,
+  showOpeningHours,
+  setShowOpeningHours
+}) => (
+  <View style={styles.infoContainer}>
+    <View style={[isBlackAndWhite && styles.blackAndWhiteContainer]}>
+      <Text style={[styles.buildingName, isLargeText && styles.largeText]}>
+        {building.name}
+      </Text>
+      <Text style={[styles.description, isLargeText && styles.largeText]}>
+        {building.address}
+      </Text>
+      <View style={styles.horizontalRule} />
+      <Text style={[styles.infoText, isLargeText && styles.largeText]}>
+        Description
+      </Text>
+      <Text style={[styles.description, isLargeText && styles.largeText]}>
+        {building.description}
+      </Text>
+
+      <View style={styles.horizontalRule} />
+
+      {/* Toggle Button */}
+      <TouchableOpacity
+        onPress={() => setShowOpeningHours(!showOpeningHours)}
+      >
+        <Text style={[isLargeText && styles.largeText]}>
+          {showOpeningHours ? 'Hide Opening Hours' : 'Show Opening Hours'}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Conditionally Show Opening Hours */}
+      {showOpeningHours && (
+        <Text style={[styles.description, isLargeText && styles.largeText]}>
+          {openingHours}
+        </Text>
+      )}
+    </View>
+  </View>
+);
+
+// Campus Buttons Component
+const CampusButtons: React.FC<{
+  selectedCampus: string | null;
+  switchToCampus: (coords: LocationCoords, name: string) => void;
+  isBlackAndWhite: boolean;
+  isLargeText: boolean;
+}> = ({ 
+  selectedCampus, 
+  switchToCampus, 
+  isBlackAndWhite, 
+  isLargeText 
+}) => (
+  <View style={styles.buttonContainer}>
+    <TouchableOpacity
+      style={[
+        styles.circularButton,
+        selectedCampus === 'SGW' && styles.selectedButton,
+        isBlackAndWhite && styles.blackAndWhiteButton,
+      ]}
+      onPress={() => switchToCampus(SGW_COORDS, 'SGW')}
+    >
+      <Text
+        style={[
+          styles.buttonText,
+          selectedCampus === 'SGW' && styles.selectedButtonText,
+          isLargeText && styles.largeText,
+          isBlackAndWhite && styles.blackAndWhiteText,
+        ]}
+      >
+        SGW Campus
+      </Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      style={[
+        styles.circularButton,
+        selectedCampus === 'Loyola' && styles.selectedButton,
+        isBlackAndWhite && styles.blackAndWhiteButton,
+      ]}
+      onPress={() => switchToCampus(LOYOLA_COORDS, 'Loyola')}
+    >
+      <Text
+        style={[
+          styles.buttonText,
+          selectedCampus === 'Loyola' && styles.selectedButtonText,
+          isLargeText && styles.largeText,
+          isBlackAndWhite && styles.blackAndWhiteText,
+        ]}
+      >
+        Loyola Campus
+      </Text>
+    </TouchableOpacity>
+  </View>
+);
+
+// ===== Main Component =====
 const CampusMap: React.FC = () => {
-  const { isBlackAndWhite, isLargeText } =
-    React.useContext(AccessibilityContext);
-  const [location, setLocation] =
-    useState<Location.LocationObjectCoords | null>(null);
+  const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
+  const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
   const [region, setRegion] = useState<Region | null>(null);
   const [selectedCampus, setSelectedCampus] = useState<string | null>(null);
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(
-    null,
-  );
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
   const [openingHours, setOpeningHours] = useState<string>('Loading...');
   const [showOpeningHours, setShowOpeningHours] = useState<boolean>(true);
-  const [showDescription, setshowDescription] = useState<boolean>(true);
 
-  const buildings = createBuildings();
-
-  const mapStyle: MapStyleElement[] = isBlackAndWhite
-    ? [
-        {
-          elementType: 'geometry',
-          stylers: [{ saturation: -100 }],
-        },
-        {
-          elementType: 'labels.text.fill',
-          stylers: [{ saturation: -100 }],
-        },
-        {
-          elementType: 'labels.text.stroke',
-          stylers: [{ saturation: -100 }],
-        },
-      ]
-    : [];
+  // Use factory to create buildings and map style
+  const buildings = MapComponentFactory.createBuildings();
+  const mapStyle = MapComponentFactory.createMapStyle(isBlackAndWhite);
 
   useEffect(() => {
-    requestLocationPermission(setLocation, setRegion);
+    MapComponentFactory.requestLocationPermission(setLocation, setRegion);
   }, []);
 
   useEffect(() => {
@@ -149,12 +319,9 @@ const CampusMap: React.FC = () => {
   }, [selectedBuilding]);
 
   const switchToCampus = (campusCoords: LocationCoords, campusName: string) => {
-    setRegion({
-      latitude: campusCoords.latitude,
-      longitude: campusCoords.longitude,
-      latitudeDelta: 0.005,
-      longitudeDelta: 0.005,
-    });
+    // Use factory to create region
+    const newRegion = MapComponentFactory.createCampusRegion(campusCoords);
+    setRegion(newRegion);
     setSelectedCampus(campusName);
     setSelectedBuilding(null);
   };
@@ -162,6 +329,9 @@ const CampusMap: React.FC = () => {
   const toggleShuttles = () => {
     setShowShuttles(!showShuttles);
   };
+
+  // Get shuttle markers using factory
+  const shuttleMarkers = MapComponentFactory.createShuttleMarkers(shuttleData, showShuttles);
 
   return (
     <View
@@ -212,49 +382,47 @@ const CampusMap: React.FC = () => {
             />
           ))}
 
-          {showShuttles &&
-            shuttleData?.buses.map((bus) => (
-              <Marker
-                key={bus.ID}
-                coordinate={{
-                  latitude: bus.Latitude,
-                  longitude: bus.Longitude,
-                }}
-                title={`Shuttle ${bus.ID}`}
-                testID={`marker-${bus.ID}`}
-              >
-                <View style={styles.busMarker}>
-                  <Image
-                    source={require('../assets/images/transportModes/busBlack.png')}
-                    style={styles.busIcon}
-                    resizeMode="contain"
-                  />
-                </View>
-              </Marker>
-            ))}
+          {shuttleMarkers.buses.map((bus) => (
+            <Marker
+              key={bus.ID}
+              coordinate={{
+                latitude: bus.Latitude,
+                longitude: bus.Longitude,
+              }}
+              title={`Shuttle ${bus.ID}`}
+              testID={`marker-${bus.ID}`}
+            >
+              <View style={styles.busMarker}>
+                <Image
+                  source={require('../assets/images/transportModes/busBlack.png')}
+                  style={styles.busIcon}
+                  resizeMode="contain"
+                />
+              </View>
+            </Marker>
+          ))}
 
-          {showShuttles &&
-            shuttleData?.stations.map((station) => (
-              <Marker
-                key={station.ID}
-                coordinate={{
-                  latitude: station.Latitude,
-                  longitude: station.Longitude,
-                }}
-                title={
-                  station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'
-                }
-                testID={`marker-${station.ID}`}
-              >
-                <View style={styles.stationMarker}>
-                  <Image
-                    source={require('../assets/images/transportModes/busStation.png')}
-                    style={styles.stationIcon}
-                    resizeMode="contain"
-                  />
-                </View>
-              </Marker>
-            ))}
+          {shuttleMarkers.stations.map((station) => (
+            <Marker
+              key={station.ID}
+              coordinate={{
+                latitude: station.Latitude,
+                longitude: station.Longitude,
+              }}
+              title={
+                station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'
+              }
+              testID={`marker-${station.ID}`}
+            >
+              <View style={styles.stationMarker}>
+                <Image
+                  source={require('../assets/images/transportModes/busStation.png')}
+                  style={styles.stationIcon}
+                  resizeMode="contain"
+                />
+              </View>
+            </Marker>
+          ))}
         </MapView>
       ) : (
         <Text style={[styles.infoText, isLargeText && styles.largeText]}>
@@ -263,31 +431,14 @@ const CampusMap: React.FC = () => {
       )}
 
       {selectedBuilding && (
-        <View style={styles.infoContainer}>
-          <BuildingInfo
-            building={selectedBuilding}
-            isBlackAndWhite={isBlackAndWhite}
-            isLargeText={isLargeText}
-          />
-
-          <View style={styles.horizontalRule} />
-
-          {/* Toggle Button */}
-          <TouchableOpacity
-            onPress={() => setShowOpeningHours(!showOpeningHours)}
-          >
-            <Text style={[isLargeText && styles.largeText]}>
-              {showOpeningHours ? 'Hide Opening Hours' : 'Show Opening Hours'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Conditionally Show Opening Hours */}
-          {showOpeningHours && (
-            <Text style={[styles.description, isLargeText && styles.largeText]}>
-              {openingHours}
-            </Text>
-          )}
-        </View>
+        <BuildingInfo
+          building={selectedBuilding}
+          isBlackAndWhite={isBlackAndWhite}
+          isLargeText={isLargeText}
+          openingHours={openingHours}
+          showOpeningHours={showOpeningHours}
+          setShowOpeningHours={setShowOpeningHours}
+        />
       )}
 
       <CampusButtons
@@ -308,77 +459,6 @@ const CampusMap: React.FC = () => {
     </View>
   );
 };
-
-const BuildingInfo: React.FC<{
-  building: Building;
-  isBlackAndWhite: boolean;
-  isLargeText: boolean;
-}> = ({ building, isBlackAndWhite, isLargeText }) => (
-  <View style={[isBlackAndWhite && styles.blackAndWhiteContainer]}>
-    <Text style={[styles.buildingName, isLargeText && styles.largeText]}>
-      {building.name}
-    </Text>
-    <Text style={[styles.description, isLargeText && styles.largeText]}>
-      {building.address}
-    </Text>
-    <View style={styles.horizontalRule} />
-    <Text style={[styles.infoText, isLargeText && styles.largeText]}>
-      Description
-    </Text>
-    <Text style={[styles.description, isLargeText && styles.largeText]}>
-      {building.description}
-    </Text>
-  </View>
-);
-
-const CampusButtons: React.FC<{
-  selectedCampus: string | null;
-  switchToCampus: (coords: LocationCoords, name: string) => void;
-  isBlackAndWhite: boolean;
-  isLargeText: boolean;
-}> = ({ selectedCampus, switchToCampus, isBlackAndWhite, isLargeText }) => (
-  <View style={styles.buttonContainer}>
-    <TouchableOpacity
-      style={[
-        styles.circularButton,
-        selectedCampus === 'SGW' && styles.selectedButton,
-        isBlackAndWhite && styles.blackAndWhiteButton,
-      ]}
-      onPress={() => switchToCampus(SGW_COORDS, 'SGW')}
-    >
-      <Text
-        style={[
-          styles.buttonText,
-          selectedCampus === 'SGW' && styles.selectedButtonText,
-          isLargeText && styles.largeText,
-          isBlackAndWhite && styles.blackAndWhiteText,
-        ]}
-      >
-        SGW Campus
-      </Text>
-    </TouchableOpacity>
-
-    <TouchableOpacity
-      style={[
-        styles.circularButton,
-        selectedCampus === 'Loyola' && styles.selectedButton,
-        isBlackAndWhite && styles.blackAndWhiteButton,
-      ]}
-      onPress={() => switchToCampus(LOYOLA_COORDS, 'Loyola')}
-    >
-      <Text
-        style={[
-          styles.buttonText,
-          selectedCampus === 'Loyola' && styles.selectedButtonText,
-          isLargeText && styles.largeText,
-          isBlackAndWhite && styles.blackAndWhiteText,
-        ]}
-      >
-        Loyola Campus
-      </Text>
-    </TouchableOpacity>
-  </View>
-);
 
 const styles = StyleSheet.create({
   container: {
