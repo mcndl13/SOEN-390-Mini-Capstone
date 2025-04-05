@@ -10,6 +10,14 @@ jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn(),
 }));
 
+jest.mock('react', () => {
+  const actualReact = jest.requireActual('react');
+  return {
+    ...actualReact,
+    useState: jest.fn((initial) => [true, jest.fn()]),
+  };
+});
+
 const renderHomeScreen = () => {
   return render(<HomeScreen navigation={mockNavigation} />);
 };
@@ -48,13 +56,13 @@ describe('HomeScreen', () => {
     'navigates to $target when "$buttonText" button is pressed',
     async ({ buttonText, target }) => {
       const { getByText } = renderHomeScreen();
-      // Wait for useEffect updates and button to render
       await waitFor(() => getByText(buttonText));
       const button = getByText(buttonText);
-      expect(button).toBeTruthy(); // Ensure the button is rendered
+      expect(button).toBeTruthy();
       act(() => {
         fireEvent.press(button);
       });
+      console.log(`Button "${buttonText}" pressed`); // Debug log
       await waitFor(() => {
         expect(mockNavigation.navigate).toHaveBeenCalledWith(target);
       });

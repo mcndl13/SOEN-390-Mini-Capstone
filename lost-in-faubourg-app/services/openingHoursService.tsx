@@ -21,7 +21,9 @@ const getPlaceID = async (
     const place = response.data.results[0];
     return place ? place.place_id : null;
   } catch (error) {
-    console.error('Error fetching Place ID:', error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Error fetching Place ID:', error);
+    }
     return null;
   }
 };
@@ -34,7 +36,7 @@ const getOpeningHours = async (
     const placeId = await getPlaceID(latitude, longitude);
     if (!placeId) {
       console.warn('No Place ID found for the given location.');
-      return null;
+      return 'No hours available';
     }
 
     const response = await axios.get(
@@ -53,7 +55,9 @@ const getOpeningHours = async (
       'No hours available'
     );
   } catch (error) {
-    console.error('Error fetching opening hours:', error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Error fetching opening hours:', error);
+    }
     return 'Error fetching hours';
   }
 };

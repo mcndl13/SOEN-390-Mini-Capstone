@@ -180,7 +180,7 @@ export default function POIScreen() {
         setIsLoading(false);
       }
     })();
-  }, []);
+  }, []); 
 
   // Animation effect for selected POI
   useEffect(() => {
@@ -388,6 +388,7 @@ export default function POIScreen() {
         customMapStyle={mapStyle}
         onMapReady={() => setMapReady(true)}
         onPress={() => selectedPOI && closeInfo()}
+        testID="mapView"
       >
         {/* Polygons for Concordia buildings */}
         {polygons.map((polygon, idx) => (
@@ -418,6 +419,7 @@ export default function POIScreen() {
                 name={POI_TYPE_ICONS[poi.type] || POI_TYPE_ICONS.default}
                 size={18}
                 color="white"
+                testID={`icon-${poi.type || 'default'}`}
               />
             </View>
           </Marker>
@@ -506,6 +508,7 @@ export default function POIScreen() {
                 isLargeText && { fontSize: 16 },
                 searchQuery === option.id && styles.selectedPillText
               ]}
+               testID='quickSearchText'
             >
               {option.name}
             </Text>
@@ -599,6 +602,7 @@ export default function POIScreen() {
               isBlackAndWhite && styles.directionsButtonBW
             ]}
             onPress={() => getDirections(selectedPOI)}
+            testID="getDirectionsButton"
           >
             <Ionicons 
               name="navigate" 
