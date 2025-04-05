@@ -23,9 +23,7 @@ jest.mock(
 try {
   require.resolve('react-native/Libraries/Animated/NativeAnimatedHelper');
   jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper', () => ({}));
-} catch (err) {
-  // Module not found—skip mocking.
-}
+} catch (err) {}
 
 jest.mock('expo-constants', () => ({
   statusBarHeight: 20,
@@ -185,11 +183,12 @@ describe('DirectionsScreen', () => {
       await waitForTimeout(700);
     });
     expect(rendered.queryByText('Turn-by-turn Directions')).toBeNull();
-    expect(rendered.queryAllByText(/^\d+\./).length).toBe(0);
+    await waitFor(() => {
+      expect(rendered.queryAllByText(/^\d+\./).length).toBe(0);
+    });
   });
 });
 
-// Refactored duplicate interactions using helper functions
 describe('More DirectionsScreen interactions', () => {
   const { useRoute } = require('@react-navigation/native');
 
@@ -289,14 +288,11 @@ describe('Additional DirectionsScreen interactions', () => {
     });
     fireEvent.press(rendered.getByText('Find Route'));
     await waitForTimeout(800);
-    // Use testID to find the expand/collapse button.
     const expandButton = await waitFor(() =>
       rendered.getByTestId('expandCollapseBtn'),
     );
     expect(expandButton).toBeTruthy();
-    // Use within() to query for the text inside the expand button.
     const { getByText } = within(expandButton);
-    // Initially, the panel is expanded so the button text should be "Collapse"
     expect(getByText('Collapse')).toBeTruthy();
     fireEvent.press(expandButton);
     await waitFor(() => {
@@ -361,7 +357,6 @@ describe('Additional DirectionsScreen interactions', () => {
       rendered.getAllByText('Route Steps'),
     );
     expect(routeStepsHeaders[0]).toBeTruthy();
-    // Changed regex to match "1" instead of "1." as per rendering.
     expect(rendered.getByText(/^1$/)).toBeTruthy();
   });
 });

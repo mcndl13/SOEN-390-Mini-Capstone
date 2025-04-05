@@ -1,55 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="130" failures="0" errors="0" time="18.687">
-  <testsuite name="AccessibilitySettings" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:28:16" time="1.192" tests="1">
-    <testcase classname="AccessibilitySettings opens modal and toggles accessibility options" name="AccessibilitySettings opens modal and toggles accessibility options" time="0.297">
+<testsuites name="jest tests" tests="130" failures="0" errors="0" time="19.877">
+  <testsuite name="AccessibilitySettings" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:39:56" time="1.659" tests="1">
+    <testcase classname="AccessibilitySettings opens modal and toggles accessibility options" name="AccessibilitySettings opens modal and toggles accessibility options" time="0.419">
     </testcase>
   </testsuite>
-  <testsuite name="HomeScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:28:17" time="0.32" tests="8">
-    <testcase classname="HomeScreen renders correctly" name="HomeScreen renders correctly" time="0.023">
+  <testsuite name="HomeScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:39:58" time="0.321" tests="8">
+    <testcase classname="HomeScreen renders correctly" name="HomeScreen renders correctly" time="0.084">
     </testcase>
-    <testcase classname="HomeScreen navigates to CampusMap when &quot;Explore Campus Map&quot; button is pressed" name="HomeScreen navigates to CampusMap when &quot;Explore Campus Map&quot; button is pressed" time="0.015">
+    <testcase classname="HomeScreen navigates to CampusMap when &quot;Explore Campus Map&quot; button is pressed" name="HomeScreen navigates to CampusMap when &quot;Explore Campus Map&quot; button is pressed" time="0.021">
     </testcase>
-    <testcase classname="HomeScreen navigates to Directions when &quot;Get Directions&quot; button is pressed" name="HomeScreen navigates to Directions when &quot;Get Directions&quot; button is pressed" time="0.003">
+    <testcase classname="HomeScreen navigates to Directions when &quot;Get Directions&quot; button is pressed" name="HomeScreen navigates to Directions when &quot;Get Directions&quot; button is pressed" time="0.018">
     </testcase>
-    <testcase classname="HomeScreen navigates to CalendarIntegration when &quot;Connect to Google Calendar&quot; button is pressed" name="HomeScreen navigates to CalendarIntegration when &quot;Connect to Google Calendar&quot; button is pressed" time="0.004">
+    <testcase classname="HomeScreen navigates to CalendarIntegration when &quot;Connect to Google Calendar&quot; button is pressed" name="HomeScreen navigates to CalendarIntegration when &quot;Connect to Google Calendar&quot; button is pressed" time="0.008">
     </testcase>
-    <testcase classname="HomeScreen navigates to IndoorDirections when &quot;Indoor Navigation&quot; button is pressed" name="HomeScreen navigates to IndoorDirections when &quot;Indoor Navigation&quot; button is pressed" time="0.005">
+    <testcase classname="HomeScreen navigates to IndoorDirections when &quot;Indoor Navigation&quot; button is pressed" name="HomeScreen navigates to IndoorDirections when &quot;Indoor Navigation&quot; button is pressed" time="0.007">
     </testcase>
-    <testcase classname="HomeScreen navigates to PointsOfInterest when &quot;Find Points of Interest&quot; button is pressed" name="HomeScreen navigates to PointsOfInterest when &quot;Find Points of Interest&quot; button is pressed" time="0.003">
+    <testcase classname="HomeScreen navigates to PointsOfInterest when &quot;Find Points of Interest&quot; button is pressed" name="HomeScreen navigates to PointsOfInterest when &quot;Find Points of Interest&quot; button is pressed" time="0.009">
     </testcase>
-    <testcase classname="HomeScreen renders title correctly" name="HomeScreen renders title correctly" time="0.002">
+    <testcase classname="HomeScreen renders title correctly" name="HomeScreen renders title correctly" time="0.006">
     </testcase>
-    <testcase classname="HomeScreen opens shuttle schedule on button press" name="HomeScreen opens shuttle schedule on button press" time="0.163">
-    </testcase>
-  </testsuite>
-  <testsuite name="IndoorDirectionsScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:28:18" time="0.155" tests="4">
-    <testcase classname="IndoorDirectionsScreen renders building options" name="IndoorDirectionsScreen renders building options" time="0.027">
-    </testcase>
-    <testcase classname="IndoorDirectionsScreen opens and closes modal when a building is selected" name="IndoorDirectionsScreen opens and closes modal when a building is selected" time="0.009">
-    </testcase>
-    <testcase classname="IndoorDirectionsScreen calls WebView.reload when Reload button is pressed" name="IndoorDirectionsScreen calls WebView.reload when Reload button is pressed" time="0.007">
-    </testcase>
-    <testcase classname="IndoorDirectionsScreen closes modal on onRequestClose" name="IndoorDirectionsScreen closes modal on onRequestClose" time="0.006">
+    <testcase classname="HomeScreen opens shuttle schedule on button press" name="HomeScreen opens shuttle schedule on button press" time="0.054">
     </testcase>
   </testsuite>
-  <testsuite name="geometry utilities" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:28:18" time="0.037" tests="7">
-    <testcase classname="geometry utilities getPolygonCenter returns correct center for a triangle" name="geometry utilities getPolygonCenter returns correct center for a triangle" time="0">
+  <testsuite name="IndoorDirectionsScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:39:58" time="0.105" tests="4">
+    <testcase classname="IndoorDirectionsScreen renders building options" name="IndoorDirectionsScreen renders building options" time="0.031">
     </testcase>
-    <testcase classname="geometry utilities isUserInBuilding returns center when point is inside polygon" name="geometry utilities isUserInBuilding returns center when point is inside polygon" time="0.001">
+    <testcase classname="IndoorDirectionsScreen opens and closes modal when a building is selected" name="IndoorDirectionsScreen opens and closes modal when a building is selected" time="0.005">
     </testcase>
-    <testcase classname="geometry utilities isUserInBuilding returns null when point is outside polygon" name="geometry utilities isUserInBuilding returns null when point is outside polygon" time="0">
+    <testcase classname="IndoorDirectionsScreen calls WebView.reload when Reload button is pressed" name="IndoorDirectionsScreen calls WebView.reload when Reload button is pressed" time="0.003">
     </testcase>
-    <testcase classname="getPolygonCenter additional tests getPolygonCenter returns correct center for a square" name="getPolygonCenter additional tests getPolygonCenter returns correct center for a square" time="0">
-    </testcase>
-    <testcase classname="getPolygonCenter additional tests getPolygonCenter returns correct center for a pentagon" name="getPolygonCenter additional tests getPolygonCenter returns correct center for a pentagon" time="0">
-    </testcase>
-    <testcase classname="getPolygonCenter additional tests getPolygonCenter returns correct center for a single point" name="getPolygonCenter additional tests getPolygonCenter returns correct center for a single point" time="0">
-    </testcase>
-    <testcase classname="getPolygonCenter additional tests getPolygonCenter returns correct center for a line" name="getPolygonCenter additional tests getPolygonCenter returns correct center for a line" time="0.001">
+    <testcase classname="IndoorDirectionsScreen closes modal on onRequestClose" name="IndoorDirectionsScreen closes modal on onRequestClose" time="0.004">
     </testcase>
   </testsuite>
-  <testsuite name="openingHoursService" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:28:18" time="0.111" tests="6">
-    <testcase classname="openingHoursService getPlaceID returns place_id when response has results" name="openingHoursService getPlaceID returns place_id when response has results" time="0">
+  <testsuite name="openingHoursService" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:39:58" time="0.071" tests="6">
+    <testcase classname="openingHoursService getPlaceID returns place_id when response has results" name="openingHoursService getPlaceID returns place_id when response has results" time="0.001">
     </testcase>
     <testcase classname="openingHoursService getPlaceID returns null when no results" name="openingHoursService getPlaceID returns null when no results" time="0">
     </testcase>
@@ -62,214 +46,230 @@
     <testcase classname="openingHoursService getOpeningHours returns error message on error" name="openingHoursService getOpeningHours returns error message on error" time="0">
     </testcase>
   </testsuite>
-  <testsuite name="POIScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:28:16" time="2.387" tests="17">
-    <testcase classname="POIScreen mapStyle is black and white when isBlackAndWhite is true" name="POIScreen mapStyle is black and white when isBlackAndWhite is true" time="0.105">
+  <testsuite name="geometry utilities" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:39:59" time="0.043" tests="7">
+    <testcase classname="geometry utilities getPolygonCenter returns correct center for a triangle" name="geometry utilities getPolygonCenter returns correct center for a triangle" time="0.001">
     </testcase>
-    <testcase classname="POIScreen mapStyle is default when isBlackAndWhite is false" name="POIScreen mapStyle is default when isBlackAndWhite is false" time="0.243">
+    <testcase classname="geometry utilities isUserInBuilding returns center when point is inside polygon" name="geometry utilities isUserInBuilding returns center when point is inside polygon" time="0">
     </testcase>
-    <testcase classname="POIScreen displays loading indicator when fetching location" name="POIScreen displays loading indicator when fetching location" time="0.087">
+    <testcase classname="geometry utilities isUserInBuilding returns null when point is outside polygon" name="geometry utilities isUserInBuilding returns null when point is outside polygon" time="0">
     </testcase>
-    <testcase classname="POIScreen displays error message when location permission is denied" name="POIScreen displays error message when location permission is denied" time="0.069">
+    <testcase classname="getPolygonCenter additional tests getPolygonCenter returns correct center for a square" name="getPolygonCenter additional tests getPolygonCenter returns correct center for a square" time="0">
     </testcase>
-    <testcase classname="POIScreen displays error message when location cannot be determined" name="POIScreen displays error message when location cannot be determined" time="0.061">
+    <testcase classname="getPolygonCenter additional tests getPolygonCenter returns correct center for a pentagon" name="getPolygonCenter additional tests getPolygonCenter returns correct center for a pentagon" time="0">
     </testcase>
-    <testcase classname="POIScreen fetches POIs on search submission" name="POIScreen fetches POIs on search submission" time="0.017">
+    <testcase classname="getPolygonCenter additional tests getPolygonCenter returns correct center for a single point" name="getPolygonCenter additional tests getPolygonCenter returns correct center for a single point" time="0.001">
     </testcase>
-    <testcase classname="POIScreen displays message when no POIs are found" name="POIScreen displays message when no POIs are found" time="0.063">
-    </testcase>
-    <testcase classname="POIScreen displays POIs on the map" name="POIScreen displays POIs on the map" time="0.068">
-    </testcase>
-    <testcase classname="POIScreen additional coverage applies large text styles when isLargeText is true" name="POIScreen additional coverage applies large text styles when isLargeText is true" time="0.017">
-    </testcase>
-    <testcase classname="POIScreen additional coverage displays error message when POI fetch fails" name="POIScreen additional coverage displays error message when POI fetch fails" time="0.06">
-    </testcase>
-    <testcase classname="POIScreen additional coverage displays correct icons for various POI types (covers determinePoiType)" name="POIScreen additional coverage displays correct icons for various POI types (covers determinePoiType)" time="0.07">
-    </testcase>
-    <testcase classname="Additional POIScreen tests displays multiple POIs markers on the map" name="Additional POIScreen tests displays multiple POIs markers on the map" time="0.071">
-    </testcase>
-    <testcase classname="Additional POIScreen tests handles empty search query gracefully" name="Additional POIScreen tests handles empty search query gracefully" time="0.017">
-    </testcase>
-    <testcase classname="Additional POIScreen tests displays error message when POI fetch returns non OK status" name="Additional POIScreen tests displays error message when POI fetch returns non OK status" time="0.061">
-    </testcase>
-    <testcase classname="Increased coverage tests does not fetch POIs for whitespace-only query" name="Increased coverage tests does not fetch POIs for whitespace-only query" time="0.013">
-    </testcase>
-    <testcase classname="Increased coverage tests displays POIs with incomplete data" name="Increased coverage tests displays POIs with incomplete data" time="0.059">
-    </testcase>
-    <testcase classname="Additional missing lines coverage shows success message when POIs are found (covers line 115)" name="Additional missing lines coverage shows success message when POIs are found (covers line 115)" time="0.06">
+    <testcase classname="getPolygonCenter additional tests getPolygonCenter returns correct center for a line" name="getPolygonCenter additional tests getPolygonCenter returns correct center for a line" time="0">
     </testcase>
   </testsuite>
-  <testsuite name="CampusMap" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:28:16" time="3.776" tests="67">
-    <testcase classname="CampusMap map renders correctly with user location" name="CampusMap map renders correctly with user location" time="0.162">
+  <testsuite name="POIScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:39:56" time="2.74" tests="17">
+    <testcase classname="POIScreen mapStyle is black and white when isBlackAndWhite is true" name="POIScreen mapStyle is black and white when isBlackAndWhite is true" time="0.219">
     </testcase>
-    <testcase classname="CampusMap switches to SGW campus on button press" name="CampusMap switches to SGW campus on button press" time="0.026">
+    <testcase classname="POIScreen mapStyle is default when isBlackAndWhite is false" name="POIScreen mapStyle is default when isBlackAndWhite is false" time="0.034">
     </testcase>
-    <testcase classname="CampusMap switches to Loyola campus on button press" name="CampusMap switches to Loyola campus on button press" time="0.012">
+    <testcase classname="POIScreen displays loading indicator when fetching location" name="POIScreen displays loading indicator when fetching location" time="0.065">
     </testcase>
-    <testcase classname="CampusMap displays JMSB building information on marker press" name="CampusMap displays JMSB building information on marker press" time="0.151">
+    <testcase classname="POIScreen displays error message when location permission is denied" name="POIScreen displays error message when location permission is denied" time="0.061">
     </testcase>
-    <testcase classname="CampusMap displays B Annex building information on marker press" name="CampusMap displays B Annex building information on marker press" time="0.307">
+    <testcase classname="POIScreen displays error message when location cannot be determined" name="POIScreen displays error message when location cannot be determined" time="0.059">
     </testcase>
-    <testcase classname="CampusMap displays CI Annex building information on marker press" name="CampusMap displays CI Annex building information on marker press" time="0.038">
+    <testcase classname="POIScreen fetches POIs on search submission" name="POIScreen fetches POIs on search submission" time="0.03">
     </testcase>
-    <testcase classname="CampusMap displays CL Annex building information on marker press" name="CampusMap displays CL Annex building information on marker press" time="0.031">
+    <testcase classname="POIScreen displays message when no POIs are found" name="POIScreen displays message when no POIs are found" time="0.064">
     </testcase>
-    <testcase classname="CampusMap displays D Annex building information on marker press" name="CampusMap displays D Annex building information on marker press" time="0.073">
+    <testcase classname="POIScreen displays POIs on the map" name="POIScreen displays POIs on the map" time="0.08">
     </testcase>
-    <testcase classname="CampusMap displays EN Annex building information on marker press" name="CampusMap displays EN Annex building information on marker press" time="0.015">
+    <testcase classname="POIScreen additional coverage applies large text styles when isLargeText is true" name="POIScreen additional coverage applies large text styles when isLargeText is true" time="0.01">
     </testcase>
-    <testcase classname="CampusMap displays ER Building building information on marker press" name="CampusMap displays ER Building building information on marker press" time="0.07">
+    <testcase classname="POIScreen additional coverage displays error message when POI fetch fails" name="POIScreen additional coverage displays error message when POI fetch fails" time="0.064">
     </testcase>
-    <testcase classname="CampusMap displays EV Building building information on marker press" name="CampusMap displays EV Building building information on marker press" time="0.023">
+    <testcase classname="POIScreen additional coverage displays correct icons for various POI types (covers determinePoiType)" name="POIScreen additional coverage displays correct icons for various POI types (covers determinePoiType)" time="0.019">
     </testcase>
-    <testcase classname="CampusMap displays FA Annex building information on marker press" name="CampusMap displays FA Annex building information on marker press" time="0.026">
+    <testcase classname="Additional POIScreen tests displays multiple POIs markers on the map" name="Additional POIScreen tests displays multiple POIs markers on the map" time="0.073">
     </testcase>
-    <testcase classname="CampusMap displays FB Building building information on marker press" name="CampusMap displays FB Building building information on marker press" time="0.014">
+    <testcase classname="Additional POIScreen tests handles empty search query gracefully" name="Additional POIScreen tests handles empty search query gracefully" time="0.014">
     </testcase>
-    <testcase classname="CampusMap displays FG Building building information on marker press" name="CampusMap displays FG Building building information on marker press" time="0.059">
+    <testcase classname="Additional POIScreen tests displays error message when POI fetch returns non OK status" name="Additional POIScreen tests displays error message when POI fetch returns non OK status" time="0.071">
     </testcase>
-    <testcase classname="CampusMap displays Grey Nuns Building building information on marker press" name="CampusMap displays Grey Nuns Building building information on marker press" time="0.058">
+    <testcase classname="Increased coverage tests does not fetch POIs for whitespace-only query" name="Increased coverage tests does not fetch POIs for whitespace-only query" time="0.023">
     </testcase>
-    <testcase classname="CampusMap displays Guy-de Maisonneuve building information on marker press" name="CampusMap displays Guy-de Maisonneuve building information on marker press" time="0.062">
+    <testcase classname="Increased coverage tests displays POIs with incomplete data" name="Increased coverage tests displays POIs with incomplete data" time="0.069">
     </testcase>
-    <testcase classname="CampusMap displays GS Building building information on marker press" name="CampusMap displays GS Building building information on marker press" time="0.066">
+    <testcase classname="Additional missing lines coverage shows success message when POIs are found (covers line 115)" name="Additional missing lines coverage shows success message when POIs are found (covers line 115)" time="0.061">
     </testcase>
-    <testcase classname="CampusMap displays Hall Building building information on marker press" name="CampusMap displays Hall Building building information on marker press" time="0.011">
+  </testsuite>
+  <testsuite name="CampusMap" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:39:56" time="3.72" tests="67">
+    <testcase classname="CampusMap map renders correctly with user location" name="CampusMap map renders correctly with user location" time="0.24">
     </testcase>
-    <testcase classname="CampusMap displays K Annex building information on marker press" name="CampusMap displays K Annex building information on marker press" time="0.062">
+    <testcase classname="CampusMap switches to SGW campus on button press" name="CampusMap switches to SGW campus on button press" time="0.032">
+    </testcase>
+    <testcase classname="CampusMap switches to Loyola campus on button press" name="CampusMap switches to Loyola campus on button press" time="0.019">
+    </testcase>
+    <testcase classname="CampusMap displays JMSB building information on marker press" name="CampusMap displays JMSB building information on marker press" time="0.281">
+    </testcase>
+    <testcase classname="CampusMap displays B Annex building information on marker press" name="CampusMap displays B Annex building information on marker press" time="0.036">
+    </testcase>
+    <testcase classname="CampusMap displays CI Annex building information on marker press" name="CampusMap displays CI Annex building information on marker press" time="0.024">
+    </testcase>
+    <testcase classname="CampusMap displays CL Annex building information on marker press" name="CampusMap displays CL Annex building information on marker press" time="0.019">
+    </testcase>
+    <testcase classname="CampusMap displays D Annex building information on marker press" name="CampusMap displays D Annex building information on marker press" time="0.017">
+    </testcase>
+    <testcase classname="CampusMap displays EN Annex building information on marker press" name="CampusMap displays EN Annex building information on marker press" time="0.014">
+    </testcase>
+    <testcase classname="CampusMap displays ER Building building information on marker press" name="CampusMap displays ER Building building information on marker press" time="0.014">
+    </testcase>
+    <testcase classname="CampusMap displays EV Building building information on marker press" name="CampusMap displays EV Building building information on marker press" time="0.068">
+    </testcase>
+    <testcase classname="CampusMap displays FA Annex building information on marker press" name="CampusMap displays FA Annex building information on marker press" time="0.019">
+    </testcase>
+    <testcase classname="CampusMap displays FB Building building information on marker press" name="CampusMap displays FB Building building information on marker press" time="0.016">
+    </testcase>
+    <testcase classname="CampusMap displays FG Building building information on marker press" name="CampusMap displays FG Building building information on marker press" time="0.069">
+    </testcase>
+    <testcase classname="CampusMap displays Grey Nuns Building building information on marker press" name="CampusMap displays Grey Nuns Building building information on marker press" time="0.015">
+    </testcase>
+    <testcase classname="CampusMap displays Guy-de Maisonneuve building information on marker press" name="CampusMap displays Guy-de Maisonneuve building information on marker press" time="0.021">
+    </testcase>
+    <testcase classname="CampusMap displays GS Building building information on marker press" name="CampusMap displays GS Building building information on marker press" time="0.06">
+    </testcase>
+    <testcase classname="CampusMap displays Hall Building building information on marker press" name="CampusMap displays Hall Building building information on marker press" time="0.014">
+    </testcase>
+    <testcase classname="CampusMap displays K Annex building information on marker press" name="CampusMap displays K Annex building information on marker press" time="0.016">
     </testcase>
     <testcase classname="CampusMap displays LB Building building information on marker press" name="CampusMap displays LB Building building information on marker press" time="0.008">
     </testcase>
-    <testcase classname="CampusMap displays LS Building building information on marker press" name="CampusMap displays LS Building building information on marker press" time="0.058">
+    <testcase classname="CampusMap displays LS Building building information on marker press" name="CampusMap displays LS Building building information on marker press" time="0.059">
     </testcase>
-    <testcase classname="CampusMap displays M Annex building information on marker press" name="CampusMap displays M Annex building information on marker press" time="0.008">
+    <testcase classname="CampusMap displays M Annex building information on marker press" name="CampusMap displays M Annex building information on marker press" time="0.01">
     </testcase>
-    <testcase classname="CampusMap displays MI Annex building information on marker press" name="CampusMap displays MI Annex building information on marker press" time="0.059">
+    <testcase classname="CampusMap displays MI Annex building information on marker press" name="CampusMap displays MI Annex building information on marker press" time="0.017">
     </testcase>
-    <testcase classname="CampusMap displays MU Annex building information on marker press" name="CampusMap displays MU Annex building information on marker press" time="0.01">
+    <testcase classname="CampusMap displays MU Annex building information on marker press" name="CampusMap displays MU Annex building information on marker press" time="0.014">
     </testcase>
-    <testcase classname="CampusMap displays P Annex building information on marker press" name="CampusMap displays P Annex building information on marker press" time="0.012">
+    <testcase classname="CampusMap displays P Annex building information on marker press" name="CampusMap displays P Annex building information on marker press" time="0.018">
     </testcase>
-    <testcase classname="CampusMap displays PR Annex building information on marker press" name="CampusMap displays PR Annex building information on marker press" time="0.01">
+    <testcase classname="CampusMap displays PR Annex building information on marker press" name="CampusMap displays PR Annex building information on marker press" time="0.015">
     </testcase>
-    <testcase classname="CampusMap displays Q Annex building information on marker press" name="CampusMap displays Q Annex building information on marker press" time="0.062">
+    <testcase classname="CampusMap displays Q Annex building information on marker press" name="CampusMap displays Q Annex building information on marker press" time="0.064">
     </testcase>
-    <testcase classname="CampusMap displays R Annex building information on marker press" name="CampusMap displays R Annex building information on marker press" time="0.01">
+    <testcase classname="CampusMap displays R Annex building information on marker press" name="CampusMap displays R Annex building information on marker press" time="0.025">
     </testcase>
-    <testcase classname="CampusMap displays RR Annex building information on marker press" name="CampusMap displays RR Annex building information on marker press" time="0.013">
+    <testcase classname="CampusMap displays RR Annex building information on marker press" name="CampusMap displays RR Annex building information on marker press" time="0.02">
     </testcase>
-    <testcase classname="CampusMap displays S Annex building information on marker press" name="CampusMap displays S Annex building information on marker press" time="0.009">
+    <testcase classname="CampusMap displays S Annex building information on marker press" name="CampusMap displays S Annex building information on marker press" time="0.015">
     </testcase>
-    <testcase classname="CampusMap displays Samuel Bronfman Building building information on marker press" name="CampusMap displays Samuel Bronfman Building building information on marker press" time="0.062">
+    <testcase classname="CampusMap displays Samuel Bronfman Building building information on marker press" name="CampusMap displays Samuel Bronfman Building building information on marker press" time="0.068">
     </testcase>
-    <testcase classname="CampusMap displays Toronto-Dominion Building building information on marker press" name="CampusMap displays Toronto-Dominion Building building information on marker press" time="0.009">
+    <testcase classname="CampusMap displays Toronto-Dominion Building building information on marker press" name="CampusMap displays Toronto-Dominion Building building information on marker press" time="0.013">
     </testcase>
-    <testcase classname="CampusMap displays V Annex building information on marker press" name="CampusMap displays V Annex building information on marker press" time="0.061">
+    <testcase classname="CampusMap displays V Annex building information on marker press" name="CampusMap displays V Annex building information on marker press" time="0.06">
     </testcase>
-    <testcase classname="CampusMap displays Visual Arts Building building information on marker press" name="CampusMap displays Visual Arts Building building information on marker press" time="0.011">
+    <testcase classname="CampusMap displays Visual Arts Building building information on marker press" name="CampusMap displays Visual Arts Building building information on marker press" time="0.008">
     </testcase>
-    <testcase classname="CampusMap displays X Annex building information on marker press" name="CampusMap displays X Annex building information on marker press" time="0.06">
+    <testcase classname="CampusMap displays X Annex building information on marker press" name="CampusMap displays X Annex building information on marker press" time="0.059">
     </testcase>
-    <testcase classname="CampusMap displays Z Annex building information on marker press" name="CampusMap displays Z Annex building information on marker press" time="0.01">
+    <testcase classname="CampusMap displays Z Annex building information on marker press" name="CampusMap displays Z Annex building information on marker press" time="0.013">
     </testcase>
-    <testcase classname="CampusMap displays Administration Building building information on marker press" name="CampusMap displays Administration Building building information on marker press" time="0.06">
+    <testcase classname="CampusMap displays Administration Building building information on marker press" name="CampusMap displays Administration Building building information on marker press" time="0.013">
     </testcase>
-    <testcase classname="CampusMap displays BB Annex building information on marker press" name="CampusMap displays BB Annex building information on marker press" time="0.01">
+    <testcase classname="CampusMap displays BB Annex building information on marker press" name="CampusMap displays BB Annex building information on marker press" time="0.012">
     </testcase>
-    <testcase classname="CampusMap displays BH Annex building information on marker press" name="CampusMap displays BH Annex building information on marker press" time="0.061">
+    <testcase classname="CampusMap displays BH Annex building information on marker press" name="CampusMap displays BH Annex building information on marker press" time="0.06">
     </testcase>
-    <testcase classname="CampusMap displays Central Building building information on marker press" name="CampusMap displays Central Building building information on marker press" time="0.01">
+    <testcase classname="CampusMap displays Central Building building information on marker press" name="CampusMap displays Central Building building information on marker press" time="0.011">
     </testcase>
-    <testcase classname="CampusMap displays Communication Studies and Journalism Building building information on marker press" name="CampusMap displays Communication Studies and Journalism Building building information on marker press" time="0.061">
+    <testcase classname="CampusMap displays Communication Studies and Journalism Building building information on marker press" name="CampusMap displays Communication Studies and Journalism Building building information on marker press" time="0.063">
     </testcase>
     <testcase classname="CampusMap displays Stinger Dome building information on marker press" name="CampusMap displays Stinger Dome building information on marker press" time="0.01">
     </testcase>
-    <testcase classname="CampusMap displays F. C. Smith Building building information on marker press" name="CampusMap displays F. C. Smith Building building information on marker press" time="0.061">
+    <testcase classname="CampusMap displays F. C. Smith Building building information on marker press" name="CampusMap displays F. C. Smith Building building information on marker press" time="0.01">
     </testcase>
-    <testcase classname="CampusMap displays Center for Structural and Functional Genomics building information on marker press" name="CampusMap displays Center for Structural and Functional Genomics building information on marker press" time="0.012">
+    <testcase classname="CampusMap displays Center for Structural and Functional Genomics building information on marker press" name="CampusMap displays Center for Structural and Functional Genomics building information on marker press" time="0.009">
     </testcase>
-    <testcase classname="CampusMap displays Hingston Hall, wing HA building information on marker press" name="CampusMap displays Hingston Hall, wing HA building information on marker press" time="0.062">
+    <testcase classname="CampusMap displays Hingston Hall, wing HA building information on marker press" name="CampusMap displays Hingston Hall, wing HA building information on marker press" time="0.01">
     </testcase>
-    <testcase classname="CampusMap displays Hingston Hall, wing B building information on marker press" name="CampusMap displays Hingston Hall, wing B building information on marker press" time="0.01">
+    <testcase classname="CampusMap displays Hingston Hall, wing B building information on marker press" name="CampusMap displays Hingston Hall, wing B building information on marker press" time="0.007">
     </testcase>
-    <testcase classname="CampusMap displays Hingston Hall, wing HC building information on marker press" name="CampusMap displays Hingston Hall, wing HC building information on marker press" time="0.06">
+    <testcase classname="CampusMap displays Hingston Hall, wing HC building information on marker press" name="CampusMap displays Hingston Hall, wing HC building information on marker press" time="0.061">
     </testcase>
     <testcase classname="CampusMap displays Applied Science Hub building information on marker press" name="CampusMap displays Applied Science Hub building information on marker press" time="0.011">
     </testcase>
-    <testcase classname="CampusMap displays Jesuit Residence building information on marker press" name="CampusMap displays Jesuit Residence building information on marker press" time="0.009">
+    <testcase classname="CampusMap displays Jesuit Residence building information on marker press" name="CampusMap displays Jesuit Residence building information on marker press" time="0.01">
     </testcase>
-    <testcase classname="CampusMap displays Perform Center building information on marker press" name="CampusMap displays Perform Center building information on marker press" time="0.008">
+    <testcase classname="CampusMap displays Perform Center building information on marker press" name="CampusMap displays Perform Center building information on marker press" time="0.01">
     </testcase>
-    <testcase classname="CampusMap displays Physical Services Building building information on marker press" name="CampusMap displays Physical Services Building building information on marker press" time="0.06">
+    <testcase classname="CampusMap displays Physical Services Building building information on marker press" name="CampusMap displays Physical Services Building building information on marker press" time="0.01">
     </testcase>
-    <testcase classname="CampusMap displays Oscar Peterson Concert Hall building information on marker press" name="CampusMap displays Oscar Peterson Concert Hall building information on marker press" time="0.009">
+    <testcase classname="CampusMap displays Oscar Peterson Concert Hall building information on marker press" name="CampusMap displays Oscar Peterson Concert Hall building information on marker press" time="0.008">
     </testcase>
-    <testcase classname="CampusMap displays Psychology Building building information on marker press" name="CampusMap displays Psychology Building building information on marker press" time="0.059">
+    <testcase classname="CampusMap displays Psychology Building building information on marker press" name="CampusMap displays Psychology Building building information on marker press" time="0.065">
     </testcase>
-    <testcase classname="CampusMap displays Quadrangle building information on marker press" name="CampusMap displays Quadrangle building information on marker press" time="0.007">
+    <testcase classname="CampusMap displays Quadrangle building information on marker press" name="CampusMap displays Quadrangle building information on marker press" time="0.009">
     </testcase>
-    <testcase classname="CampusMap displays Recreation and Athletics Complex building information on marker press" name="CampusMap displays Recreation and Athletics Complex building information on marker press" time="0.059">
+    <testcase classname="CampusMap displays Recreation and Athletics Complex building information on marker press" name="CampusMap displays Recreation and Athletics Complex building information on marker press" time="0.065">
     </testcase>
-    <testcase classname="CampusMap displays Loyola Jesuit Hall and Conference Centre building information on marker press" name="CampusMap displays Loyola Jesuit Hall and Conference Centre building information on marker press" time="0.01">
+    <testcase classname="CampusMap displays Loyola Jesuit Hall and Conference Centre building information on marker press" name="CampusMap displays Loyola Jesuit Hall and Conference Centre building information on marker press" time="0.009">
     </testcase>
-    <testcase classname="CampusMap displays Student Center building information on marker press" name="CampusMap displays Student Center building information on marker press" time="0.011">
+    <testcase classname="CampusMap displays Student Center building information on marker press" name="CampusMap displays Student Center building information on marker press" time="0.058">
     </testcase>
-    <testcase classname="CampusMap displays Solar House building information on marker press" name="CampusMap displays Solar House building information on marker press" time="0.008">
+    <testcase classname="CampusMap displays Solar House building information on marker press" name="CampusMap displays Solar House building information on marker press" time="0.01">
     </testcase>
-    <testcase classname="CampusMap displays Saint Ignatius of Loyola Catholic Church building information on marker press" name="CampusMap displays Saint Ignatius of Loyola Catholic Church building information on marker press" time="0.06">
+    <testcase classname="CampusMap displays Saint Ignatius of Loyola Catholic Church building information on marker press" name="CampusMap displays Saint Ignatius of Loyola Catholic Church building information on marker press" time="0.058">
     </testcase>
     <testcase classname="CampusMap displays Richard J Renaud Science Complex building information on marker press" name="CampusMap displays Richard J Renaud Science Complex building information on marker press" time="0.01">
     </testcase>
-    <testcase classname="CampusMap renders polygons correctly" name="CampusMap renders polygons correctly" time="0.068">
+    <testcase classname="CampusMap renders polygons correctly" name="CampusMap renders polygons correctly" time="0.072">
     </testcase>
     <testcase classname="CampusMap renders shuttle markers correctly" name="CampusMap renders shuttle markers correctly" time="0.053">
     </testcase>
-    <testcase classname="CampusMap additional tests handles permission denied gracefully" name="CampusMap additional tests handles permission denied gracefully" time="0.002">
+    <testcase classname="CampusMap additional tests handles permission denied gracefully" name="CampusMap additional tests handles permission denied gracefully" time="0.003">
     </testcase>
-    <testcase classname="CampusMap additional tests calls cleanup for shuttle tracking on unmount" name="CampusMap additional tests calls cleanup for shuttle tracking on unmount" time="0.003">
+    <testcase classname="CampusMap additional tests calls cleanup for shuttle tracking on unmount" name="CampusMap additional tests calls cleanup for shuttle tracking on unmount" time="0.001">
     </testcase>
-    <testcase classname="CampusMap accessibility customization renders polygons in black and white mode" name="CampusMap accessibility customization renders polygons in black and white mode" time="0.062">
+    <testcase classname="CampusMap accessibility customization renders polygons in black and white mode" name="CampusMap accessibility customization renders polygons in black and white mode" time="0.06">
     </testcase>
-    <testcase classname="Toggle buttons functionality toggles opening hours text on press" name="Toggle buttons functionality toggles opening hours text on press" time="0.066">
+    <testcase classname="Toggle buttons functionality toggles opening hours text on press" name="Toggle buttons functionality toggles opening hours text on press" time="0.062">
     </testcase>
-    <testcase classname="Toggle buttons functionality toggles shuttle markers on press" name="Toggle buttons functionality toggles shuttle markers on press" time="0.063">
+    <testcase classname="Toggle buttons functionality toggles shuttle markers on press" name="Toggle buttons functionality toggles shuttle markers on press" time="0.059">
     </testcase>
   </testsuite>
-  <testsuite name="DirectionsScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:28:16" time="13.434" tests="20">
-    <testcase classname="DirectionsScreen renders origin and destination input placeholders" name="DirectionsScreen renders origin and destination input placeholders" time="0.175">
+  <testsuite name="DirectionsScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-05T20:39:56" time="13.9" tests="20">
+    <testcase classname="DirectionsScreen renders origin and destination input placeholders" name="DirectionsScreen renders origin and destination input placeholders" time="0.238">
     </testcase>
-    <testcase classname="DirectionsScreen renders Use My Location and Clear Points buttons" name="DirectionsScreen renders Use My Location and Clear Points buttons" time="0.033">
+    <testcase classname="DirectionsScreen renders Use My Location and Clear Points buttons" name="DirectionsScreen renders Use My Location and Clear Points buttons" time="0.034">
     </testcase>
-    <testcase classname="DirectionsScreen renders Trace route button" name="DirectionsScreen renders Trace route button" time="0.016">
+    <testcase classname="DirectionsScreen renders Trace route button" name="DirectionsScreen renders Trace route button" time="0.021">
     </testcase>
-    <testcase classname="DirectionsScreen calls clearPoints when Clear Points is pressed" name="DirectionsScreen calls clearPoints when Clear Points is pressed" time="0.03">
+    <testcase classname="DirectionsScreen calls clearPoints when Clear Points is pressed" name="DirectionsScreen calls clearPoints when Clear Points is pressed" time="0.091">
     </testcase>
-    <testcase classname="DirectionsScreen matches snapshot" name="DirectionsScreen matches snapshot" time="0.019">
+    <testcase classname="DirectionsScreen matches snapshot" name="DirectionsScreen matches snapshot" time="0.051">
     </testcase>
-    <testcase classname="DirectionsScreen sets steps to empty when API returns no steps" name="DirectionsScreen sets steps to empty when API returns no steps" time="1.434">
+    <testcase classname="DirectionsScreen sets steps to empty when API returns no steps" name="DirectionsScreen sets steps to empty when API returns no steps" time="1.443">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions shows error when tracing route with no origin" name="More DirectionsScreen interactions shows error when tracing route with no origin" time="0.653">
+    <testcase classname="More DirectionsScreen interactions shows error when tracing route with no origin" name="More DirectionsScreen interactions shows error when tracing route with no origin" time="0.617">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions shows error when tracing route with no destination" name="More DirectionsScreen interactions shows error when tracing route with no destination" time="0.612">
+    <testcase classname="More DirectionsScreen interactions shows error when tracing route with no destination" name="More DirectionsScreen interactions shows error when tracing route with no destination" time="0.626">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions sets campus points and toggles shuttle route" name="More DirectionsScreen interactions sets campus points and toggles shuttle route" time="1.942">
+    <testcase classname="More DirectionsScreen interactions sets campus points and toggles shuttle route" name="More DirectionsScreen interactions sets campus points and toggles shuttle route" time="1.965">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions toggles shuttle visibility" name="More DirectionsScreen interactions toggles shuttle visibility" time="0.836">
+    <testcase classname="More DirectionsScreen interactions toggles shuttle visibility" name="More DirectionsScreen interactions toggles shuttle visibility" time="0.837">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions handles back button press in directions view" name="More DirectionsScreen interactions handles back button press in directions view" time="0.628">
+    <testcase classname="More DirectionsScreen interactions handles back button press in directions view" name="More DirectionsScreen interactions handles back button press in directions view" time="0.644">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions processes current location button press" name="More DirectionsScreen interactions processes current location button press" time="0.641">
+    <testcase classname="More DirectionsScreen interactions processes current location button press" name="More DirectionsScreen interactions processes current location button press" time="0.648">
     </testcase>
-    <testcase classname="Additional DirectionsScreen interactions changes travel mode when mode buttons are pressed" name="Additional DirectionsScreen interactions changes travel mode when mode buttons are pressed" time="0.852">
+    <testcase classname="Additional DirectionsScreen interactions changes travel mode when mode buttons are pressed" name="Additional DirectionsScreen interactions changes travel mode when mode buttons are pressed" time="0.855">
     </testcase>
-    <testcase classname="Additional DirectionsScreen interactions expands and collapses the directions panel when expand button is pressed" name="Additional DirectionsScreen interactions expands and collapses the directions panel when expand button is pressed" time="0.828">
+    <testcase classname="Additional DirectionsScreen interactions expands and collapses the directions panel when expand button is pressed" name="Additional DirectionsScreen interactions expands and collapses the directions panel when expand button is pressed" time="0.827">
     </testcase>
-    <testcase classname="Additional DirectionsScreen interactions handles campus button presses via onPlaceSelected callback" name="Additional DirectionsScreen interactions handles campus button presses via onPlaceSelected callback" time="0.655">
+    <testcase classname="Additional DirectionsScreen interactions handles campus button presses via onPlaceSelected callback" name="Additional DirectionsScreen interactions handles campus button presses via onPlaceSelected callback" time="0.631">
     </testcase>
     <testcase classname="Additional DirectionsScreen interactions handles error in fetching detailed directions" name="Additional DirectionsScreen interactions handles error in fetching detailed directions" time="0.817">
     </testcase>
-    <testcase classname="Additional DirectionsScreen interactions expands directions panel via button press" name="Additional DirectionsScreen interactions expands directions panel via button press" time="0.817">
+    <testcase classname="Additional DirectionsScreen interactions expands directions panel via button press" name="Additional DirectionsScreen interactions expands directions panel via button press" time="0.814">
     </testcase>
-    <testcase classname="Additional DirectionsScreen interactions renders route steps when API returns steps" name="Additional DirectionsScreen interactions renders route steps when API returns steps" time="1.522">
+    <testcase classname="Additional DirectionsScreen interactions renders route steps when API returns steps" name="Additional DirectionsScreen interactions renders route steps when API returns steps" time="1.477">
     </testcase>
     <testcase classname="Helper function stripHtml removes HTML tags correctly" name="Helper function stripHtml removes HTML tags correctly" time="0.001">
     </testcase>
