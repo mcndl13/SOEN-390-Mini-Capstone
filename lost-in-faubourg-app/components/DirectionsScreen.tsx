@@ -171,7 +171,6 @@ export default function DirectionsScreen() {
   // Shuttle states
   const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
-  const [, setZoomLevel] = useState(15); // Default zoom level
   
   // Toast message state for user feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -327,9 +326,6 @@ export default function DirectionsScreen() {
     latitudeDelta: number;
     longitudeDelta: number;
   }) => {
-    // Calculate approximate zoom level based on latitudeDelta
-    const zoom = Math.round(Math.log(360 / region.latitudeDelta) / Math.LN2);
-    setZoomLevel(zoom);
   };
 
   // Function to check if user is in a building and provide specific guidance
@@ -579,7 +575,7 @@ export default function DirectionsScreen() {
     const snappedPosition = snapToNearestBuilding(position);
     
     // Extract the place name from details (or fallback to the description)
-    const placeName = details.name || data?.description || '';
+    const placeName = details.name ?? data?.description ?? '';
     
     // Create a new object that includes the name
     const newLocation = { ...snappedPosition, name: placeName };
@@ -632,27 +628,6 @@ export default function DirectionsScreen() {
     // Reset map view
     mapRef.current?.animateToRegion(INITIAL_POSITION, 1000);
   };
-
-  // Test directions with hardcoded values (for debugging)
-  // const testDirections = () => {
-  //   const testOrigin = { latitude: 45.4953534, longitude: -73.578549 }; // SGW
-  //   const testDest = { latitude: 45.4582, longitude: -73.6405 }; // Loyola
-    
-  //   setOrigin(testOrigin);
-  //   setDestination(testDest);
-    
-  //   // Wait a moment for state to update
-  //   setTimeout(() => {
-  //     if (mapRef.current) {
-  //       mapRef.current.fitToCoordinates([testOrigin, testDest], {
-  //         edgePadding,
-  //         animated: true,
-  //       });
-  //       setShowDirections(true);
-  //       setShowShuttleRoute(true);
-  //     }
-  //   }, 500);
-  // };
 
   // Add map style for black and white mode
   const mapStyle: MapStyleElement[] = isBlackAndWhite ? [

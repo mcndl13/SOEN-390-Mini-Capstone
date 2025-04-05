@@ -96,7 +96,7 @@ export default function CalendarIntegrationScreen() {
   async function handleGetDirections() {
     if (events.length > 0) {
       const nextEvent = events[0];
-      if (!nextEvent.location || nextEvent.location === "N/A") {
+      if ((nextEvent.location ?? "N/A") === "N/A") {
         Alert.alert("No valid location", "The next event doesn't have a valid location.");
         return;
       }
@@ -120,7 +120,7 @@ export default function CalendarIntegrationScreen() {
         // Navigate to the Directions screen with both origin and destination
         navigation.navigate("Directions", { origin, destination });
       } catch (error) {
-        Alert.alert("Error", "Could not determine the location for directions.");
+        console.log(`Exception: ${error}`);
       }
     } else {
       Alert.alert("No upcoming events", "There are no upcoming events available.");
@@ -147,8 +147,8 @@ export default function CalendarIntegrationScreen() {
             <View key={`${event.start}-${event.summary}`} style={styles.eventContainer}>
               <Text style={styles.eventTitle}>{event.summary}</Text>
               <Text style={styles.eventDetails}>{`Start: ${event.start}`}</Text>
-              <Text style={styles.eventDetails}>{`Location: ${event.location || "N/A"}`}</Text>
-              {index === 0 && event.location && event.location !== "N/A" && (
+              <Text style={styles.eventDetails}>{`Location: ${event.location ?? "N/A"}`}</Text>
+              {index === 0 && (event.location ?? "N/A") !== "N/A" && (
                 <TouchableOpacity style={styles.getDirectionsButton} onPress={handleGetDirections}>
                   <Text style={styles.buttonText}>Get directions</Text>
                 </TouchableOpacity>

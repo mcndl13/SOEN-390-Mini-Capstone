@@ -6,7 +6,7 @@ import { GOOGLE_MAPS_API_KEY } from '@env';
 
 export default function LocationScreen() {
   const [location, setLocation] = useState<LocationObject | null>(null);
-  const [, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const [currentBuilding, setCurrentBuilding] = useState('');
   const [campus, setCampus] = useState('SGW'); // Default to SGW
 
@@ -38,6 +38,7 @@ export default function LocationScreen() {
       }
     } catch (error) {
       setCurrentBuilding('Building info unavailable');
+      console.log('Error fetching building name:', error);
     }
   };
 
@@ -47,6 +48,7 @@ export default function LocationScreen() {
         let { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
           setErrorMsg('Permission to access location was denied');
+          console.log(`${errorMsg}`);
           return;
         }
 
@@ -55,6 +57,9 @@ export default function LocationScreen() {
         fetchBuildingName(currentLocation.coords.latitude, currentLocation.coords.longitude);
       } catch (error) {
         setErrorMsg('Failed to fetch location. Please try again.');
+        console.log(`${errorMsg}`);
+
+        console.log(`${errorMsg}`, error);
       }
     })();
   }, []);

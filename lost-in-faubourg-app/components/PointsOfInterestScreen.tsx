@@ -85,7 +85,7 @@ export default function POIScreen() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [pois, setPois] = useState<POI[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [, setSelectedPOI] = useState<POI | null>(null);
+  const [selectedPoi, setSelectedPoi] = useState<POI | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const mapRef = useRef<MapView | null>(null);
@@ -193,9 +193,9 @@ export default function POIScreen() {
           latitude: place.geometry.location.lat,
           longitude: place.geometry.location.lng
         },
-        description: place.vicinity || place.formatted_address || '',
-        address: place.vicinity || place.formatted_address || '',
-        rating: place.rating || 'N/A',
+        description: place.vicinity ?? place.formatted_address ?? '',
+        address: place.vicinity ?? place.formatted_address ?? '',
+        rating: place.rating ?? 'N/A',
         place_id: place.place_id
       }));
       
@@ -331,12 +331,12 @@ export default function POIScreen() {
             coordinate={poi.coordinates}
             title={poi.name}
             description={poi.description}
-            onPress={() => setSelectedPOI(poi)}
+            onPress={() => setSelectedPoi(poi)}
             pinColor={isBlackAndWhite ? "black" : undefined}
           >
             <View style={styles.markerContainer}>
               <Text style={styles.markerIcon}>
-                {POI_TYPE_ICONS[poi.type] || POI_TYPE_ICONS.default}
+                {selectedPoi ? POI_TYPE_ICONS[selectedPoi.type] || POI_TYPE_ICONS.default : POI_TYPE_ICONS.default}
               </Text>
             </View>
             <Callout tooltip onPress={() => getDirections(poi)}>
