@@ -22,7 +22,7 @@ try {
   require.resolve('react-native/Libraries/Animated/NativeAnimatedHelper');
   jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper', () => ({}));
 } catch (err) {
-  console.warn('NativeAnimatedHelper not found, skipping mock.');
+  console.warn('NativeAnimatedHelper not found ${err}');
 }
 
 jest.mock('expo-constants', () => ({
