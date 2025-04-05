@@ -1,6 +1,5 @@
-process.env.EXPO_OS = process.env.EXPO_OS || 'ios';
 import React from 'react';
-import { fireEvent, waitFor, act } from '@testing-library/react-native';
+import { fireEvent, waitFor, act, within } from '@testing-library/react-native';
 import { stripHtml } from '../components/DirectionsScreen';
 import {
   renderDirectionsScreen,
@@ -10,7 +9,6 @@ import {
   selectCampus,
   selectMyLocation,
 } from './helpers/directionsTestHelpers';
-import { within } from '@testing-library/react-native';
 
 jest.mock(
   '@env',
@@ -23,7 +21,9 @@ jest.mock(
 try {
   require.resolve('react-native/Libraries/Animated/NativeAnimatedHelper');
   jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper', () => ({}));
-} catch (err) {}
+} catch (err) {
+  console.warn('NativeAnimatedHelper not found, skipping mock.');
+}
 
 jest.mock('expo-constants', () => ({
   statusBarHeight: 20,

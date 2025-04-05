@@ -95,7 +95,6 @@ jest.mock('../services/shuttleService', () => ({
 }));
 
 jest.mock('@expo/vector-icons', () => {
-  const React = require('react');
   const { Text } = require('react-native');
   return {
     Ionicons: (props) => <Text {...props} />,
@@ -347,7 +346,7 @@ describe('Toggle buttons functionality', () => {
 
   test('toggles shuttle markers on press', async () => {
     setLocationMock();
-    const { getByText, getByTestId, queryByTestId } = renderCampusMap();
+    const { getByTestId, queryByTestId } = renderCampusMap();
 
     await waitFor(() => expect(getByTestId('marker-BUS1')).toBeTruthy());
 

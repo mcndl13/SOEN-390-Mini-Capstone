@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, StatusBar, Animated, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Animated, ScrollView } from 'react-native';
 import MapView, {
   Marker,
   Polygon,
@@ -96,7 +96,7 @@ const CampusMap: React.FC = () => {
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
   const [openingHours, setOpeningHours] = useState<string>('Loading...');
   const [showOpeningHours, setShowOpeningHours] = useState<boolean>(true);
-  const [mapReady, setMapReady] = useState<boolean>(false);
+  const [, setMapReady] = useState<boolean>(false);
   const mapRef = React.useRef<MapView>(null);
   
   // Animation values
