@@ -6,7 +6,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  Image,
   Linking,
   PanResponder,
   Animated,
@@ -221,7 +220,7 @@ export default function DirectionsScreen() {
 
   const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
-  const [zoomLevel, setZoomLevel] = useState(15);
+  const [_zoomLevel, setZoomLevel] = useState(15);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -585,7 +584,7 @@ export default function DirectionsScreen() {
       longitude: details.geometry.location.lng,
     };
     const snappedPosition = snapToNearestBuilding(position);
-    const placeName = details.name || data?.description || '';
+    const placeName = details.name ?? data?.description ?? '';
     const newLocation = { ...snappedPosition, name: placeName };
     if (flag === 'origin') {
       setOrigin(newLocation);
@@ -678,6 +677,10 @@ export default function DirectionsScreen() {
     };
     return icons[mode] || 'navigate-outline';
   };
+
+  const busIconColor = isBlackAndWhite 
+    ? "#000" 
+    : (showShuttles ? "#1E88E5" : "#757575");
 
   return (
     <View style={styles.container}>
@@ -1145,18 +1148,21 @@ export default function DirectionsScreen() {
                 ]}
                 onPress={() => setActiveRouteTab('standard')}
               >
-                <Ionicons
-                  name={getModeIcon(travelMode)}
-                  size={18}
-                  color={
-                    activeRouteTab === 'standard'
-                      ? isBlackAndWhite
-                        ? '#000'
-                        : '#912338'
-                      : '#666'
-                  }
-                  style={styles.routeTabIcon}
-                />
+               {(() => {
+                  // Extract the nested ternary into a constant using an IIFE
+                  const routeTabIconColor = activeRouteTab === 'standard'
+                    ? (isBlackAndWhite ? '#000' : '#912338')
+                    : '#666';
+                    
+                  return (
+                    <Ionicons
+                      name={getModeIcon(travelMode)}
+                      size={18}
+                      color={routeTabIconColor}
+                      style={styles.routeTabIcon}
+                    />
+                  );
+                })()}
                 <Text
                   style={[
                     styles.routeTabText,
@@ -1176,18 +1182,20 @@ export default function DirectionsScreen() {
                   ]}
                   onPress={() => setActiveRouteTab('shuttle')}
                 >
-                  <Ionicons
-                    name="bus"
-                    size={18}
-                    color={
-                      activeRouteTab === 'shuttle'
-                        ? isBlackAndWhite
-                          ? '#000'
-                          : '#912338'
-                        : '#666'
-                    }
-                    style={styles.routeTabIcon}
-                  />
+                  {(() => {
+                    const shuttleTabIconColor = activeRouteTab === 'shuttle'
+                      ? (isBlackAndWhite ? '#000' : '#912338')
+                      : '#666';
+                      
+                    return (
+                      <Ionicons
+                        name="bus"
+                        size={18}
+                        color={shuttleTabIconColor}
+                        style={styles.routeTabIcon}
+                      />
+                    );
+                  })()}
                   <Text
                     style={[
                       styles.routeTabText,
@@ -1352,7 +1360,7 @@ export default function DirectionsScreen() {
 
                   <View style={styles.stepsList}>
                     {steps.map((step, index) => (
-                      <View style={styles.stepItem} key={index}>
+                      <View style={styles.stepItem} key={`step-${index}-${stripHtml(step.html_instructions).slice(0, 10)}`}>
                         <View style={styles.stepNumberContainer}>
                           <Text style={styles.stepNumber}>{index + 1}</Text>
                         </View>
