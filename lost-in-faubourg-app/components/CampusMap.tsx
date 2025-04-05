@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Animated, ScrollView } from 'react-native';
 import MapView, {
   Marker,
@@ -13,6 +13,7 @@ import { AccessibilityContext } from './AccessibilitySettings';
 import { startShuttleTracking, ShuttleData } from '../services/shuttleService';
 import { getOpeningHours } from '../services/openingHoursService';
 
+// Types
 interface LocationCoords {
   latitude: number;
   longitude: number;
@@ -27,6 +28,7 @@ interface Building {
   description: string | undefined;
 }
 
+// Constants
 const SGW_COORDS: LocationCoords = {
   latitude: 45.4953534,
   longitude: -73.578549,
@@ -36,9 +38,9 @@ const LOYOLA_COORDS: LocationCoords = {
   longitude: -73.6405,
 };
 
+// Utility Functions
 const getPolygonCenter = (boundaries: LocationCoords[]): LocationCoords => {
-  let latSum = 0,
-    lonSum = 0;
+  let latSum = 0, lonSum = 0;
   boundaries.forEach((coord) => {
     latSum += coord.latitude;
     lonSum += coord.longitude;
@@ -82,67 +84,332 @@ const requestLocationPermission = async (
   });
 };
 
+// Sub-components
+const LoadingView = ({ isLargeText }: { isLargeText: boolean }) => (
+  <View style={styles.loadingContainer}>
+    <Text style={[styles.loadingText, isLargeText && styles.largeText]}>
+      Loading Map...
+    </Text>
+  </View>
+);
+
+const MapControls = ({ 
+  isBlackAndWhite, 
+  showShuttles, 
+  recenterMap, 
+  toggleShuttles 
+}: { 
+  isBlackAndWhite: boolean, 
+  showShuttles: boolean, 
+  recenterMap: () => void, 
+  toggleShuttles: () => void 
+}) => {
+  const busIconColor = isBlackAndWhite 
+    ? "#000" 
+    : (showShuttles ? "#1E88E5" : "#757575");
+
+  return (
+    <View style={styles.mapControls}>
+      <TouchableOpacity 
+        style={styles.mapControlButton} 
+        onPress={recenterMap}
+      >
+        <Ionicons 
+          name="locate" 
+          size={24} 
+          color={isBlackAndWhite ? "#000" : "#912338"} 
+        />
+      </TouchableOpacity>
+      
+      <TouchableOpacity 
+        style={styles.mapControlButton} 
+        onPress={toggleShuttles}
+        testID='shuttlesBtn'
+      >
+        <Ionicons 
+          name="bus" 
+          size={24} 
+          color={busIconColor} 
+        />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const CampusSelector = ({ 
+  selectedCampus, 
+  isBlackAndWhite, 
+  isLargeText, 
+  switchToCampus 
+}: { 
+  selectedCampus: string | null, 
+  isBlackAndWhite: boolean, 
+  isLargeText: boolean, 
+  switchToCampus: (coords: LocationCoords, name: string) => void 
+}) => (
+  <View style={styles.campusSelector}>
+    <TouchableOpacity
+      style={[
+        styles.campusPill,
+        selectedCampus === 'SGW' && (isBlackAndWhite ? styles.selectedPillBW : styles.selectedPill),
+      ]}
+      onPress={() => switchToCampus(SGW_COORDS, 'SGW')}
+    >
+      <Text
+        style={[
+          styles.campusPillText,
+          selectedCampus === 'SGW' && styles.selectedPillText,
+          isLargeText && styles.largeText,
+        ]}
+      >
+        SGW Campus
+      </Text>
+    </TouchableOpacity>
+
+    <TouchableOpacity
+      style={[
+        styles.campusPill,
+        selectedCampus === 'Loyola' && (isBlackAndWhite ? styles.selectedPillBW : styles.selectedPill),
+      ]}
+      onPress={() => switchToCampus(LOYOLA_COORDS, 'Loyola')}
+    >
+      <Text
+        style={[
+          styles.campusPillText,
+          selectedCampus === 'Loyola' && styles.selectedPillText,
+          isLargeText && styles.largeText,
+        ]}
+      >
+        Loyola Campus
+      </Text>
+    </TouchableOpacity>
+  </View>
+);
+
+const BuildingInfoCard = ({
+  building,
+  openingHours,
+  showOpeningHours,
+  setShowOpeningHours,
+  slideAnimation,
+  fadeAnimation,
+  closeInfo,
+  isBlackAndWhite,
+  isLargeText
+}: {
+  building: Building | null,
+  openingHours: string,
+  showOpeningHours: boolean,
+  setShowOpeningHours: React.Dispatch<React.SetStateAction<boolean>>,
+  slideAnimation: Animated.Value,
+  fadeAnimation: Animated.Value,
+  closeInfo: () => void,
+  isBlackAndWhite: boolean,
+  isLargeText: boolean
+}) => {
+  if (!building) return null;
+  
+  const infoContainerTranslateY = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [100, 0],
+  });
+
+  return (
+    <Animated.View 
+      style={[
+        styles.infoCard,
+        {
+          transform: [{ translateY: infoContainerTranslateY }],
+          opacity: fadeAnimation,
+        },
+        isBlackAndWhite && styles.infoCardBW
+      ]}
+    >
+      <TouchableOpacity 
+        style={styles.closeButton} 
+        onPress={closeInfo}
+      >
+        <Ionicons 
+          name="close" 
+          size={24} 
+          color={isBlackAndWhite ? "#000" : "#912338"} 
+        />
+      </TouchableOpacity>
+      
+      <Text style={[styles.buildingName, isLargeText && styles.largeText]}>
+        {building.name}
+      </Text>
+      
+      <View style={styles.addressContainer}>
+        <Ionicons 
+          name="location" 
+          size={18} 
+          color={isBlackAndWhite ? "#000" : "#912338"} 
+          style={styles.addressIcon} 
+        />
+        <Text style={[styles.address, isLargeText && styles.largeText]}>
+          {building.address}
+        </Text>
+      </View>
+      
+      <View style={styles.separator} />
+      
+      <ScrollView style={styles.scrollableContent}>
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeader}>
+            <Ionicons 
+              name="information-circle" 
+              size={20} 
+              color={isBlackAndWhite ? "#000" : "#912338"} 
+            />
+            <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
+              Description
+            </Text>
+          </View>
+          <Text style={[styles.description, isLargeText && styles.largeText]}>
+            {building.description ?? "No description available."}
+          </Text>
+        </View>
+        
+        <TouchableOpacity
+          style={styles.hoursToggle}
+          onPress={() => setShowOpeningHours(!showOpeningHours)}
+        >
+          <View style={styles.sectionHeader}>
+            <Ionicons 
+              name="time" 
+              size={20} 
+              color={isBlackAndWhite ? "#000" : "#912338"} 
+            />
+            <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
+              Opening Hours
+            </Text>
+            <Ionicons 
+              name={showOpeningHours ? "chevron-up" : "chevron-down"} 
+              size={20} 
+              color={isBlackAndWhite ? "#000" : "#757575"} 
+              style={styles.toggleIcon}
+            />
+          </View>
+        </TouchableOpacity>
+
+        {showOpeningHours && (
+          <Text style={[styles.hoursText, isLargeText && styles.largeText]}>
+            {openingHours}
+          </Text>
+        )}
+        
+        <View style={styles.scrollPadding} />
+      </ScrollView>
+    </Animated.View>
+  );
+};
+
+const createMapStyle = (isBlackAndWhite: boolean): MapStyleElement[] => {
+  if (isBlackAndWhite) {
+    return [
+      {
+        elementType: 'geometry',
+        stylers: [{ saturation: -100 }],
+      },
+      {
+        elementType: 'labels.text.fill',
+        stylers: [{ saturation: -100 }],
+      },
+      {
+        elementType: 'labels.text.stroke',
+        stylers: [{ saturation: -100 }],
+      },
+    ];
+  }
+  
+  return [
+    {
+      featureType: 'water',
+      elementType: 'geometry',
+      stylers: [{ color: '#e9e9e9' }, { lightness: 17 }],
+    },
+    {
+      featureType: 'landscape',
+      elementType: 'geometry',
+      stylers: [{ color: '#f5f5f5' }, { lightness: 20 }],
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry.fill',
+      stylers: [{ color: '#ffffff' }, { lightness: 17 }],
+    },
+    {
+      featureType: 'poi',
+      elementType: 'geometry',
+      stylers: [{ color: '#f5f5f5' }, { lightness: 21 }],
+    },
+  ];
+};
+
+// Main Component
 const CampusMap: React.FC = () => {
-  const { isBlackAndWhite, isLargeText } =
-    React.useContext(AccessibilityContext);
-  const [location, setLocation] =
-    useState<Location.LocationObjectCoords | null>(null);
+  // Context and Refs
+  const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
+  const mapRef = useRef<MapView>(null);
+
+  // State
+  const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
   const [region, setRegion] = useState<Region | null>(null);
   const [selectedCampus, setSelectedCampus] = useState<string | null>(null);
-  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(
-    null,
-  );
+  const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
   const [openingHours, setOpeningHours] = useState<string>('Loading...');
   const [showOpeningHours, setShowOpeningHours] = useState<boolean>(true);
   const [, setMapReady] = useState<boolean>(false);
-  const mapRef = React.useRef<MapView>(null);
   
-  // Animation values
-  const slideAnimation = useState(new Animated.Value(0))[0];
-  const fadeAnimation = useState(new Animated.Value(0))[0];
+  // Animation state
+  const [slideAnimation] = useState(new Animated.Value(0));
+  const [fadeAnimation] = useState(new Animated.Value(0));
 
+  // Data processing
   const buildings = createBuildings();
+  const mapStyle = createMapStyle(isBlackAndWhite);
 
-  const mapStyle: MapStyleElement[] = isBlackAndWhite
-    ? [
-        {
-          elementType: 'geometry',
-          stylers: [{ saturation: -100 }],
-        },
-        {
-          elementType: 'labels.text.fill',
-          stylers: [{ saturation: -100 }],
-        },
-        {
-          elementType: 'labels.text.stroke',
-          stylers: [{ saturation: -100 }],
-        },
-      ]
-    : [
-        {
-          featureType: 'water',
-          elementType: 'geometry',
-          stylers: [{ color: '#e9e9e9' }, { lightness: 17 }],
-        },
-        {
-          featureType: 'landscape',
-          elementType: 'geometry',
-          stylers: [{ color: '#f5f5f5' }, { lightness: 20 }],
-        },
-        {
-          featureType: 'road.highway',
-          elementType: 'geometry.fill',
-          stylers: [{ color: '#ffffff' }, { lightness: 17 }],
-        },
-        {
-          featureType: 'poi',
-          elementType: 'geometry',
-          stylers: [{ color: '#f5f5f5' }, { lightness: 21 }],
-        },
-      ];
+  // Callbacks
+  const switchToCampus = useCallback((campusCoords: LocationCoords, campusName: string) => {
+    setRegion({
+      latitude: campusCoords.latitude,
+      longitude: campusCoords.longitude,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    });
+    setSelectedCampus(campusName);
+    setSelectedBuilding(null);
+  }, []);
 
+  const toggleShuttles = useCallback(() => {
+    setShowShuttles(!showShuttles);
+  }, [showShuttles]);
+
+  const recenterMap = useCallback(() => {
+    if (location) {
+      setRegion({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        latitudeDelta: 0.005,
+        longitudeDelta: 0.005,
+      });
+    }
+  }, [location]);
+
+  const closeInfo = useCallback(() => {
+    Animated.timing(fadeAnimation, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      setSelectedBuilding(null);
+    });
+  }, [fadeAnimation]);
+
+  // Effects
   useEffect(() => {
     requestLocationPermission(setLocation, setRegion);
   }, []);
@@ -195,49 +462,93 @@ const CampusMap: React.FC = () => {
       slideAnimation.setValue(0);
       fadeAnimation.setValue(0);
     }
-  }, [selectedBuilding]);
+  }, [selectedBuilding, slideAnimation, fadeAnimation]);
 
-  const switchToCampus = (campusCoords: LocationCoords, campusName: string) => {
-    setRegion({
-      latitude: campusCoords.latitude,
-      longitude: campusCoords.longitude,
-      latitudeDelta: 0.005,
-      longitudeDelta: 0.005,
-    });
-    setSelectedCampus(campusName);
-    setSelectedBuilding(null);
+  // Render helper components
+  const renderBuildingMarkers = () => (
+    buildings.map((building) => (
+      <Marker
+        key={building.id}
+        coordinate={{
+          latitude: building.latitude,
+          longitude: building.longitude,
+        }}
+        pinColor={isBlackAndWhite ? 'black' : '#912338'}
+        onPress={() => setSelectedBuilding(building)}
+        testID={`marker-${building.id}`}
+      />
+    ))
+  );
+
+  const renderBuildingPolygons = () => (
+    polygons.map((polygon, index) => (
+      <Polygon
+        key={index}
+        coordinates={polygon.boundaries}
+        fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
+        strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
+        strokeWidth={2}
+      />
+    ))
+  );
+
+  const renderShuttleMarkers = () => {
+    if (!showShuttles || !shuttleData) return null;
+    
+    return (
+      <>
+        {shuttleData.buses.map((bus) => (
+          <Marker
+            key={bus.ID}
+            coordinate={{
+              latitude: bus.Latitude,
+              longitude: bus.Longitude,
+            }}
+            title={`Shuttle ${bus.ID}`}
+            testID={`marker-${bus.ID}`}
+          >
+            <View style={[
+              styles.customIconMarker,
+              isBlackAndWhite ? styles.markerBW : styles.shuttleMarker
+            ]}>
+              <Ionicons 
+                name="bus" 
+                size={20} 
+                color="white" 
+              />
+            </View>
+          </Marker>
+        ))}
+
+        {shuttleData.stations.map((station) => (
+          <Marker
+            key={station.ID}
+            coordinate={{
+              latitude: station.Latitude,
+              longitude: station.Longitude,
+            }}
+            title={
+              station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'
+            }
+            testID={`marker-${station.ID}`}
+          >
+            <View style={[
+              styles.customIconMarker,
+              isBlackAndWhite ? styles.markerBW : styles.stationMarker
+            ]}>
+              <Ionicons 
+                name="bus-outline" 
+                size={20} 
+                color="white" 
+              />
+            </View>
+          </Marker>
+        ))}
+      </>
+    );
   };
 
-  const toggleShuttles = () => {
-    setShowShuttles(!showShuttles);
-  };
-
-  const recenterMap = () => {
-    if (location) {
-      setRegion({
-        latitude: location.latitude,
-        longitude: location.longitude,
-        latitudeDelta: 0.005,
-        longitudeDelta: 0.005,
-      });
-    }
-  };
-
-  const closeInfo = () => {
-    Animated.timing(fadeAnimation, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: true,
-    }).start(() => {
-      setSelectedBuilding(null);
-    });
-  };
-
-  const infoContainerTranslateY = slideAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [100, 0],
-  });
-
+  // Main render
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -256,243 +567,39 @@ const CampusMap: React.FC = () => {
           onMapReady={() => setMapReady(true)}
           onPress={() => selectedBuilding && closeInfo()}
         >
-          {buildings.map((building) => (
-            <Marker
-              key={building.id}
-              coordinate={{
-                latitude: building.latitude,
-                longitude: building.longitude,
-              }}
-              pinColor={isBlackAndWhite ? 'black' : '#912338'}
-              onPress={() => setSelectedBuilding(building)}
-              testID={`marker-${building.id}`}
-            />
-          ))}
-
-          {polygons.map((polygon, index) => (
-            <Polygon
-              key={index}
-              coordinates={polygon.boundaries}
-              fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
-              strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
-              strokeWidth={2}
-            />
-          ))}
-
-          {showShuttles &&
-            shuttleData?.buses.map((bus) => (
-              <Marker
-                key={bus.ID}
-                coordinate={{
-                  latitude: bus.Latitude,
-                  longitude: bus.Longitude,
-                }}
-                title={`Shuttle ${bus.ID}`}
-                testID={`marker-${bus.ID}`}
-              >
-                <View style={[
-                  styles.customIconMarker,
-                  isBlackAndWhite ? styles.markerBW : styles.shuttleMarker
-                ]}>
-                  <Ionicons 
-                    name="bus" 
-                    size={20} 
-                    color="white" 
-                  />
-                </View>
-              </Marker>
-            ))}
-
-          {showShuttles &&
-            shuttleData?.stations.map((station) => (
-              <Marker
-                key={station.ID}
-                coordinate={{
-                  latitude: station.Latitude,
-                  longitude: station.Longitude,
-                }}
-                title={
-                  station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'
-                }
-                testID={`marker-${station.ID}`}
-              >
-                <View style={[
-                  styles.customIconMarker,
-                  isBlackAndWhite ? styles.markerBW : styles.stationMarker
-                ]}>
-                  <Ionicons 
-                    name="bus-outline" 
-                    size={20} 
-                    color="white" 
-                  />
-                </View>
-              </Marker>
-            ))}
+          {renderBuildingMarkers()}
+          {renderBuildingPolygons()}
+          {renderShuttleMarkers()}
         </MapView>
       ) : (
-        <View style={styles.loadingContainer}>
-          <Text style={[styles.loadingText, isLargeText && styles.largeText]}>
-            Loading Map...
-          </Text>
-        </View>
+        <LoadingView isLargeText={isLargeText} />
       )}
 
-      {/* Map Controls */}
-      <View style={styles.mapControls}>
-        <TouchableOpacity 
-          style={styles.mapControlButton} 
-          onPress={recenterMap}
-        >
-          <Ionicons 
-            name="locate" 
-            size={24} 
-            color={isBlackAndWhite ? "#000" : "#912338"} 
-          />
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.mapControlButton} 
-          onPress={toggleShuttles}
-          testID='shuttlesBtn'
-        >
-          <Ionicons 
-            name="bus" 
-            size={24} 
-            color={isBlackAndWhite ? "#000" : showShuttles ? "#1E88E5" : "#757575"} 
-          />
-        </TouchableOpacity>
-      </View>
+      <MapControls 
+        isBlackAndWhite={isBlackAndWhite}
+        showShuttles={showShuttles}
+        recenterMap={recenterMap}
+        toggleShuttles={toggleShuttles}
+      />
 
-      {/* Campus Selection Pills */}
-      <View style={styles.campusSelector}>
-        <TouchableOpacity
-          style={[
-            styles.campusPill,
-            selectedCampus === 'SGW' && (isBlackAndWhite ? styles.selectedPillBW : styles.selectedPill),
-          ]}
-          onPress={() => switchToCampus(SGW_COORDS, 'SGW')}
-        >
-          <Text
-            style={[
-              styles.campusPillText,
-              selectedCampus === 'SGW' && styles.selectedPillText,
-              isLargeText && styles.largeText,
-            ]}
-          >
-            SGW Campus
-          </Text>
-        </TouchableOpacity>
+      <CampusSelector 
+        selectedCampus={selectedCampus}
+        isBlackAndWhite={isBlackAndWhite}
+        isLargeText={isLargeText}
+        switchToCampus={switchToCampus}
+      />
 
-        <TouchableOpacity
-          style={[
-            styles.campusPill,
-            selectedCampus === 'Loyola' && (isBlackAndWhite ? styles.selectedPillBW : styles.selectedPill),
-          ]}
-          onPress={() => switchToCampus(LOYOLA_COORDS, 'Loyola')}
-        >
-          <Text
-            style={[
-              styles.campusPillText,
-              selectedCampus === 'Loyola' && styles.selectedPillText,
-              isLargeText && styles.largeText,
-            ]}
-          >
-            Loyola Campus
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Building Info Card */}
-      {selectedBuilding && (
-        <Animated.View 
-          style={[
-            styles.infoCard,
-            {
-              transform: [{ translateY: infoContainerTranslateY }],
-              opacity: fadeAnimation,
-            },
-            isBlackAndWhite && styles.infoCardBW
-          ]}
-        >
-          <TouchableOpacity 
-            style={styles.closeButton} 
-            onPress={closeInfo}
-          >
-            <Ionicons 
-              name="close" 
-              size={24} 
-              color={isBlackAndWhite ? "#000" : "#912338"} 
-            />
-          </TouchableOpacity>
-          
-          <Text style={[styles.buildingName, isLargeText && styles.largeText]}>
-            {selectedBuilding.name}
-          </Text>
-          
-          <View style={styles.addressContainer}>
-            <Ionicons 
-              name="location" 
-              size={18} 
-              color={isBlackAndWhite ? "#000" : "#912338"} 
-              style={styles.addressIcon} 
-            />
-            <Text style={[styles.address, isLargeText && styles.largeText]}>
-              {selectedBuilding.address}
-            </Text>
-          </View>
-          
-          <View style={styles.separator} />
-          
-          <ScrollView style={styles.scrollableContent}>
-            <View style={styles.sectionContainer}>
-              <View style={styles.sectionHeader}>
-                <Ionicons 
-                  name="information-circle" 
-                  size={20} 
-                  color={isBlackAndWhite ? "#000" : "#912338"} 
-                />
-                <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
-                  Description
-                </Text>
-              </View>
-              <Text style={[styles.description, isLargeText && styles.largeText]}>
-                {selectedBuilding.description || "No description available."}
-              </Text>
-            </View>
-            
-            <TouchableOpacity
-              style={styles.hoursToggle}
-              onPress={() => setShowOpeningHours(!showOpeningHours)}
-            >
-              <View style={styles.sectionHeader}>
-                <Ionicons 
-                  name="time" 
-                  size={20} 
-                  color={isBlackAndWhite ? "#000" : "#912338"} 
-                />
-                <Text style={[styles.sectionTitle, isLargeText && styles.largeText]}>
-                  Opening Hours
-                </Text>
-                <Ionicons 
-                  name={showOpeningHours ? "chevron-up" : "chevron-down"} 
-                  size={20} 
-                  color={isBlackAndWhite ? "#000" : "#757575"} 
-                  style={styles.toggleIcon}
-                />
-              </View>
-            </TouchableOpacity>
-
-            {showOpeningHours && (
-              <Text style={[styles.hoursText, isLargeText && styles.largeText]}>
-                {openingHours}
-              </Text>
-            )}
-            
-            {/* Add extra padding at the bottom for better scrolling */}
-            <View style={styles.scrollPadding} />
-          </ScrollView>
-        </Animated.View>
-      )}
+      <BuildingInfoCard
+        building={selectedBuilding}
+        openingHours={openingHours}
+        showOpeningHours={showOpeningHours}
+        setShowOpeningHours={setShowOpeningHours}
+        slideAnimation={slideAnimation}
+        fadeAnimation={fadeAnimation}
+        closeInfo={closeInfo}
+        isBlackAndWhite={isBlackAndWhite}
+        isLargeText={isLargeText}
+      />
     </View>
   );
 };
