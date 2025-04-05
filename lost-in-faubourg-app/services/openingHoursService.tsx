@@ -51,7 +51,7 @@ const getOpeningHours = async (
     );
 
     return (
-      response.data.result?.current_opening_hours?.weekday_text?.join('\n') ||
+      response.data.result?.current_opening_hours?.weekday_text?.join('\n') ??
       'No hours available'
     );
   } catch (error) {
