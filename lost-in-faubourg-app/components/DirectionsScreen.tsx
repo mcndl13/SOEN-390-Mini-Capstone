@@ -171,7 +171,7 @@ export default function DirectionsScreen() {
   // Shuttle states
   const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
-  const [zoomLevel, setZoomLevel] = useState(15); // Default zoom level
+  const [, setZoomLevel] = useState(15); // Default zoom level
   
   // Toast message state for user feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -634,25 +634,25 @@ export default function DirectionsScreen() {
   };
 
   // Test directions with hardcoded values (for debugging)
-  const testDirections = () => {
-    const testOrigin = { latitude: 45.4953534, longitude: -73.578549 }; // SGW
-    const testDest = { latitude: 45.4582, longitude: -73.6405 }; // Loyola
+  // const testDirections = () => {
+  //   const testOrigin = { latitude: 45.4953534, longitude: -73.578549 }; // SGW
+  //   const testDest = { latitude: 45.4582, longitude: -73.6405 }; // Loyola
     
-    setOrigin(testOrigin);
-    setDestination(testDest);
+  //   setOrigin(testOrigin);
+  //   setDestination(testDest);
     
-    // Wait a moment for state to update
-    setTimeout(() => {
-      if (mapRef.current) {
-        mapRef.current.fitToCoordinates([testOrigin, testDest], {
-          edgePadding,
-          animated: true,
-        });
-        setShowDirections(true);
-        setShowShuttleRoute(true);
-      }
-    }, 500);
-  };
+  //   // Wait a moment for state to update
+  //   setTimeout(() => {
+  //     if (mapRef.current) {
+  //       mapRef.current.fitToCoordinates([testOrigin, testDest], {
+  //         edgePadding,
+  //         animated: true,
+  //       });
+  //       setShowDirections(true);
+  //       setShowShuttleRoute(true);
+  //     }
+  //   }, 500);
+  // };
 
   // Add map style for black and white mode
   const mapStyle: MapStyleElement[] = isBlackAndWhite ? [
@@ -716,9 +716,9 @@ export default function DirectionsScreen() {
         onRegionChangeComplete={onRegionChange}
       >
         {/* Polygons for Concordia buildings */}
-        {polygons.map((polygon, idx) => (
+        {polygons.map((polygon) => (
           <Polygon
-            key={idx}
+            key={polygon.name || JSON.stringify(polygon.boundaries)} // use a unique id or a string of boundaries
             coordinates={polygon.boundaries}
             fillColor={isBlackAndWhite ? "#000000aa" : "#912338cc"}
             strokeColor={isBlackAndWhite ? "#000000" : "#912338cc"}
@@ -1098,7 +1098,7 @@ export default function DirectionsScreen() {
                 <>
                   <Text style={styles.regularRouteHeader}>Route Steps</Text>
                   {steps.map((step, index) => (
-                    <Text style={styles.stepText} key={index}>
+                    <Text style={styles.stepText} key={step.html_instructions}>
                       {index + 1}. {stripHtml(step.html_instructions)}
                     </Text>
                   ))}

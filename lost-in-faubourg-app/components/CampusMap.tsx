@@ -95,7 +95,6 @@ const CampusMap: React.FC = () => {
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
   const [openingHours, setOpeningHours] = useState<string>('Loading...');
   const [showOpeningHours, setShowOpeningHours] = useState<boolean>(true);
-  const [showDescription, setshowDescription] = useState<boolean>(true);
 
   const buildings = createBuildings();
 
@@ -202,9 +201,9 @@ const CampusMap: React.FC = () => {
             />
           ))}
 
-          {polygons.map((polygon, index) => (
+          {polygons.map((polygon) => (
             <Polygon
-              key={index}
+              key={`${polygon.name}-${polygon.address}`}
               coordinates={polygon.boundaries}
               fillColor={isBlackAndWhite ? '#000000cc' : '#912338cc'}
               strokeColor={isBlackAndWhite ? '#000000' : '#912338cc'}

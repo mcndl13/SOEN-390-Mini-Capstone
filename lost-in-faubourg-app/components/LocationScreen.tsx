@@ -6,7 +6,7 @@ import { GOOGLE_MAPS_API_KEY } from '@env';
 
 export default function LocationScreen() {
   const [location, setLocation] = useState<LocationObject | null>(null);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [, setErrorMsg] = useState('');
   const [currentBuilding, setCurrentBuilding] = useState('');
   const [campus, setCampus] = useState('SGW'); // Default to SGW
 

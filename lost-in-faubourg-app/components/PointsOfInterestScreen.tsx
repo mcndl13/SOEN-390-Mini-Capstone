@@ -85,7 +85,7 @@ export default function POIScreen() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [pois, setPois] = useState<POI[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
+  const [, setSelectedPOI] = useState<POI | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const mapRef = useRef<MapView | null>(null);
@@ -314,9 +314,9 @@ export default function POIScreen() {
         customMapStyle={mapStyle}
       >
         {/* Polygons for Concordia buildings */}
-        {polygons.map((polygon, idx) => (
+        {polygons.map((polygon) => (
           <Polygon
-            key={idx}
+            key={polygon.name}
             coordinates={polygon.boundaries}
             fillColor={isBlackAndWhite ? "#333333cc" : "#912338cc"}
             strokeColor={isBlackAndWhite ? "#333333cc" : "#912338cc"}
