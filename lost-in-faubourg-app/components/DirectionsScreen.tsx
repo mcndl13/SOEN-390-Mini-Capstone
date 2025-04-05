@@ -66,10 +66,10 @@ function InputAutocomplete({
   onPlaceSelected,
   currentValue,
 }: {
-  label: string;
-  placeholder: string;
-  onPlaceSelected: (data: any, details: any) => void;
-  currentValue?: string;
+  readonly label: string;
+  readonly placeholder: string;
+  readonly onPlaceSelected: (data: any, details: any) => void;
+  readonly currentValue?: string;
 }) {
   // Minimal custom styling for Google Autocomplete
   const googleAutocompleteStyles = {

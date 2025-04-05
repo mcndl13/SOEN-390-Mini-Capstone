@@ -83,7 +83,7 @@ export default function POIScreen() {
   const { isBlackAndWhite, isLargeText } = useContext(AccessibilityContext);
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [pois, setPOIs] = useState<POI[]>([]);
+  const [pois, setPois] = useState<POI[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -180,7 +180,7 @@ export default function POIScreen() {
       if (data.status !== 'OK') {
         console.error('Places API Error:', data.status);
         setMessage('Error fetching places');
-        setPOIs([]);
+        setPois([]);
         return;
       }
       
@@ -199,7 +199,7 @@ export default function POIScreen() {
         place_id: place.place_id
       }));
       
-      setPOIs(mappedPOIs);
+      setPois(mappedPOIs);
       
       if (mappedPOIs.length === 0) {
         setMessage('No places found');

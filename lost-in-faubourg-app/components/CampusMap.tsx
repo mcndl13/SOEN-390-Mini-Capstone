@@ -142,7 +142,7 @@ const CampusMap: React.FC = () => {
         selectedBuilding.longitude,
       );
 
-      setOpeningHours(hours || 'No hours available');
+      setOpeningHours(hours ?? 'No hours available');
     };
 
     fetchOpeningHours();

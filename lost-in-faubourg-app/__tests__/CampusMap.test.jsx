@@ -7,7 +7,6 @@ import { AccessibilityContext } from '../components/AccessibilitySettings';
 
 // --- Mocks ---
 jest.mock('react-native-maps', () => {
-  const React = require('react');
   const { View } = require('react-native');
   const PropTypes = require('prop-types');
 
@@ -38,19 +37,6 @@ jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn(),
   getCurrentPositionAsync: jest.fn(),
 }));
-
-jest.mock('react-native-maps', () => {
-  const { View } = require('react-native');
-  const MockMapView = (props) => <View {...props}>{props.children}</View>;
-  const MockMarker = (props) => <View {...props}>{props.children}</View>;
-  const MockPolygon = (props) => <View {...props}>{props.children}</View>;
-  return {
-    __esModule: true,
-    default: MockMapView,
-    Marker: MockMarker,
-    Polygon: MockPolygon,
-  };
-});
 
 jest.mock('../services/shuttleService', () => ({
   fetchShuttlePositions: jest.fn().mockResolvedValue({
