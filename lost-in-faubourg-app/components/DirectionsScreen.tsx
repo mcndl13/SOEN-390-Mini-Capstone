@@ -678,10 +678,6 @@ export default function DirectionsScreen() {
     return icons[mode] || 'navigate-outline';
   };
 
-  const busIconColor = isBlackAndWhite 
-    ? "#000" 
-    : (showShuttles ? "#1E88E5" : "#757575");
-
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />

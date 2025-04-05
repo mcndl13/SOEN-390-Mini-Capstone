@@ -362,7 +362,7 @@ const CampusMap: React.FC = () => {
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
   const [openingHours, setOpeningHours] = useState<string>('Loading...');
   const [showOpeningHours, setShowOpeningHours] = useState<boolean>(true);
-  const [, setMapReady] = useState<boolean>(false);
+  const [_mapReady, setMapReady] = useState<boolean>(false);
   
   // Animation state
   const [slideAnimation] = useState(new Animated.Value(0));
