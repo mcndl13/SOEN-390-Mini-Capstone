@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">89.28% </span>
+                <span class="strong">94.64% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>100/112</span>
+                <span class='fraction'>106/112</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">68.68% </span>
+                <span class="strong">75.75% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>68/99</span>
+                <span class='fraction'>75/99</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80.48% </span>
+                <span class="strong">87.8% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>33/41</span>
+                <span class='fraction'>36/41</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.78% </span>
+                <span class="strong">94.39% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>95/107</span>
+                <span class='fraction'>101/107</span>
             </div>
         
             
@@ -985,27 +985,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1791,7 +1791,7 @@ const LOYOLA_COORDS: LocationCoords = {
 };
 &nbsp;
 // ===== Factory Pattern Implementation =====
-class MapComponentFactory {
+export class MapComponentFactory {
   // Create buildings using factory method
   static createBuildings(): Building[] {
     return polygons.map((polygon, index) =&gt; ({
@@ -1828,28 +1828,28 @@ class MapComponentFactory {
   }
 &nbsp;
   // Create campus-specific configuration
-<span class="fstat-no" title="function not covered" >  st</span>atic createMapConfiguration(campusName: string) {
-<span class="cstat-no" title="statement not covered" >    switch (campusName) {</span>
+  static createMapConfiguration(campusName: string) {
+    switch (campusName) {
       case 'SGW':
-<span class="cstat-no" title="statement not covered" >        return {</span>
+        return {
           coords: SGW_COORDS,
           zoomLevel: 0.005,
-          defaultBuildings: this.createBuildings().filter(<span class="fstat-no" title="function not covered" >bu</span>ilding =&gt; 
+          defaultBuildings: this.createBuildings().filter(building =&gt; 
             // Filter logic for SGW buildings
-<span class="cstat-no" title="statement not covered" >            building.latitude &gt; 45.49 &amp;&amp; building.latitude &lt; 45.50</span>
+            building.latitude &gt; 45.49 &amp;&amp; building.latitude &lt; 45.50
           ),
         };
       case 'Loyola':
-<span class="cstat-no" title="statement not covered" >        return {</span>
+        return {
           coords: LOYOLA_COORDS,
           zoomLevel: 0.005,
-          defaultBuildings: this.createBuildings().filter(<span class="fstat-no" title="function not covered" >bu</span>ilding =&gt; 
+          defaultBuildings: this.createBuildings().filter(building =&gt; 
             // Filter logic for Loyola buildings
-<span class="cstat-no" title="statement not covered" >            building.latitude &gt; 45.45 &amp;&amp; building.latitude &lt; 45.46</span>
+            building.latitude &gt; 45.45 &amp;&amp; building.latitude &lt; 45.46
           ),
         };
       default:
-<span class="cstat-no" title="statement not covered" >        return {</span>
+        return {
           coords: SGW_COORDS,
           zoomLevel: 0.005,
           defaultBuildings: this.createBuildings(),
@@ -2602,7 +2602,7 @@ export default CampusMap;</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T03:04:13.317Z
+                at 2025-04-06T12:59:40.731Z
             </div>
         <script src="../prettify.js"></script>
         <script>
