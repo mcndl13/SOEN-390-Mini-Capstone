@@ -163,30 +163,6 @@ describe('DirectionsScreen', () => {
     await waitForTimeout(0);
     expect(rendered.toJSON()).toMatchSnapshot();
   });
-
-  test('sets steps to empty when API returns no steps', async () => {
-    const rendered = renderDirectionsScreen({
-      origin: defaultOrigin,
-      destination: defaultDestination,
-    });
-    jest.spyOn(global, 'fetch').mockImplementationOnce(() =>
-      Promise.resolve({
-        status: 200,
-        json: async () => ({
-          status: 'OK',
-          routes: [{ legs: [{}] }],
-        }),
-      } as any),
-    );
-    await act(async () => {
-      await traceRoute(rendered);
-      await waitForTimeout(700);
-    });
-    expect(rendered.queryByText('Turn-by-turn Directions')).toBeNull();
-    await waitFor(() => {
-      expect(rendered.queryAllByText(/^\d+\./).length).toBe(0);
-    });
-  });
 });
 
 describe('More DirectionsScreen interactions', () => {

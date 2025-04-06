@@ -4,6 +4,7 @@ import CampusMap from '../components/CampusMap';
 import * as Location from 'expo-location';
 import { polygons } from '../components/polygonCoordinates';
 import { AccessibilityContext } from '../components/AccessibilitySettings';
+import { MapComponentFactory } from '../components/CampusMap';
 
 process.env.EXPO_OS = 'ios';
 
@@ -366,3 +367,56 @@ describe('Toggle buttons functionality', () => {
     });
   });
 });
+
+
+const mockBuildings = [
+  { latitude: 45.495, name: 'SGW Building 1' },
+  { latitude: 45.496, name: 'SGW Building 2' },
+  { latitude: 45.455, name: 'Loyola Building 1' },
+  { latitude: 45.456, name: 'Loyola Building 2' },
+  { latitude: 45.48, name: 'Out of Range' },
+];
+
+// Mock coordinates
+const SGW_COORDS = { latitude: 45.4953534, longitude: -73.578549 };
+const LOYOLA_COORDS = { latitude: 45.4582, longitude: -73.6405 };
+
+describe('MapComponentFactory.createMapConfiguration', () => {
+  beforeAll(() => {
+    jest.spyOn(MapComponentFactory, 'createBuildings').mockImplementation(() => mockBuildings);
+  });
+
+  const testCases = [
+    {
+      campus: 'SGW',
+      expectedCoords: SGW_COORDS,
+      expectedBuildings: [
+        { latitude: 45.495, name: 'SGW Building 1' },
+        { latitude: 45.496, name: 'SGW Building 2' },
+      ],
+    },
+    {
+      campus: 'Loyola',
+      expectedCoords: LOYOLA_COORDS,
+      expectedBuildings: [
+        { latitude: 45.455, name: 'Loyola Building 1' },
+        { latitude: 45.456, name: 'Loyola Building 2' },
+      ],
+    },
+    {
+      campus: 'Unknown',
+      expectedCoords: SGW_COORDS,
+      expectedBuildings: mockBuildings,
+    },
+  ];
+
+  testCases.forEach(({ campus, expectedCoords, expectedBuildings }) => {
+    it(`returns correct config for campus: ${campus}`, () => {
+      const config = MapComponentFactory.createMapConfiguration(campus);
+      expect(config.coords).toEqual(expectedCoords);
+      expect(config.zoomLevel).toBe(0.005);
+      expect(config.defaultBuildings).toEqual(expectedBuildings);
+    });
+  });
+});
+

@@ -420,9 +420,10 @@ export default function DirectionsScreen() {
 
   // Replace the original formatLocationName with an updated version that accepts currentUserLocation.
   const formatLocationName = (
-    location: { latitude: number; longitude: number; name?: string },
-    currentUserLocation?: { latitude: number; longitude: number },
+    location: { latitude: number; longitude: number; name?: string } | null | undefined,
+    currentUserLocation?: { latitude: number; longitude: number } | null,
   ) => {
+    if (!location) return '';
     if (location.name) {
       return location.name;
     }
@@ -668,8 +669,8 @@ export default function DirectionsScreen() {
         },
       ];
 
-  const getModeIcon = (mode: MapViewDirectionsMode): string => {
-    const icons: Record<MapViewDirectionsMode, string> = {
+  const getModeIcon = (mode: MapViewDirectionsMode): keyof typeof Ionicons.glyphMap => {
+    const icons: Record<MapViewDirectionsMode, keyof typeof Ionicons.glyphMap> = {
       DRIVING: 'car-outline',
       WALKING: 'walk-outline',
       BICYCLING: 'bicycle-outline',

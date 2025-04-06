@@ -82,8 +82,13 @@ const POI_TYPE_ICONS: Record<string, string> = {
   'default': 'location'
 };
 
-// Helper Components
-const LoadingIndicator = ({ isLoading, isBlackAndWhite, isLargeText }) => {
+interface LoadingIndicatorProps {
+  isLoading: boolean;
+  isBlackAndWhite: boolean;
+  isLargeText: boolean;
+}
+
+const LoadingIndicator = ({ isLoading, isBlackAndWhite, isLargeText }: LoadingIndicatorProps) => {
   if (!isLoading) return null;
   
   return (
@@ -100,7 +105,12 @@ const LoadingIndicator = ({ isLoading, isBlackAndWhite, isLargeText }) => {
   );
 };
 
-const MessageBanner = ({ message, isLargeText }) => {
+interface MessageBannerProps {
+  message: string | null;
+  isLargeText: boolean;
+}
+
+const MessageBanner = ({ message, isLargeText }: MessageBannerProps) => {
   if (!message) return null;
   
   return (
@@ -112,7 +122,17 @@ const MessageBanner = ({ message, isLargeText }) => {
   );
 };
 
-const SearchBar = ({ searchQuery, setSearchQuery, handleSearch, isLoading, isLargeText, isBlackAndWhite, searchInputRef }) => (
+interface SearchBarProps {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  handleSearch: () => void;
+  isLoading: boolean;
+  isLargeText: boolean;
+  isBlackAndWhite: boolean;
+  searchInputRef: React.RefObject<TextInput>;
+}
+
+const SearchBar = ({ searchQuery, setSearchQuery, handleSearch, isLoading, isLargeText, isBlackAndWhite, searchInputRef }: SearchBarProps) => (
   <View style={styles.searchContainer}>
     <View style={styles.searchBarWrapper}>
       <TextInput
@@ -136,7 +156,12 @@ const SearchBar = ({ searchQuery, setSearchQuery, handleSearch, isLoading, isLar
   </View>
 );
 
-const MapControls = ({ onLocate, isBlackAndWhite }) => (
+interface MapControlsProps {
+  onLocate: () => void;
+  isBlackAndWhite: boolean;
+}
+
+const MapControls = ({ onLocate, isBlackAndWhite }: MapControlsProps) => (
   <View style={styles.mapControls}>
     <TouchableOpacity 
       style={styles.mapControlButton} 
@@ -151,7 +176,16 @@ const MapControls = ({ onLocate, isBlackAndWhite }) => (
   </View>
 );
 
-const QuickSearchButtons = ({ options, searchQuery, handleQuickSearch, isLoading, isLargeText, isBlackAndWhite }) => (
+interface QuickSearchButtonsProps {
+  options: QuickSearchOption[];
+  searchQuery: string;
+  handleQuickSearch: (s: string) => void;
+  isLoading: boolean;
+  isLargeText: boolean;
+  isBlackAndWhite: boolean;
+}
+
+const QuickSearchButtons = ({ options, searchQuery, handleQuickSearch, isLoading, isLargeText, isBlackAndWhite }: QuickSearchButtonsProps) => (
   <View style={styles.quickSearchContainer}>
     {options.map((option) => (
       <TouchableOpacity
@@ -193,6 +227,16 @@ const QuickSearchButtons = ({ options, searchQuery, handleQuickSearch, isLoading
   </View>
 );
 
+interface POIInfoCardProps{
+  selectedPOI: POI | null;
+  closeInfo: () => void, 
+  getDirections: (poi: POI) => void;
+  slideAnimation: Animated.Value;
+  fadeAnimation: Animated.Value;
+  isBlackAndWhite: boolean;
+  isLargeText: boolean;
+}
+
 const POIInfoCard = ({ 
   selectedPOI, 
   closeInfo, 
@@ -201,7 +245,7 @@ const POIInfoCard = ({
   fadeAnimation, 
   isBlackAndWhite, 
   isLargeText 
-}) => {
+}: POIInfoCardProps) => {
   if (!selectedPOI) return null;
   
   const infoContainerTranslateY = slideAnimation.interpolate({
@@ -773,7 +817,7 @@ const styles = StyleSheet.create({
   // Search bar
   searchContainer: {
     position: 'absolute',
-    top: Constants.statusBarHeight + 60,
+    top: Constants.statusBarHeight + 1,
     left: 0,
     right: 0,
     paddingHorizontal: 15,

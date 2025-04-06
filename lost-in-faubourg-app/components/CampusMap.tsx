@@ -18,7 +18,6 @@ interface LocationCoords {
   latitude: number;
   longitude: number;
 }
-
 interface Building {
   id: number;
   name: string;
@@ -38,51 +37,148 @@ const LOYOLA_COORDS: LocationCoords = {
   longitude: -73.6405,
 };
 
-// Utility Functions
-const getPolygonCenter = (boundaries: LocationCoords[]): LocationCoords => {
-  let latSum = 0, lonSum = 0;
-  boundaries.forEach((coord) => {
-    latSum += coord.latitude;
-    lonSum += coord.longitude;
-  });
-  return {
-    latitude: latSum / boundaries.length,
-    longitude: lonSum / boundaries.length,
-  };
-};
-
-const createBuildings = () => {
-  return polygons.map((polygon, index) => ({
-    id: index + 1,
-    name: polygon.name,
-    latitude: getPolygonCenter(polygon.boundaries).latitude,
-    longitude: getPolygonCenter(polygon.boundaries).longitude,
-    address: `${polygon.address} - Concordia University`,
-    description: polygon.description,
-  }));
-};
-
-const requestLocationPermission = async (
-  setLocation: React.Dispatch<
-    React.SetStateAction<Location.LocationObjectCoords | null>
-  >,
-  setRegion: React.Dispatch<React.SetStateAction<Region | null>>,
-) => {
-  let { status } = await Location.requestForegroundPermissionsAsync();
-  if (status !== 'granted') {
-    console.log('Permission to access location was denied');
-    return;
+// ===== Factory Pattern Implementation =====
+export class MapComponentFactory {
+  // Create buildings using factory method
+  static createBuildings(): Building[] {
+    return polygons.map((polygon, index) => ({
+      id: index + 1,
+      name: polygon.name,
+      latitude: this.getPolygonCenter(polygon.boundaries).latitude,
+      longitude: this.getPolygonCenter(polygon.boundaries).longitude,
+      address: `${polygon.address} - Concordia University`,
+      description: polygon.description,
+    }));
   }
 
-  let currentLocation = await Location.getCurrentPositionAsync({});
-  setLocation(currentLocation.coords);
-  setRegion({
-    latitude: currentLocation.coords.latitude,
-    longitude: currentLocation.coords.longitude,
-    latitudeDelta: 0.005,
-    longitudeDelta: 0.005,
-  });
-};
+  // Helper method to calculate polygon center
+  static getPolygonCenter(boundaries: LocationCoords[]): LocationCoords {
+    let latSum = 0, lonSum = 0;
+    boundaries.forEach((coord) => {
+      latSum += coord.latitude;
+      lonSum += coord.longitude;
+    });
+    return {
+      latitude: latSum / boundaries.length,
+      longitude: lonSum / boundaries.length,
+    };
+  }
+
+  // Create campus region based on coordinates
+  static createCampusRegion(campusCoords: LocationCoords): Region {
+    return {
+      latitude: campusCoords.latitude,
+      longitude: campusCoords.longitude,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    };
+  }
+
+  // Create campus-specific configuration
+  static createMapConfiguration(campusName: string) {
+    switch (campusName) {
+      case 'SGW':
+        return {
+          coords: SGW_COORDS,
+          zoomLevel: 0.005,
+          defaultBuildings: this.createBuildings().filter(building => 
+            // Filter logic for SGW buildings
+            building.latitude > 45.49 && building.latitude < 45.50
+          ),
+        };
+      case 'Loyola':
+        return {
+          coords: LOYOLA_COORDS,
+          zoomLevel: 0.005,
+          defaultBuildings: this.createBuildings().filter(building => 
+            // Filter logic for Loyola buildings
+            building.latitude > 45.45 && building.latitude < 45.46
+          ),
+        };
+      default:
+        return {
+          coords: SGW_COORDS,
+          zoomLevel: 0.005,
+          defaultBuildings: this.createBuildings(),
+        };
+    }
+  }
+
+  // Create shuttle markers
+  static createShuttleMarkers(shuttleData: ShuttleData | null, showShuttles: boolean) {
+    if (!showShuttles || !shuttleData) return { buses: [], stations: [] };
+    
+    return {
+      buses: shuttleData.buses,
+      stations: shuttleData.stations
+    };
+  }
+
+  // Create map style based on accessibility settings
+  static createMapStyle(isBlackAndWhite: boolean): MapStyleElement[] {
+    if (isBlackAndWhite) {
+      return [
+        {
+          elementType: 'geometry',
+          stylers: [{ saturation: -100 }],
+        },
+        {
+          elementType: 'labels.text.fill',
+          stylers: [{ saturation: -100 }],
+        },
+        {
+          elementType: 'labels.text.stroke',
+          stylers: [{ saturation: -100 }],
+        },
+      ];
+    }
+    
+    return [
+      {
+        featureType: 'water',
+        elementType: 'geometry',
+        stylers: [{ color: '#e9e9e9' }, { lightness: 17 }],
+      },
+      {
+        featureType: 'landscape',
+        elementType: 'geometry',
+        stylers: [{ color: '#f5f5f5' }, { lightness: 20 }],
+      },
+      {
+        featureType: 'road.highway',
+        elementType: 'geometry.fill',
+        stylers: [{ color: '#ffffff' }, { lightness: 17 }],
+      },
+      {
+        featureType: 'poi',
+        elementType: 'geometry',
+        stylers: [{ color: '#f5f5f5' }, { lightness: 21 }],
+      },
+    ];
+  }
+
+  // Request location permission
+  static async requestLocationPermission(
+    setLocation: React.Dispatch<
+      React.SetStateAction<Location.LocationObjectCoords | null>
+    >,
+    setRegion: React.Dispatch<React.SetStateAction<Region | null>>,
+  ) {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      console.log('Permission to access location was denied');
+      return;
+    }
+    let currentLocation = await Location.getCurrentPositionAsync({});
+    setLocation(currentLocation.coords);
+    setRegion({
+      latitude: currentLocation.coords.latitude,
+      longitude: currentLocation.coords.longitude,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    });
+  }
+}
 
 // Sub-components
 const LoadingView = ({ isLargeText }: { isLargeText: boolean }) => (
@@ -107,7 +203,6 @@ const MapControls = ({
   const busIconColor = isBlackAndWhite 
     ? "#000" 
     : (showShuttles ? "#1E88E5" : "#757575");
-
   return (
     <View style={styles.mapControls}>
       <TouchableOpacity 
@@ -165,7 +260,6 @@ const CampusSelector = ({
         SGW Campus
       </Text>
     </TouchableOpacity>
-
     <TouchableOpacity
       style={[
         styles.campusPill,
@@ -213,7 +307,6 @@ const BuildingInfoCard = ({
     inputRange: [0, 1],
     outputRange: [100, 0],
   });
-
   return (
     <Animated.View 
       style={[
@@ -292,7 +385,6 @@ const BuildingInfoCard = ({
             />
           </View>
         </TouchableOpacity>
-
         {showOpeningHours && (
           <Text style={[styles.hoursText, isLargeText && styles.largeText]}>
             {openingHours}
@@ -305,54 +397,12 @@ const BuildingInfoCard = ({
   );
 };
 
-const createMapStyle = (isBlackAndWhite: boolean): MapStyleElement[] => {
-  if (isBlackAndWhite) {
-    return [
-      {
-        elementType: 'geometry',
-        stylers: [{ saturation: -100 }],
-      },
-      {
-        elementType: 'labels.text.fill',
-        stylers: [{ saturation: -100 }],
-      },
-      {
-        elementType: 'labels.text.stroke',
-        stylers: [{ saturation: -100 }],
-      },
-    ];
-  }
-  
-  return [
-    {
-      featureType: 'water',
-      elementType: 'geometry',
-      stylers: [{ color: '#e9e9e9' }, { lightness: 17 }],
-    },
-    {
-      featureType: 'landscape',
-      elementType: 'geometry',
-      stylers: [{ color: '#f5f5f5' }, { lightness: 20 }],
-    },
-    {
-      featureType: 'road.highway',
-      elementType: 'geometry.fill',
-      stylers: [{ color: '#ffffff' }, { lightness: 17 }],
-    },
-    {
-      featureType: 'poi',
-      elementType: 'geometry',
-      stylers: [{ color: '#f5f5f5' }, { lightness: 21 }],
-    },
-  ];
-};
-
 // Main Component
 const CampusMap: React.FC = () => {
   // Context and Refs
   const { isBlackAndWhite, isLargeText } = React.useContext(AccessibilityContext);
   const mapRef = useRef<MapView>(null);
-
+  
   // State
   const [location, setLocation] = useState<Location.LocationObjectCoords | null>(null);
   const [region, setRegion] = useState<Region | null>(null);
@@ -367,27 +417,24 @@ const CampusMap: React.FC = () => {
   // Animation state
   const [slideAnimation] = useState(new Animated.Value(0));
   const [fadeAnimation] = useState(new Animated.Value(0));
-
-  // Data processing
-  const buildings = createBuildings();
-  const mapStyle = createMapStyle(isBlackAndWhite);
-
+  
+  // Use factory to create buildings and map style
+  const buildings = MapComponentFactory.createBuildings();
+  const mapStyle = MapComponentFactory.createMapStyle(isBlackAndWhite);
+  
   // Callbacks
   const switchToCampus = useCallback((campusCoords: LocationCoords, campusName: string) => {
-    setRegion({
-      latitude: campusCoords.latitude,
-      longitude: campusCoords.longitude,
-      latitudeDelta: 0.005,
-      longitudeDelta: 0.005,
-    });
+    // Use factory to create region
+    const newRegion = MapComponentFactory.createCampusRegion(campusCoords);
+    setRegion(newRegion);
     setSelectedCampus(campusName);
     setSelectedBuilding(null);
   }, []);
-
+  
   const toggleShuttles = useCallback(() => {
     setShowShuttles(!showShuttles);
   }, [showShuttles]);
-
+  
   const recenterMap = useCallback(() => {
     if (location) {
       setRegion({
@@ -398,7 +445,7 @@ const CampusMap: React.FC = () => {
       });
     }
   }, [location]);
-
+  
   const closeInfo = useCallback(() => {
     Animated.timing(fadeAnimation, {
       toValue: 0,
@@ -408,40 +455,36 @@ const CampusMap: React.FC = () => {
       setSelectedBuilding(null);
     });
   }, [fadeAnimation]);
-
+  
   // Effects
   useEffect(() => {
-    requestLocationPermission(setLocation, setRegion);
+    MapComponentFactory.requestLocationPermission(setLocation, setRegion);
   }, []);
-
+  
   useEffect(() => {
     const stopTracking = startShuttleTracking((data) => {
       setShuttleData(data);
     }, 15000);
-
     return () => {
       stopTracking();
     };
   }, []);
-
+  
   useEffect(() => {
     const fetchOpeningHours = async () => {
       if (!selectedBuilding) {
         setOpeningHours('No hours available');
         return;
       }
-
       const hours = await getOpeningHours(
         selectedBuilding.latitude,
         selectedBuilding.longitude,
       );
-
       setOpeningHours(hours || 'No hours available');
     };
-
     fetchOpeningHours();
   }, [selectedBuilding]);
-
+  
   useEffect(() => {
     if (selectedBuilding) {
       // Animate in the info panel
@@ -463,8 +506,11 @@ const CampusMap: React.FC = () => {
       fadeAnimation.setValue(0);
     }
   }, [selectedBuilding, slideAnimation, fadeAnimation]);
-
-  // Render helper components
+  
+  // Get shuttle markers using factory
+  const shuttleMarkers = MapComponentFactory.createShuttleMarkers(shuttleData, showShuttles);
+  
+  // Render helper functions
   const renderBuildingMarkers = () => (
     buildings.map((building) => (
       <Marker
@@ -479,7 +525,7 @@ const CampusMap: React.FC = () => {
       />
     ))
   );
-
+  
   const renderBuildingPolygons = () => (
     polygons.map((polygon, index) => (
       <Polygon
@@ -491,13 +537,13 @@ const CampusMap: React.FC = () => {
       />
     ))
   );
-
+  
   const renderShuttleMarkers = () => {
     if (!showShuttles || !shuttleData) return null;
     
     return (
       <>
-        {shuttleData.buses.map((bus) => (
+        {shuttleMarkers.buses.map((bus) => (
           <Marker
             key={bus.ID}
             coordinate={{
@@ -519,8 +565,7 @@ const CampusMap: React.FC = () => {
             </View>
           </Marker>
         ))}
-
-        {shuttleData.stations.map((station) => (
+        {shuttleMarkers.stations.map((station) => (
           <Marker
             key={station.ID}
             coordinate={{
@@ -547,7 +592,7 @@ const CampusMap: React.FC = () => {
       </>
     );
   };
-
+  
   // Main render
   return (
     <View style={styles.container}>
@@ -574,21 +619,21 @@ const CampusMap: React.FC = () => {
       ) : (
         <LoadingView isLargeText={isLargeText} />
       )}
-
+      
       <MapControls 
         isBlackAndWhite={isBlackAndWhite}
         showShuttles={showShuttles}
         recenterMap={recenterMap}
         toggleShuttles={toggleShuttles}
       />
-
+      
       <CampusSelector 
         selectedCampus={selectedCampus}
         isBlackAndWhite={isBlackAndWhite}
         isLargeText={isLargeText}
         switchToCampus={switchToCampus}
       />
-
+      
       <BuildingInfoCard
         building={selectedBuilding}
         openingHours={openingHours}
@@ -766,19 +811,6 @@ const styles = StyleSheet.create({
     right: 16,
     zIndex: 10,
   },
-  customMarker: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
-  },
   customIconMarker: {
     width: 30,
     height: 30,
@@ -792,14 +824,6 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderWidth: 2,
     borderColor: 'white',
-  },
-  markerInner: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-  },
-  markerColor: {
-    backgroundColor: '#912338',
   },
   markerBW: {
     backgroundColor: '#000000',
