@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
 
 process.env.EXPO_OS = 'ios';
 
-// Override console.warn to ignore "No Place ID found" warnings.
 const originalConsoleWarn = console.warn;
 console.warn = (message, ...args) => {
   if (typeof message === 'string' && message.includes('No Place ID found')) {
@@ -17,7 +16,6 @@ console.warn = (message, ...args) => {
   originalConsoleWarn(message, ...args);
 };
 
-// --- Mocks ---
 jest.mock('react-native-maps', () => {
   const { View } = require('react-native');
   const PropTypes = require('prop-types');
@@ -101,7 +99,6 @@ jest.mock('@expo/vector-icons', () => {
   };
 });
 
-// --- Helper functions ---
 const setLocationMock = (
   coords = { latitude: 45.4953534, longitude: -73.578549 },
   status = 'granted',
@@ -112,7 +109,6 @@ const setLocationMock = (
 
 const renderCampusMap = () => render(<CampusMap />);
 
-// --- Tests ---
 describe('CampusMap', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -185,18 +181,14 @@ describe('CampusMap', () => {
       setLocationMock();
       const { getByTestId, getAllByText } = renderCampusMap();
 
-      await waitFor(() => {
-        expect(getAllByText('Loading Map...')).toBeTruthy();
-      });
+      await waitFor(() => expect(getAllByText('Loading Map...')).toBeTruthy());
 
-      await waitFor(() => {
-        const mapView = getByTestId('mapView');
-        expect(mapView.props.region).toEqual({
-          latitude: 45.4953534,
-          longitude: -73.578549,
-          latitudeDelta: expect.any(Number),
-          longitudeDelta: expect.any(Number),
-        });
+      const mapView = await waitFor(() => getByTestId('mapView'));
+      expect(mapView.props.region).toEqual({
+        latitude: 45.4953534,
+        longitude: -73.578549,
+        latitudeDelta: expect.any(Number),
+        longitudeDelta: expect.any(Number),
       });
 
       fireEvent.press(getByTestId(`marker-${index + 1}`));
@@ -204,32 +196,30 @@ describe('CampusMap', () => {
       await waitFor(() => {
         const nameElements = getAllByText(polygon.name);
         expect(nameElements.length).toBeGreaterThan(0);
-        const addressElements = getAllByText(
-          `${polygon.address} - Concordia University`,
-        );
-        expect(addressElements.length).toBeGreaterThan(0);
       });
+      const addressElements = getAllByText(
+        `${polygon.address} - Concordia University`,
+      );
+      expect(addressElements.length).toBeGreaterThan(0);
     },
   );
 
   test('renders polygons correctly', async () => {
     setLocationMock();
     const { getByTestId } = renderCampusMap();
-
-    await waitFor(() => {
-      const mapView = getByTestId('mapView');
-      const flatChildren = mapView.props.children.flat();
-      polygons.forEach((polygon) => {
-        const polygonComponent = flatChildren.find(
-          (child) =>
-            child.key === polygon.name && child.type.name === 'MockPolygon',
-        );
-        expect(polygonComponent).toBeTruthy();
-        expect(polygonComponent.props.coordinates).toEqual(polygon.boundaries);
-        expect(polygonComponent.props.fillColor).toBe('#91233833');
-        expect(polygonComponent.props.strokeColor).toBe('#912338');
-        expect(polygonComponent.props.strokeWidth).toBe(2);
-      });
+    await waitFor(() => getByTestId('mapView'));
+    const mapView = getByTestId('mapView');
+    const flatChildren = mapView.props.children.flat();
+    polygons.forEach((polygon) => {
+      const polygonComponent = flatChildren.find(
+        (child) =>
+          child.key === polygon.name && child.type.name === 'MockPolygon',
+      );
+      expect(polygonComponent).toBeTruthy();
+      expect(polygonComponent.props.coordinates).toEqual(polygon.boundaries);
+      expect(polygonComponent.props.fillColor).toBe('#91233833');
+      expect(polygonComponent.props.strokeColor).toBe('#912338');
+      expect(polygonComponent.props.strokeWidth).toBe(2);
     });
   });
 
@@ -253,9 +243,7 @@ describe('CampusMap additional tests', () => {
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     setLocationMock({ latitude: 0, longitude: 0 }, 'denied');
     const { getByText } = renderCampusMap();
-    await waitFor(() => {
-      expect(getByText('Loading Map...')).toBeTruthy();
-    });
+    await waitFor(() => expect(getByText('Loading Map...')).toBeTruthy());
     expect(consoleSpy).toHaveBeenCalledWith(
       'Permission to access location was denied',
     );
@@ -325,7 +313,6 @@ describe('CampusMap accessibility customization', () => {
 
     await waitFor(() => {
       const mapView = getByTestId('mapView');
-      // Use fillColor prop directly to filter polygon components
       const flatChildren = React.Children.toArray(
         mapView.props.children,
       ).flat();
@@ -364,21 +351,14 @@ describe('Toggle buttons functionality', () => {
     const { getByTestId, queryByTestId } = renderCampusMap();
 
     await waitFor(() => expect(getByTestId('marker-BUS1')).toBeTruthy());
-
     const toggleBtn = await waitFor(() => getByTestId('shuttlesBtn'));
     expect(toggleBtn).toBeTruthy();
 
     fireEvent.press(toggleBtn);
-
-    await waitFor(() => {
-      expect(queryByTestId('marker-BUS1')).toBeNull();
-    });
+    await waitFor(() => expect(queryByTestId('marker-BUS1')).toBeNull());
 
     fireEvent.press(getByTestId('shuttlesBtn'));
-
-    await waitFor(() => {
-      expect(getByTestId('marker-BUS1')).toBeTruthy();
-    });
+    await waitFor(() => expect(getByTestId('marker-BUS1')).toBeTruthy());
   });
 });
 
