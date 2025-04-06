@@ -104,9 +104,17 @@ const MapControls = ({
   recenterMap: () => void, 
   toggleShuttles: () => void 
 }) => {
-  const busIconColor = isBlackAndWhite 
-    ? "#000" 
-    : (showShuttles ? "#1E88E5" : "#757575");
+  // Extract nested ternary into an independent statement
+  let busIconColor: string;
+  if (isBlackAndWhite) {
+    busIconColor = "#000";
+  } else {
+    if (showShuttles) {
+      busIconColor = "#1E88E5";
+    } else {
+      busIconColor = "#757575";
+    }
+  }
 
   return (
     <View style={styles.mapControls}>
@@ -480,9 +488,9 @@ const CampusMap: React.FC = () => {
   );
 
   const renderBuildingPolygons = () => (
-    polygons.map((polygon, index) => (
+    polygons.map((polygon) => (
       <Polygon
-        key={index}
+        key={polygon.name}
         coordinates={polygon.boundaries}
         fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
         strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
@@ -526,9 +534,7 @@ const CampusMap: React.FC = () => {
               latitude: station.Latitude,
               longitude: station.Longitude,
             }}
-            title={
-              station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'
-            }
+            title={station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'}
             testID={`marker-${station.ID}`}
           >
             <View style={[

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, Switch, StyleSheet, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Make sure to install expo/vector-icons
 
@@ -14,13 +14,15 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
     const [isBlackAndWhite, setIsBlackAndWhite] = useState(false);
     const [isLargeText, setIsLargeText] = useState(false);
 
+    const contextValue = useMemo(() => ({
+        isBlackAndWhite,
+        isLargeText,
+        setIsBlackAndWhite,
+        setIsLargeText,
+    }), [isBlackAndWhite, isLargeText]);
+
     return (
-        <AccessibilityContext.Provider value={{
-            isBlackAndWhite,
-            isLargeText,
-            setIsBlackAndWhite,
-            setIsLargeText,
-        }}>
+        <AccessibilityContext.Provider value={contextValue}>
             {children}
         </AccessibilityContext.Provider>
     );

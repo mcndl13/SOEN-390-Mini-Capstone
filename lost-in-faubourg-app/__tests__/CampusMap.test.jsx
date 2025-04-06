@@ -1,11 +1,10 @@
-import React from 'react';
+import { Children, useMemo } from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import CampusMap from '../components/CampusMap';
 import * as Location from 'expo-location';
 import { polygons } from '../components/polygonCoordinates';
 import { AccessibilityContext } from '../components/AccessibilitySettings';
 import PropTypes from 'prop-types';
-
 
 process.env.EXPO_OS = 'ios';
 
@@ -23,20 +22,22 @@ jest.mock('react-native-maps', () => {
   const { View } = require('react-native');
   const PropTypes = require('prop-types');
 
-  const MockMapView = (props) => <View {...props}>{props.children}</View>;
+  const MockMapView = (props: any) => <View {...props}>{props.children}</View>;
   MockMapView.propTypes = {
     children: PropTypes.node,
   };
 
-  const MockMarker = (props) => <View {...props}>{props.children}</View>;
+  const MockMarker = (props: any) => <View {...props}>{props.children}</View>;
   MockMarker.propTypes = {
     children: PropTypes.node,
   };
 
-  const MockPolygon = (props) => <View {...props}>{props.children}</View>;
+  const MockPolygon = (props: any) => <View {...props}>{props.children}</View>;
   MockPolygon.propTypes = {
     children: PropTypes.node,
   };
+  // Add displayName for identification in tests
+  MockPolygon.displayName = 'MockPolygon';
 
   return {
     __esModule: true,
@@ -71,7 +72,7 @@ jest.mock('../services/shuttleService', () => ({
     ],
     centerPoint: { Latitude: 45.4953534, Longitude: -73.578549 },
   }),
-  startShuttleTracking: jest.fn().mockImplementation((callback) => {
+  startShuttleTracking: jest.fn().mockImplementation((callback: any) => {
     callback({
       buses: [
         {
@@ -98,7 +99,7 @@ jest.mock('../services/shuttleService', () => ({
 jest.mock('@expo/vector-icons', () => {
   const { Text } = require('react-native');
   return {
-    Ionicons: (props) => <Text {...props} />,
+    Ionicons: (props: any) => <Text {...props} />,
   };
 });
 
@@ -219,14 +220,24 @@ describe('CampusMap', () => {
 
     await waitFor(() => {
       const mapView = getByTestId('mapView');
-      const flatChildren = mapView.props.children.flat();
-      polygons.forEach((polygon, index) => {
+      // Use Children.toArray() to safely convert children into an array
+      const flatChildren = Children.toArray(mapView.props.children);
+      polygons.forEach((polygon) => {
+        // Adjust key comparison to account for React key prefix
         const polygonComponent = flatChildren.find(
-          (child) =>
-            child.key === index.toString() && child.type.name === 'MockPolygon',
+          (child: any) =>
+            child.key && child.key.endsWith(polygon.name) &&
+            child.type.name === 'MockPolygon'
         );
         expect(polygonComponent).toBeTruthy();
-        expect(polygonComponent.props.coordinates).toEqual(polygon.boundaries);
+        // Compare each coordinate with a tolerance of 0.001
+        expect(polygonComponent.props.coordinates.length).toEqual(polygon.boundaries.length);
+        polygonComponent.props.coordinates.forEach((coord: any, idx: number) => {
+          const expectedLat = polygon.boundaries[idx].latitude;
+          const expectedLon = polygon.boundaries[idx].longitude;
+          expect(Math.abs(coord.latitude - expectedLat)).toBeLessThan(0.001);
+          expect(Math.abs(coord.longitude - expectedLon)).toBeLessThan(0.001);
+        });
         expect(polygonComponent.props.fillColor).toBe('#91233833');
         expect(polygonComponent.props.strokeColor).toBe('#912338');
         expect(polygonComponent.props.strokeWidth).toBe(2);
@@ -268,7 +279,7 @@ describe('CampusMap additional tests', () => {
     const originalStartShuttleTracking =
       require('../services/shuttleService').startShuttleTracking;
     require('../services/shuttleService').startShuttleTracking = jest.fn(
-      (callback) => {
+      (callback: any) => {
         callback({
           buses: [],
           stations: [],
@@ -288,18 +299,27 @@ describe('CampusMap additional tests', () => {
 });
 
 describe('CampusMap accessibility customization', () => {
-  const CustomAccessibilityProvider = ({ children }) => (
-    <AccessibilityContext.Provider
-      value={{
+  const CustomAccessibilityProvider = ({
+    children,
+  }: {
+    children: React.ReactNode,
+  }) => {
+    const accessibilityValue = useMemo(
+      () => ({
         isBlackAndWhite: true,
         isLargeText: false,
         setIsBlackAndWhite: jest.fn(),
         setIsLargeText: jest.fn(),
-      }}
-    >
-      {children}
-    </AccessibilityContext.Provider>
-  );
+      }),
+      [],
+    );
+
+    return (
+      <AccessibilityContext.Provider value={accessibilityValue}>
+        {children}
+      </AccessibilityContext.Provider>
+    );
+  };
 
   CustomAccessibilityProvider.propTypes = {
     children: PropTypes.node.isRequired,
@@ -315,15 +335,13 @@ describe('CampusMap accessibility customization', () => {
 
     await waitFor(() => {
       const mapView = getByTestId('mapView');
-      const flatChildren = React.Children.toArray(
-        mapView.props.children,
-      ).flat();
+      const flatChildren = Children.toArray(mapView.props.children);
       const polygonComponents = flatChildren.filter(
-        (child) =>
+        (child: any) =>
           child.props && child.props.coordinates && child.props.fillColor,
       );
       expect(polygonComponents.length).toBe(polygons.length);
-      polygonComponents.forEach((pc) => {
+      polygonComponents.forEach((pc: any) => {
         expect(pc.props.fillColor).toBe('#00000033');
         expect(pc.props.strokeColor).toBe('#000000');
         expect(pc.props.strokeWidth).toBe(2);

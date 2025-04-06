@@ -357,8 +357,7 @@ export default function DirectionsScreen() {
     longitude: number;
     latitudeDelta: number;
     longitudeDelta: number;
-  }) => {
-  };
+  }) => {};
 
   const checkUserInBuilding = () => {
     if (!userLocation) return null;
@@ -415,7 +414,6 @@ export default function DirectionsScreen() {
     return isUserInBuilding(point) || point;
   };
 
-  // Replace the original formatLocationName with an updated version that accepts currentUserLocation.
   const formatLocationName = (
     location: { latitude: number; longitude: number; name?: string },
     currentUserLocation?: { latitude: number; longitude: number },
@@ -675,6 +673,99 @@ export default function DirectionsScreen() {
     return icons[mode] || 'navigate-outline';
   };
 
+  // --- Extract nested ternaries into independent constants ---
+
+  // For travel mode buttons in Quick Actions
+  // (L853) Extract nested ternary from Ionicons color:
+  // travelMode === mode ? 'white' : isBlackAndWhite ? 'black' : '#912338'
+  // This will be computed inside the map callback for each mode.
+
+  // For Route Tabs:
+  // (L983) Shuttle Tab Icon Color:
+  const shuttleTabIconColor =
+    activeRouteTab === 'shuttle'
+      ? (isBlackAndWhite ? '#000' : '#912338')
+      : '#666';
+
+  // (L1183) Standard Tab Icon Color:
+  const standardTabIconColor =
+    activeRouteTab === 'standard'
+      ? (isBlackAndWhite ? '#000' : '#912338')
+      : '#666';
+
+  // For Expand/Collapse button:
+  // (L1150) Extract nested ternaries for icon name and text.
+  const expandIconName = expandedDirections ? 'chevron-down' : 'chevron-up';
+  const expandButtonText = expandedDirections ? 'Collapse' : 'Expand';
+
+  // --- End of nested ternary extractions ---
+
+  // Render helper components
+  const renderBuildingMarkers = () => (
+    // Use polygon.name as a unique key (instead of array index)
+    polygons.map((polygon) => (
+      <Polygon
+        key={polygon.name}
+        coordinates={polygon.boundaries}
+        fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
+        strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
+        strokeWidth={2}
+      />
+    ))
+  );
+
+  const renderShuttleMarkers = () => {
+    if (!showShuttles || !shuttleData) return null;
+    
+    return (
+      <>
+        {shuttleData.buses.map((bus) => (
+          <Marker
+            key={bus.ID}
+            coordinate={{
+              latitude: bus.Latitude,
+              longitude: bus.Longitude,
+            }}
+            title={`Shuttle ${bus.ID}`}
+            testID={`marker-${bus.ID}`}
+            tracksViewChanges={false}
+          >
+            <View
+              style={[
+                styles.customIconMarker,
+                isBlackAndWhite ? styles.markerBW : styles.shuttleMarker,
+              ]}
+            >
+              <Ionicons name="bus" size={20} color="white" />
+            </View>
+          </Marker>
+        ))}
+
+        {shuttleData.stations.map((station) => (
+          <Marker
+            key={station.ID}
+            coordinate={{
+              latitude: station.Latitude,
+              longitude: station.Longitude,
+            }}
+            title={station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'}
+            testID={`marker-${station.ID}`}
+            tracksViewChanges={false}
+          >
+            <View
+              style={[
+                styles.customIconMarker,
+                isBlackAndWhite ? styles.markerBW : styles.stationMarker,
+              ]}
+            >
+              <Ionicons name="bus-outline" size={20} color="white" />
+            </View>
+          </Marker>
+        ))}
+      </>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -716,15 +807,7 @@ export default function DirectionsScreen() {
         showsCompass={true}
         showsScale={true}
       >
-        {polygons.map((polygon, idx) => (
-          <Polygon
-            key={idx}
-            coordinates={polygon.boundaries}
-            fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
-            strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
-            strokeWidth={2}
-          />
-        ))}
+        {renderBuildingMarkers()}
 
         {origin && (
           <Marker
@@ -961,38 +1044,41 @@ export default function DirectionsScreen() {
               Travel Mode
             </Text>
             <View style={styles.modeContainer}>
-              {['DRIVING', 'TRANSIT', 'WALKING', 'BICYCLING'].map((mode) => (
-                <TouchableOpacity
-                  key={mode}
-                  style={[
-                    styles.modeButton,
-                    travelMode === mode && styles.activeModeButton,
-                  ]}
-                  onPress={() => setTravelMode(mode as MapViewDirectionsMode)}
-                  testID={`${mode}`}
-                >
-                  <Ionicons
-                    name={getModeIcon(mode as MapViewDirectionsMode)}
-                    size={22}
-                    color={
-                      travelMode === mode
-                        ? 'white'
-                        : isBlackAndWhite
-                        ? 'black'
-                        : '#912338'
-                    }
-                  />
-                  <Text
-                    style={
-                      travelMode === mode
-                        ? styles.activeModeButtonText
-                        : styles.modeButtonText
-                    }
+              {['DRIVING', 'TRANSIT', 'WALKING', 'BICYCLING'].map((mode) => {
+                // (L853) Extract nested ternary for travel mode button icon color
+                const modeIconColor =
+                  travelMode === mode
+                    ? 'white'
+                    : isBlackAndWhite
+                    ? 'black'
+                    : '#912338';
+                return (
+                  <TouchableOpacity
+                    key={mode}
+                    style={[
+                      styles.modeButton,
+                      travelMode === mode && styles.activeModeButton,
+                    ]}
+                    onPress={() => setTravelMode(mode as MapViewDirectionsMode)}
+                    testID={`${mode}`}
                   >
-                    {mode.charAt(0) + mode.slice(1).toLowerCase()}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                    <Ionicons
+                      name={getModeIcon(mode as MapViewDirectionsMode)}
+                      size={22}
+                      color={modeIconColor}
+                    />
+                    <Text
+                      style={
+                        travelMode === mode
+                          ? styles.activeModeButtonText
+                          : styles.modeButtonText
+                      }
+                    >
+                      {mode.charAt(0) + mode.slice(1).toLowerCase()}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
 
@@ -1072,12 +1158,13 @@ export default function DirectionsScreen() {
               testID="expandCollapseBtn"
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {/* (L1150) Use extracted constants for expand icon and text */}
                 <Ionicons
-                  name={expandedDirections ? 'chevron-down' : 'chevron-up'}
+                  name={expandIconName}
                   size={22}
                   color={isBlackAndWhite ? '#000' : '#666'}
                 />
-                <Text>{expandedDirections ? 'Collapse' : 'Expand'}</Text>
+                <Text>{expandButtonText}</Text>
               </View>
             </TouchableOpacity>
           </View>
@@ -1141,21 +1228,13 @@ export default function DirectionsScreen() {
                 ]}
                 onPress={() => setActiveRouteTab('standard')}
               >
-               {(() => {
-                  // Extract the nested ternary into a constant using an IIFE
-                  const routeTabIconColor = activeRouteTab === 'standard'
-                    ? (isBlackAndWhite ? '#000' : '#912338')
-                    : '#666';
-                    
-                  return (
-                    <Ionicons
-                      name={getModeIcon(travelMode)}
-                      size={18}
-                      color={routeTabIconColor}
-                      style={styles.routeTabIcon}
-                    />
-                  );
-                })()}
+                {/* (L1183) Use extracted constant for standard tab icon color */}
+                <Ionicons
+                  name={getModeIcon(travelMode)}
+                  size={18}
+                  color={standardTabIconColor}
+                  style={styles.routeTabIcon}
+                />
                 <Text
                   style={[
                     styles.routeTabText,
@@ -1175,20 +1254,13 @@ export default function DirectionsScreen() {
                   ]}
                   onPress={() => setActiveRouteTab('shuttle')}
                 >
-                  {(() => {
-                    const shuttleTabIconColor = activeRouteTab === 'shuttle'
-                      ? (isBlackAndWhite ? '#000' : '#912338')
-                      : '#666';
-                      
-                    return (
-                      <Ionicons
-                        name="bus"
-                        size={18}
-                        color={shuttleTabIconColor}
-                        style={styles.routeTabIcon}
-                      />
-                    );
-                  })()}
+                  {/* (L983) Use extracted constant for shuttle tab icon color */}
+                  <Ionicons
+                    name="bus"
+                    size={18}
+                    color={shuttleTabIconColor}
+                    style={styles.routeTabIcon}
+                  />
                   <Text
                     style={[
                       styles.routeTabText,
@@ -2016,3 +2088,5 @@ const styles = StyleSheet.create({
     borderColor: '#000000',
   },
 });
+
+export default DirectionsScreen;

@@ -74,12 +74,12 @@ const QUICK_SEARCH_OPTIONS: QuickSearchOption[] = [
 
 // POI type mapping for icons
 const POI_TYPE_ICONS: Record<string, string> = {
-  'library': 'book',
-  'restaurant': 'restaurant',
-  'cafe': 'cafe',
-  'gym': 'fitness',
-  'bookstore': 'book-outline',
-  'default': 'location'
+  library: 'book',
+  restaurant: 'restaurant',
+  cafe: 'cafe',
+  gym: 'fitness',
+  bookstore: 'book-outline',
+  default: 'location'
 };
 
 // Helper Components
@@ -151,47 +151,46 @@ const MapControls = ({ onLocate, isBlackAndWhite }) => (
   </View>
 );
 
-const QuickSearchButtons = ({ options, searchQuery, handleQuickSearch, isLoading, isLargeText, isBlackAndWhite }) => (
-  <View style={styles.quickSearchContainer}>
-    {options.map((option) => (
-      <TouchableOpacity
-        key={option.id}
-        style={[
-          styles.quickSearchButton,
-          searchQuery === option.id && (isBlackAndWhite ? styles.selectedPillBW : styles.selectedPill)
-        ]}
-        onPress={() => handleQuickSearch(option.id)}
-        disabled={isLoading}
-      >
-        {(() => {
-          // Extract the nested ternary into a constant
-          const iconColor = searchQuery === option.id 
-            ? "white" 
-            : (isBlackAndWhite ? "#000" : "#333");
-            
-          return (
-            <Ionicons 
-              name={option.icon} 
-              size={18} 
-              color={iconColor} 
-              style={styles.quickSearchIcon} 
-            />
-          );
-        })()}
-        <Text 
+const QuickSearchButtons = ({ options, searchQuery, handleQuickSearch, isLoading, isLargeText, isBlackAndWhite }) => {
+  // Extract nested ternary into an independent helper function
+  const getIconColor = (optionId: string): string => {
+    if (searchQuery === optionId) return "white";
+    return isBlackAndWhite ? "#000" : "#333";
+  };
+
+  return (
+    <View style={styles.quickSearchContainer}>
+      {options.map((option) => (
+        <TouchableOpacity
+          key={option.id}
           style={[
-            styles.quickSearchText, 
-            isLargeText && { fontSize: 16 },
-            searchQuery === option.id && styles.selectedPillText
+            styles.quickSearchButton,
+            searchQuery === option.id && (isBlackAndWhite ? styles.selectedPillBW : styles.selectedPill)
           ]}
-          testID='quickSearchText'
+          onPress={() => handleQuickSearch(option.id)}
+          disabled={isLoading}
         >
-          {option.name}
-        </Text>
-      </TouchableOpacity>
-    ))}
-  </View>
-);
+          <Ionicons 
+            name={option.icon} 
+            size={18} 
+            color={getIconColor(option.id)} 
+            style={styles.quickSearchIcon} 
+          />
+          <Text 
+            style={[
+              styles.quickSearchText, 
+              isLargeText && { fontSize: 16 },
+              searchQuery === option.id && styles.selectedPillText
+            ]}
+            testID='quickSearchText'
+          >
+            {option.name}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+};
 
 const POIInfoCard = ({ 
   selectedPOI, 
@@ -314,40 +313,40 @@ const createMapStyle = (isBlackAndWhite: boolean): MapStyleElement[] => {
   if (isBlackAndWhite) {
     return [
       {
-        "elementType": "geometry",
-        "stylers": [{ "saturation": -100 }]
+        elementType: "geometry",
+        stylers: [{ saturation: -100 }]
       },
       {
-        "elementType": "labels.text.fill",
-        "stylers": [{ "saturation": -100 }]
+        elementType: "labels.text.fill",
+        stylers: [{ saturation: -100 }]
       },
       {
-        "elementType": "labels.text.stroke",
-        "stylers": [{ "saturation": -100 }]
+        elementType: "labels.text.stroke",
+        stylers: [{ saturation: -100 }]
       }
     ];
   }
   
   return [
     {
-      "featureType": "water",
-      "elementType": "geometry",
-      "stylers": [{ "color": "#e9e9e9" }, { "lightness": 17 }]
+      featureType: "water",
+      elementType: "geometry",
+      stylers: [{ color: "#e9e9e9" }, { lightness: 17 }]
     },
     {
-      "featureType": "landscape",
-      "elementType": "geometry",
-      "stylers": [{ "color": "#f5f5f5" }, { "lightness": 20 }]
+      featureType: "landscape",
+      elementType: "geometry",
+      stylers: [{ color: "#f5f5f5" }, { lightness: 20 }]
     },
     {
-      "featureType": "road.highway",
-      "elementType": "geometry.fill",
-      "stylers": [{ "color": "#ffffff" }, { "lightness": 17 }]
+      featureType: "road.highway",
+      elementType: "geometry.fill",
+      stylers: [{ color: "#ffffff" }, { lightness: 17 }]
     },
     {
-      "featureType": "poi",
-      "elementType": "geometry",
-      "stylers": [{ "color": "#f5f5f5" }, { "lightness": 21 }]
+      featureType: "poi",
+      elementType: "geometry",
+      stylers: [{ color: "#f5f5f5" }, { lightness: 21 }]
     }
   ];
 };
@@ -641,11 +640,11 @@ export default function POIScreen() {
     ));
   };
 
-  // Render building polygons
+  // Render building polygons – use polygon.name as key instead of array index
   const renderBuildingPolygons = () => {
-    return polygons.map((polygon, idx) => (
+    return polygons.map((polygon) => (
       <Polygon
-        key={idx}
+        key={polygon.name}
         coordinates={polygon.boundaries}
         fillColor={isBlackAndWhite ? "#00000033" : "#91233833"}
         strokeColor={isBlackAndWhite ? "#000000" : "#912338"}
@@ -771,7 +770,7 @@ const styles = StyleSheet.create({
   // Search bar
   searchContainer: {
     position: 'absolute',
-    top: Constants.statusBarHeight + 60,
+    top: Constants.statusBarHeight + 1,
     left: 0,
     right: 0,
     paddingHorizontal: 15,
@@ -807,7 +806,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: Constants.statusBarHeight + 70,
     right: 16,
-    zIndex: 1,
+    elevation: 10,
   },
   mapControlButton: {
     backgroundColor: 'white',
@@ -999,3 +998,5 @@ const styles = StyleSheet.create({
     height: 20,
   },
 });
+
+export default POIScreen;

@@ -24,17 +24,17 @@ export default function CalendarIntegrationScreen() {
   // Generate URI for redirect
   const redirectUri = makeRedirectUri();
 
-  // Google Sign-In request
-  const [request, response, promptAsync] = Google.useAuthRequest({
+  // Google Sign-In request (ignoring the unused first element)
+  const [, response, promptAsync] = Google.useAuthRequest({
     androidClientId: "876949776030-i8f75o4us24vdeavtfv4q4rnjfpfg00b.apps.googleusercontent.com",
     webClientId: "876949776030-i8f75o4us24vdeavtfv4q4rnjfpfg00b.apps.googleusercontent.com",
-    iosClientId : "876949776030-uot2pvtbrfq8ushvtgn1rp54f70i9b2h.apps.googleusercontent.com",
+    iosClientId: "876949776030-uot2pvtbrfq8ushvtgn1rp54f70i9b2h.apps.googleusercontent.com",
     scopes: [
       "email",
       "profile",
-      "https://www.googleapis.com/auth/calendar.readonly", 
+      "https://www.googleapis.com/auth/calendar.readonly",
       "https://www.googleapis.com/auth/calendar.events",
-      "https://www.googleapis.com/auth/calendar"
+      "https://www.googleapis.com/auth/calendar",
     ],
     redirectUri,
   });
@@ -103,7 +103,7 @@ export default function CalendarIntegrationScreen() {
       try {
         // Geocode the event's location to get destination coordinates
         const destination = await geocodeAddress(nextEvent.location);
-        
+
         // Request location permission and get the current location for the origin
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== "granted") {
@@ -133,10 +133,7 @@ export default function CalendarIntegrationScreen() {
       {userInfo ? (
         <Text style={styles.welcomeText}>Welcome, {userInfo.name}!</Text>
       ) : (
-        <TouchableOpacity
-          style={styles.googleButton}
-          onPress={() => promptAsync()}
-        >
+        <TouchableOpacity style={styles.googleButton} onPress={() => promptAsync()}>
           <Text style={styles.buttonText}>Sign in with Google</Text>
         </TouchableOpacity>
       )}
@@ -145,7 +142,7 @@ export default function CalendarIntegrationScreen() {
       {events.length > 0 ? (
         <>
           {events.map((event, index) => (
-            <View key={index} style={styles.eventContainer}>
+            <View key={`${event.start}-${event.summary}`} style={styles.eventContainer}>
               <Text style={styles.eventTitle}>{event.summary}</Text>
               <Text style={styles.eventDetails}>{`Start: ${event.start}`}</Text>
               <Text style={styles.eventDetails}>{`Location: ${event.location ?? "N/A"}`}</Text>
