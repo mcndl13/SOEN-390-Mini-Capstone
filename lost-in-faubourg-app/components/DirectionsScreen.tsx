@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useContext } from 'react';
 import {
   StyleSheet,
   View,
@@ -34,36 +34,198 @@ import { polygons } from '../components/polygonCoordinates';
 import { startShuttleTracking, ShuttleData } from '../services/shuttleService';
 import { isUserInBuilding } from '../utils/geometry';
 
+// -- Constants and Dimensions --
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
 const LATITUDE_DELTA = 0.02;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
-
-// Default map region near SGW
 const INITIAL_POSITION = {
   latitude: 45.4953534,
   longitude: -73.578549,
   latitudeDelta: LATITUDE_DELTA,
   longitudeDelta: LONGITUDE_DELTA,
 };
-
-type DirectionsParams = {
-  origin?: {
-    latitude: number;
-    longitude: number;
-  };
-  destination?: {
-    latitude: number;
-    longitude: number;
-  };
-  travelMode?: MapViewDirectionsMode;
-};
-
-// Coordinates for the two campuses
 const SGW_COORDS = { latitude: 45.4953534, longitude: -73.578549 };
 const LOYOLA_COORDS = { latitude: 45.4582, longitude: -73.6405 };
+const EDGE_PADDING_VALUE = 70;
+const EDGE_PADDING = {
+  top: EDGE_PADDING_VALUE,
+  right: EDGE_PADDING_VALUE,
+  bottom: EDGE_PADDING_VALUE,
+  left: EDGE_PADDING_VALUE,
+};
 
-// Reusable Input Autocomplete component
+// -- Helper Functions --
+function getMapStyle(isBlackAndWhite: boolean): MapStyleElement[] {
+  return isBlackAndWhite
+    ? [
+        { elementType: 'geometry', stylers: [{ saturation: -100 }] },
+        { elementType: 'labels.text.fill', stylers: [{ saturation: -100 }] },
+        { elementType: 'labels.text.stroke', stylers: [{ saturation: -100 }] },
+      ]
+    : [
+        {
+          featureType: 'water',
+          elementType: 'geometry',
+          stylers: [{ color: '#e9e9e9' }, { lightness: 17 }],
+        },
+        {
+          featureType: 'landscape',
+          elementType: 'geometry',
+          stylers: [{ color: '#f5f5f5' }, { lightness: 20 }],
+        },
+        {
+          featureType: 'road.highway',
+          elementType: 'geometry.fill',
+          stylers: [{ color: '#ffffff' }, { lightness: 17 }],
+        },
+        {
+          featureType: 'poi',
+          elementType: 'geometry',
+          stylers: [{ color: '#f5f5f5' }, { lightness: 21 }],
+        },
+      ];
+}
+
+function getExpandButtonProps(expanded: boolean) {
+  return {
+    icon: expanded ? 'chevron-down' : 'chevron-up',
+    text: expanded ? 'Collapse' : 'Expand',
+  };
+}
+
+function deg2rad(deg: number): number {
+  return deg * (Math.PI / 180);
+}
+
+function distanceBetween(
+  point1: { latitude: number; longitude: number },
+  point2: { latitude: number; longitude: number },
+): number {
+  if (!point1 || !point2) return 9999;
+  const R = 6371;
+  const dLat = deg2rad(point2.latitude - point1.latitude);
+  const dLon = deg2rad(point2.longitude - point1.longitude);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(deg2rad(point1.latitude)) *
+      Math.cos(deg2rad(point2.latitude)) *
+      Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function snapToNearestBuilding(point: { latitude: number; longitude: number }) {
+  return isUserInBuilding(point) || point;
+}
+
+function formatLocationName(
+  location: { latitude: number; longitude: number; name?: string },
+  currentUserLocation?: { latitude: number; longitude: number },
+): string {
+  if (location.name) return location.name;
+  if (
+    Math.abs(location.latitude - SGW_COORDS.latitude) < 0.001 &&
+    Math.abs(location.longitude - SGW_COORDS.longitude) < 0.001
+  ) {
+    return 'SGW Campus';
+  }
+  if (
+    Math.abs(location.latitude - LOYOLA_COORDS.latitude) < 0.001 &&
+    Math.abs(location.longitude - LOYOLA_COORDS.longitude) < 0.001
+  ) {
+    return 'Loyola Campus';
+  }
+  if (
+    currentUserLocation &&
+    Math.abs(location.latitude - currentUserLocation.latitude) < 0.0001 &&
+    Math.abs(location.longitude - currentUserLocation.longitude) < 0.0001
+  ) {
+    return 'My Current Location';
+  }
+  return `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
+}
+
+export function stripHtml(input: string): string {
+  return input.replace(/<[^>]*>?/gm, '');
+}
+
+function isShuttleRouteApplicable(
+  origin: { latitude: number; longitude: number } | null,
+  destination: { latitude: number; longitude: number } | null,
+): boolean {
+  if (!origin || !destination) return false;
+  const finalOrigin = snapToNearestBuilding(origin);
+  const finalDestination = snapToNearestBuilding(destination);
+  const isOriginNearSGW = distanceBetween(finalOrigin, SGW_COORDS) < 0.5;
+  const isOriginNearLoyola = distanceBetween(finalOrigin, LOYOLA_COORDS) < 0.5;
+  const isDestNearSGW = distanceBetween(finalDestination, SGW_COORDS) < 0.5;
+  const isDestNearLoyola =
+    distanceBetween(finalDestination, LOYOLA_COORDS) < 0.5;
+  return (
+    (isOriginNearSGW && isDestNearLoyola) ||
+    (isOriginNearLoyola && isDestNearSGW)
+  );
+}
+
+function getModeIcon(mode: MapViewDirectionsMode): string {
+  const icons: Record<MapViewDirectionsMode, string> = {
+    DRIVING: 'car-outline',
+    WALKING: 'walk-outline',
+    BICYCLING: 'bicycle-outline',
+    TRANSIT: 'bus-outline',
+  };
+  return icons[mode] || 'navigate-outline';
+}
+
+// -- Custom Hooks --
+
+function useInitializeLocation(
+  setUserLocation: React.Dispatch<
+    React.SetStateAction<{ latitude: number; longitude: number } | null>
+  >,
+) {
+  useEffect(() => {
+    if (process.env.JEST_WORKER_ID) {
+      setUserLocation({ latitude: 45.0, longitude: -73.0 });
+      return;
+    }
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission to access location was denied');
+        return;
+      }
+      let currentLocation = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = currentLocation.coords;
+      setUserLocation({ latitude, longitude });
+    })();
+  }, [setUserLocation]);
+}
+
+function useShuttleTracking(
+  setShuttleData: React.Dispatch<React.SetStateAction<ShuttleData | null>>,
+) {
+  useEffect(() => {
+    const stopTracking = startShuttleTracking((data) => {
+      setShuttleData(data);
+    }, 15000);
+    return () => {
+      stopTracking();
+    };
+  }, [setShuttleData]);
+}
+
+// -- Reusable Components --
+
+interface InputAutocompleteProps {
+  label: string;
+  placeholder: string;
+  onPlaceSelected: (data: any, details: any) => void;
+  currentValue?: string;
+  isLargeText?: boolean;
+  isBlackAndWhite?: boolean;
+}
 function InputAutocomplete({
   label,
   placeholder,
@@ -71,15 +233,7 @@ function InputAutocomplete({
   currentValue,
   isLargeText,
   isBlackAndWhite,
-}: Readonly<{
-  label: string;
-  placeholder: string;
-  onPlaceSelected: (data: any, details: any) => void;
-  currentValue?: string;
-  isLargeText?: boolean;
-  isBlackAndWhite?: boolean;
-}>) {
-  // Modern styling for Google Autocomplete
+}: InputAutocompleteProps) {
   const googleAutocompleteStyles = {
     container: { flex: 0, marginBottom: 6 },
     textInputContainer: {
@@ -178,13 +332,480 @@ function InputAutocomplete({
   );
 }
 
-export function stripHtml(input: string): string {
-  return input.replace(/<[^>]*>?/gm, '');
+interface ToastProps {
+  message: string;
+  fadeInAnim: Animated.Value;
+}
+const Toast = ({ message, fadeInAnim }: ToastProps) => (
+  <Animated.View style={[styles.toastContainer, { opacity: fadeInAnim }]}>
+    <Text style={styles.toastText}>{message}</Text>
+  </Animated.View>
+);
+
+interface MapControlsProps {
+  isBlackAndWhite: boolean;
+  userLocation: { latitude: number; longitude: number } | null;
+  onLocatePress: () => void;
+  onToggleShuttles: () => void;
+}
+const MapControls = ({
+  isBlackAndWhite,
+  userLocation,
+  onLocatePress,
+  onToggleShuttles,
+}: MapControlsProps) => (
+  <View style={styles.mapControls}>
+    <TouchableOpacity
+      style={styles.mapControlButton}
+      onPress={onLocatePress}
+      testID="locateBtn"
+    >
+      <Ionicons
+        name="locate"
+        size={24}
+        color={isBlackAndWhite ? '#000' : '#912338'}
+      />
+    </TouchableOpacity>
+    <TouchableOpacity
+      style={styles.mapControlButton}
+      onPress={onToggleShuttles}
+      testID="shuttlesBtn"
+    >
+      <Ionicons
+        name="bus"
+        size={24}
+        color={isBlackAndWhite ? '#000' : '#1E88E5'}
+      />
+    </TouchableOpacity>
+  </View>
+);
+
+interface DirectionsPanelProps {
+  steps: { html_instructions: string }[];
+  origin: any;
+  destination: any;
+  distance: number;
+  duration: number;
+  panResponder: any;
+  panY: Animated.Value;
+  isBlackAndWhite: boolean;
+  isLargeText: boolean;
+  expanded: boolean;
+  onToggleExpand: () => void;
+  activeRouteTab: 'standard' | 'shuttle';
+  setActiveRouteTab: (tab: 'standard' | 'shuttle') => void;
+  travelMode: MapViewDirectionsMode;
+}
+const DirectionsPanel = ({
+  steps,
+  origin,
+  destination,
+  distance,
+  duration,
+  panResponder,
+  panY,
+  isBlackAndWhite,
+  isLargeText,
+  expanded,
+  onToggleExpand,
+  activeRouteTab,
+  setActiveRouteTab,
+  travelMode,
+}: DirectionsPanelProps) => {
+  const { icon, text } = getExpandButtonProps(expanded);
+  const standardTabIconColor =
+    activeRouteTab === 'standard'
+      ? isBlackAndWhite
+        ? '#000'
+        : '#912338'
+      : '#666';
+  const shuttleTabIconColor =
+    activeRouteTab === 'shuttle'
+      ? isBlackAndWhite
+        ? '#000'
+        : '#912338'
+      : '#666';
+
+  return (
+    <View
+      style={[
+        styles.directionsContainer,
+        { height: expanded ? height * 0.7 : 180 },
+      ]}
+    >
+      <Animated.View
+        style={[
+          styles.dragHandleContainer,
+          { transform: [{ translateY: panY }] },
+        ]}
+        {...panResponder.panHandlers}
+      >
+        <View style={styles.dragIndicator} />
+      </Animated.View>
+      <View style={styles.directionsHeaderRow}>
+        <View style={styles.directionsHeaderLeft}>
+          <Ionicons
+            name="navigate"
+            size={22}
+            color={isBlackAndWhite ? '#000' : '#912338'}
+            style={styles.directionsIcon}
+          />
+          <Text
+            style={[styles.directionsHeader, isLargeText && styles.largeText]}
+          >
+            Directions
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.expandButton}
+          onPress={onToggleExpand}
+          testID="expandCollapseBtn"
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Ionicons
+              name={icon}
+              size={22}
+              color={isBlackAndWhite ? '#000' : '#666'}
+            />
+            <Text>{text}</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.routeSummary}>
+        <View style={styles.routePoints}>
+          <View style={styles.routePointRow}>
+            <View style={[styles.routePointDot, styles.originDot]} />
+            <Text
+              style={[styles.routePointText, isLargeText && styles.largeText]}
+              numberOfLines={1}
+            >
+              {origin ? formatLocationName(origin) : 'Origin'}
+            </Text>
+          </View>
+          <View style={styles.routeLineConnector} />
+          <View style={styles.routePointRow}>
+            <View style={[styles.routePointDot, styles.destinationDot]} />
+            <Text
+              style={[styles.routePointText, isLargeText && styles.largeText]}
+              numberOfLines={1}
+            >
+              {destination ? formatLocationName(destination) : 'Destination'}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.routeMetrics}>
+          <View style={styles.routeMetricItem}>
+            <Ionicons name="time-outline" size={18} color="#666" />
+            <Text style={styles.routeMetricText}>
+              {Math.round(duration)} min
+            </Text>
+          </View>
+          <View style={styles.routeMetricDivider} />
+          <View style={styles.routeMetricItem}>
+            <Ionicons name="navigate-outline" size={18} color="#666" />
+            <Text style={styles.routeMetricText}>{distance.toFixed(1)} km</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.contentContainer}>
+        <View style={styles.routeTabsContainer}>
+          <TouchableOpacity
+            style={[
+              styles.routeTab,
+              activeRouteTab === 'standard' && styles.activeRouteTab,
+            ]}
+            onPress={() => setActiveRouteTab('standard')}
+          >
+            {(() => {
+              const routeTabIconColor =
+                activeRouteTab === 'standard'
+                  ? isBlackAndWhite
+                    ? '#000'
+                    : '#912338'
+                  : '#666';
+              return (
+                <Ionicons
+                  name={getModeIcon(travelMode)}
+                  size={18}
+                  color={routeTabIconColor}
+                  style={styles.routeTabIcon}
+                />
+              );
+            })()}
+            <Text
+              style={[
+                styles.routeTabText,
+                activeRouteTab === 'standard' && styles.activeRouteTabText,
+                isLargeText && styles.largeText,
+              ]}
+            >
+              Standard Route
+            </Text>
+          </TouchableOpacity>
+          {showShuttleRouteOption(activeRouteTab) && (
+            <TouchableOpacity
+              style={[
+                styles.routeTab,
+                activeRouteTab === 'shuttle' && styles.activeRouteTab,
+              ]}
+              onPress={() => setActiveRouteTab('shuttle')}
+            >
+              {(() => {
+                const shuttleTabIconColor =
+                  activeRouteTab === 'shuttle'
+                    ? isBlackAndWhite
+                      ? '#000'
+                      : '#912338'
+                    : '#666';
+                return (
+                  <Ionicons
+                    name="bus"
+                    size={18}
+                    color={shuttleTabIconColor}
+                    style={styles.routeTabIcon}
+                  />
+                );
+              })()}
+              <Text
+                style={[
+                  styles.routeTabText,
+                  activeRouteTab === 'shuttle' && styles.activeRouteTabText,
+                  isLargeText && styles.largeText,
+                ]}
+              >
+                Shuttle Option
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        <ScrollView style={styles.scrollableContent}>
+          {activeRouteTab === 'shuttle' ? (
+            <View style={styles.shuttleRouteContainer}>
+              <View style={styles.shuttleRouteHeader}>
+                <Ionicons
+                  name="school"
+                  size={20}
+                  color={isBlackAndWhite ? '#000' : '#912338'}
+                  style={styles.shuttleHeaderIcon}
+                />
+                <Text
+                  style={[
+                    styles.shuttleRouteHeaderText,
+                    isLargeText && styles.largeText,
+                  ]}
+                >
+                  Concordia Shuttle Service
+                </Text>
+              </View>
+              <View style={styles.shuttleInfoCard}>
+                <View style={styles.shuttleInfoItem}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={18}
+                    color="#666"
+                    style={styles.shuttleInfoIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.shuttleRouteText,
+                      isLargeText && styles.largeText,
+                    ]}
+                  >
+                    Take the Concordia Shuttle between campuses
+                  </Text>
+                </View>
+                <View style={styles.shuttleInfoItem}>
+                  <Ionicons
+                    name="time-outline"
+                    size={18}
+                    color="#666"
+                    style={styles.shuttleInfoIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.shuttleRouteText,
+                      isLargeText && styles.largeText,
+                    ]}
+                  >
+                    Runs every 30 minutes on weekdays
+                  </Text>
+                </View>
+                <View style={styles.shuttleInfoItem}>
+                  <Ionicons
+                    name="speedometer-outline"
+                    size={18}
+                    color="#666"
+                    style={styles.shuttleInfoIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.shuttleRouteText,
+                      isLargeText && styles.largeText,
+                    ]}
+                  >
+                    Usually faster than public transit
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.shuttleDetailRow}>
+                <View style={styles.shuttleDetailItem}>
+                  <Text style={styles.shuttleDetailLabel}>Duration</Text>
+                  <Text
+                    style={[
+                      styles.shuttleDetailValue,
+                      isLargeText && styles.largeText,
+                    ]}
+                  >
+                    ~30 min
+                  </Text>
+                </View>
+                <View style={styles.shuttleDetailItem}>
+                  <Text style={styles.shuttleDetailLabel}>Distance</Text>
+                  <Text
+                    style={[
+                      styles.shuttleDetailValue,
+                      isLargeText && styles.largeText,
+                    ]}
+                  >
+                    ~6.8 km
+                  </Text>
+                </View>
+                <View style={styles.shuttleDetailItem}>
+                  <Text style={styles.shuttleDetailLabel}>Cost</Text>
+                  <Text
+                    style={[
+                      styles.shuttleDetailValue,
+                      isLargeText && styles.largeText,
+                    ]}
+                  >
+                    Free
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={styles.shuttleScheduleButton}
+                onPress={() =>
+                  Linking.openURL(
+                    'https://www.concordia.ca/maps/shuttle-bus.html#depart',
+                  )
+                }
+              >
+                <Ionicons
+                  name="calendar-outline"
+                  size={16}
+                  color="white"
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.shuttleScheduleButtonText}>
+                  View Schedule
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <>
+              <View style={styles.directionsStepsHeader}>
+                <Ionicons
+                  name="list"
+                  size={18}
+                  color={isBlackAndWhite ? '#000' : '#912338'}
+                />
+                <Text
+                  style={[
+                    styles.directionsStepsTitle,
+                    isLargeText && styles.largeText,
+                  ]}
+                >
+                  Route Steps
+                </Text>
+              </View>
+              <View style={styles.stepsList}>
+                {steps.map((step, index) => (
+                  <View
+                    style={styles.stepItem}
+                    key={`step-${index}-${stripHtml(
+                      step.html_instructions,
+                    ).slice(0, 10)}`}
+                  >
+                    <View style={styles.stepNumberContainer}>
+                      <Text style={styles.stepNumber}>{index + 1}</Text>
+                    </View>
+                    <Text
+                      style={[styles.stepText, isLargeText && styles.largeText]}
+                    >
+                      {stripHtml(step.html_instructions)}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+              <View style={styles.routeDetailsContainer}>
+                <Text
+                  style={[
+                    styles.routeDetailsHeader,
+                    isLargeText && styles.largeText,
+                  ]}
+                >
+                  Route Summary
+                </Text>
+                <View style={styles.routeDetailsList}>
+                  <View style={styles.routeDetailItem}>
+                    <Ionicons name="navigate-outline" size={18} color="#666" />
+                    <Text
+                      style={[
+                        styles.routeDetailsText,
+                        isLargeText && styles.largeText,
+                      ]}
+                    >
+                      Distance: {distance.toFixed(1)} km
+                    </Text>
+                  </View>
+                  <View style={styles.routeDetailItem}>
+                    <Ionicons name="time-outline" size={18} color="#666" />
+                    <Text
+                      style={[
+                        styles.routeDetailsText,
+                        isLargeText && styles.largeText,
+                      ]}
+                    >
+                      Duration: {Math.round(duration)} minutes
+                    </Text>
+                  </View>
+                  <View style={styles.routeDetailItem}>
+                    <Ionicons
+                      name={getModeIcon(travelMode)}
+                      size={18}
+                      color="#666"
+                    />
+                    <Text
+                      style={[
+                        styles.routeDetailsText,
+                        isLargeText && styles.largeText,
+                      ]}
+                    >
+                      Travel Mode:{' '}
+                      {travelMode.charAt(0) + travelMode.slice(1).toLowerCase()}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+            </>
+          )}
+          <View style={styles.scrollPadding} />
+        </ScrollView>
+      </View>
+    </View>
+  );
+};
+
+// Helper to decide if the shuttle tab should be shown.
+function showShuttleRouteOption(
+  activeRouteTab: 'standard' | 'shuttle',
+): boolean {
+  return activeRouteTab === 'shuttle';
 }
 
+// -- Main Component --
 export default function DirectionsScreen() {
-  const { isBlackAndWhite, isLargeText } =
-    React.useContext(AccessibilityContext);
+  const { isBlackAndWhite, isLargeText } = useContext(AccessibilityContext);
   const [origin, setOrigin] = useState<{
     latitude: number;
     longitude: number;
@@ -195,39 +816,32 @@ export default function DirectionsScreen() {
     longitude: number;
     name?: string;
   } | null>(null);
-
   const [userLocation, setUserLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
-
-  const route = useRoute<RouteProp<Record<string, DirectionsParams>, string>>();
   const [showDirections, setShowDirections] = useState(false);
   const [distance, setDistance] = useState(0);
   const [duration, setDuration] = useState(0);
   const [steps, setSteps] = useState<{ html_instructions: string }[]>([]);
   const [showShuttleRoute, setShowShuttleRoute] = useState(false);
-
   const [expandedDirections, setExpandedDirections] = useState<boolean>(false);
-  const [directionsHeight, setDirectionsHeight] = useState<number>(180);
-
   const [activeRouteTab, setActiveRouteTab] = useState<'standard' | 'shuttle'>(
     'standard',
   );
-
   const [travelMode, setTravelMode] =
     useState<MapViewDirectionsMode>('DRIVING');
-
   const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
-
+  const [zoomLevel, setZoomLevel] = useState(15);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [nextPointIsOrigin, setNextPointIsOrigin] = useState<boolean>(true);
 
   const mapRef = useRef<MapView>(null);
-
   const panY = useRef(new Animated.Value(0)).current;
   const fadeInAnim = useRef(new Animated.Value(0)).current;
 
+  // PanResponder for handling swipe gestures in the directions panel
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -241,42 +855,41 @@ export default function DirectionsScreen() {
       },
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dy < -20 && !expandedDirections) {
-          Animated.spring(panY, {
-            toValue: 0,
-            useNativeDriver: false,
-          }).start();
+          Animated.spring(panY, { toValue: 0, useNativeDriver: false }).start();
           setExpandedDirections(true);
-          setDirectionsHeight(height * 0.7);
         } else if (gestureState.dy > 20 && expandedDirections) {
-          Animated.spring(panY, {
-            toValue: 0,
-            useNativeDriver: false,
-          }).start();
+          Animated.spring(panY, { toValue: 0, useNativeDriver: false }).start();
           setExpandedDirections(false);
-          setDirectionsHeight(180);
         } else {
-          Animated.spring(panY, {
-            toValue: 0,
-            useNativeDriver: false,
-          }).start();
+          Animated.spring(panY, { toValue: 0, useNativeDriver: false }).start();
         }
       },
     }),
   ).current;
 
-  useEffect(() => {
-    Animated.timing(fadeInAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+  // Initialize location and shuttle tracking via custom hooks
+  useInitializeLocation(setUserLocation);
+  useShuttleTracking(setShuttleData);
 
+  const route = useRoute<
+    RouteProp<
+      Record<
+        string,
+        {
+          origin?: { latitude: number; longitude: number };
+          destination?: { latitude: number; longitude: number };
+          travelMode?: MapViewDirectionsMode;
+        }
+      >,
+      string
+    >
+  >();
+
+  useEffect(() => {
     if (route.params?.origin && route.params?.destination) {
       setOrigin(route.params.origin);
       setDestination(route.params.destination);
-      if (route.params.travelMode) {
-        setTravelMode(route.params.travelMode);
-      }
+      if (route.params.travelMode) setTravelMode(route.params.travelMode);
     } else if (route.params?.origin) {
       setOrigin(route.params.origin);
     } else if (route.params?.destination) {
@@ -284,6 +897,7 @@ export default function DirectionsScreen() {
     }
   }, [route.params]);
 
+  // Toast fade effect
   useEffect(() => {
     if (toastMessage) {
       Animated.timing(fadeInAnim, {
@@ -297,52 +911,28 @@ export default function DirectionsScreen() {
             toValue: 0,
             duration: 300,
             useNativeDriver: true,
-          }).start(() => {
-            setToastMessage(null);
-          });
+          }).start(() => setToastMessage(null));
         }, 2000);
         return () => clearTimeout(timer);
       }
     }
   }, [toastMessage]);
 
+  // Toggle route tab based on shuttle route availability
   useEffect(() => {
-    if (showShuttleRoute) {
-      setActiveRouteTab('shuttle');
-    } else {
-      setActiveRouteTab('standard');
-    }
+    setActiveRouteTab(showShuttleRoute ? 'shuttle' : 'standard');
   }, [showShuttleRoute]);
 
-  useEffect(() => {
-    // During tests, set a dummy location to avoid asynchronous state updates.
-    if (process.env.JEST_WORKER_ID) {
-      setUserLocation({ latitude: 45.0, longitude: -73.0 });
-      return;
-    }
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-        return;
-      }
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      const coords = currentLocation.coords;
-      setUserLocation({
-        latitude: coords.latitude,
-        longitude: coords.longitude,
-      });
-    })();
-  }, []);
-
-  useEffect(() => {
-    const stopTracking = startShuttleTracking((data) => {
-      setShuttleData(data);
-    }, 15000);
-    return () => {
-      stopTracking();
-    };
-  }, []);
+  // Update zoom level on region change
+  const onRegionChange = (region: {
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  }) => {
+    const zoom = Math.round(Math.log(360 / region.latitudeDelta) / Math.LN2);
+    setZoomLevel(zoom);
+  };
 
   const moveTo = async (position: { latitude: number; longitude: number }) => {
     const camera = await mapRef.current?.getCamera();
@@ -352,23 +942,10 @@ export default function DirectionsScreen() {
     }
   };
 
-  const onRegionChange = (region: {
-    latitude: number;
-    longitude: number;
-    latitudeDelta: number;
-    longitudeDelta: number;
-  }) => {};
-
   const checkUserInBuilding = () => {
     if (!userLocation) return null;
-    const buildingCenter = isUserInBuilding(userLocation);
-    if (buildingCenter) {
-      return buildingCenter;
-    }
-    return null;
+    return isUserInBuilding(userLocation) || null;
   };
-
-  const [nextPointIsOrigin, setNextPointIsOrigin] = useState<boolean>(true);
 
   const setSmartLocation = (
     position: { latitude: number; longitude: number },
@@ -407,168 +984,6 @@ export default function DirectionsScreen() {
     }
   };
 
-  const snapToNearestBuilding = (point: {
-    latitude: number;
-    longitude: number;
-  }) => {
-    return isUserInBuilding(point) || point;
-  };
-
-  const formatLocationName = (
-    location: { latitude: number; longitude: number; name?: string },
-    currentUserLocation?: { latitude: number; longitude: number },
-  ) => {
-    if (location.name) {
-      return location.name;
-    }
-    // Check if it's one of the campuses
-    if (
-      Math.abs(location.latitude - SGW_COORDS.latitude) < 0.001 &&
-      Math.abs(location.longitude - SGW_COORDS.longitude) < 0.001
-    ) {
-      return 'SGW Campus';
-    }
-    if (
-      Math.abs(location.latitude - LOYOLA_COORDS.latitude) < 0.001 &&
-      Math.abs(location.longitude - LOYOLA_COORDS.longitude) < 0.001
-    ) {
-      return 'Loyola Campus';
-    }
-    // Check if it's the user's current location
-    if (
-      currentUserLocation &&
-      Math.abs(location.latitude - currentUserLocation.latitude) < 0.0001 &&
-      Math.abs(location.longitude - currentUserLocation.longitude) < 0.0001
-    ) {
-      return 'My Current Location';
-    }
-    // Otherwise show coordinates
-    return `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
-  };
-
-  interface Coordinates {
-    latitude: number;
-    longitude: number;
-  }
-
-  const distanceBetween = (
-    point1: Coordinates,
-    point2: Coordinates,
-  ): number => {
-    if (!point1 || !point2) return 9999;
-    const R = 6371;
-    const dLat = deg2rad(point2.latitude - point1.latitude);
-    const dLon = deg2rad(point2.longitude - point1.longitude);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(point1.latitude)) *
-        Math.cos(deg2rad(point2.latitude)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
-    return distance;
-  };
-
-  const deg2rad = (deg: number) => {
-    return deg * (Math.PI / 180);
-  };
-
-  const isShuttleRouteApplicable = () => {
-    if (!origin || !destination) return false;
-    const finalOrigin = snapToNearestBuilding(origin);
-    const finalDestination = snapToNearestBuilding(destination);
-    const isOriginNearSGW = distanceBetween(finalOrigin, SGW_COORDS) < 0.5;
-    const isOriginNearLoyola =
-      distanceBetween(finalOrigin, LOYOLA_COORDS) < 0.5;
-    const isDestNearSGW = distanceBetween(finalDestination, SGW_COORDS) < 0.5;
-    const isDestNearLoyola =
-      distanceBetween(finalDestination, LOYOLA_COORDS) < 0.5;
-    return (
-      (isOriginNearSGW && isDestNearLoyola) ||
-      (isOriginNearLoyola && isDestNearSGW)
-    );
-  };
-
-  const edgePaddingValue = 70;
-  const edgePadding = {
-    top: edgePaddingValue,
-    right: edgePaddingValue,
-    bottom: edgePaddingValue,
-    left: edgePaddingValue,
-  };
-
-  const traceRouteOnReady = (result: {
-    distance: number;
-    duration: number;
-  }) => {
-    if (result) {
-      setDistance(result.distance);
-      setDuration(result.duration);
-      setExpandedDirections(true);
-      setDirectionsHeight(height * 0.7);
-    }
-    fetchDetailedDirections(origin, destination, travelMode);
-  };
-
-  const fetchDetailedDirections = async (
-    orig: { latitude: number; longitude: number } | null,
-    dest: { latitude: number; longitude: number } | null,
-    mode: string,
-  ) => {
-    try {
-      if (!orig || !dest) return;
-      const url =
-        `https://maps.googleapis.com/maps/api/directions/json?` +
-        `origin=${orig.latitude},${orig.longitude}&` +
-        `destination=${dest.latitude},${dest.longitude}&` +
-        `mode=${mode.toLowerCase()}&` +
-        `key=${GOOGLE_MAPS_API_KEY}`;
-
-      const res = await fetch(url);
-      if (!process.env.JEST_WORKER_ID) {
-        console.log('Response status:', res.status);
-      }
-      const data = await res.json();
-      if (!process.env.JEST_WORKER_ID) {
-        console.log('Directions API response:', data.status);
-      }
-
-      if (data.routes?.length) {
-        const firstRoute = data.routes[0];
-        const leg = firstRoute.legs?.[0];
-        if (leg?.steps) {
-          setSteps(leg.steps);
-        } else {
-          setSteps([]);
-        }
-      }
-    } catch (err) {
-      console.error('Directions fetch error', err);
-    }
-  };
-
-  const traceRoute = () => {
-    console.log('Tracing route with:', { origin, destination });
-    if (!origin) {
-      setToastMessage('Please set an origin point');
-      return;
-    }
-    if (!destination) {
-      setToastMessage('Please set a destination point');
-      return;
-    }
-    const finalOrigin = snapToNearestBuilding(origin);
-    const finalDestination = snapToNearestBuilding(destination);
-    setShowDirections(true);
-    const shuttleApplicable = isShuttleRouteApplicable();
-    setShowShuttleRoute(shuttleApplicable);
-    mapRef.current?.fitToCoordinates([finalOrigin, finalDestination], {
-      edgePadding,
-      animated: true,
-    });
-  };
-
   const onPlaceSelected = (data: any, details: any, flag: string) => {
     if (!details?.geometry?.location) {
       console.error('No location data in selected place', details);
@@ -591,16 +1006,72 @@ export default function DirectionsScreen() {
     moveTo(snappedPosition);
   };
 
-  const stripHtml = (html = '') => {
-    if (!html) return '';
-    return html.replace(/<[^>]*>?/gm, '');
+  const fetchDetailedDirections = async (
+    orig: { latitude: number; longitude: number } | null,
+    dest: { latitude: number; longitude: number } | null,
+    mode: string,
+  ) => {
+    try {
+      if (!orig || !dest) return;
+      const url =
+        `https://maps.googleapis.com/maps/api/directions/json?` +
+        `origin=${orig.latitude},${orig.longitude}&` +
+        `destination=${dest.latitude},${dest.longitude}&` +
+        `mode=${mode.toLowerCase()}&` +
+        `key=${GOOGLE_MAPS_API_KEY}`;
+      const res = await fetch(url);
+      if (!process.env.JEST_WORKER_ID) {
+        console.log('Response status:', res.status);
+      }
+      const data = await res.json();
+      if (!process.env.JEST_WORKER_ID) {
+        console.log('Directions API response:', data.status);
+      }
+      if (data.routes?.length) {
+        const firstRoute = data.routes[0];
+        const leg = firstRoute.legs?.[0];
+        setSteps(leg?.steps || []);
+      }
+    } catch (err) {
+      console.error('Directions fetch error', err);
+    }
+  };
+
+  const traceRouteOnReady = (result: {
+    distance: number;
+    duration: number;
+  }) => {
+    if (result) {
+      setDistance(result.distance);
+      setDuration(result.duration);
+      setExpandedDirections(true);
+    }
+    fetchDetailedDirections(origin, destination, travelMode);
+  };
+
+  const traceRoute = () => {
+    console.log('Tracing route with:', { origin, destination });
+    if (!origin) {
+      setToastMessage('Please set an origin point');
+      return;
+    }
+    if (!destination) {
+      setToastMessage('Please set a destination point');
+      return;
+    }
+    const finalOrigin = snapToNearestBuilding(origin);
+    const finalDestination = snapToNearestBuilding(destination);
+    setShowDirections(true);
+    const shuttleApplicable = isShuttleRouteApplicable(origin, destination);
+    setShowShuttleRoute(shuttleApplicable);
+    mapRef.current?.fitToCoordinates([finalOrigin, finalDestination], {
+      edgePadding: EDGE_PADDING,
+      animated: true,
+    });
   };
 
   const setCampusPoint = (
-    campusCoords: {
-      latitude: number;
-      longitude: number;
-    },
+    campusCoords: { latitude: number; longitude: number },
     campusName: string,
   ) => {
     setSmartLocation(campusCoords, campusName);
@@ -625,160 +1096,13 @@ export default function DirectionsScreen() {
     mapRef.current?.animateToRegion(INITIAL_POSITION, 1000);
   };
 
-  const mapStyle: MapStyleElement[] = isBlackAndWhite
-    ? [
-        {
-          elementType: 'geometry',
-          stylers: [{ saturation: -100 }],
-        },
-        {
-          elementType: 'labels.text.fill',
-          stylers: [{ saturation: -100 }],
-        },
-        {
-          elementType: 'labels.text.stroke',
-          stylers: [{ saturation: -100 }],
-        },
-      ]
-    : [
-        {
-          featureType: 'water',
-          elementType: 'geometry',
-          stylers: [{ color: '#e9e9e9' }, { lightness: 17 }],
-        },
-        {
-          featureType: 'landscape',
-          elementType: 'geometry',
-          stylers: [{ color: '#f5f5f5' }, { lightness: 20 }],
-        },
-        {
-          featureType: 'road.highway',
-          elementType: 'geometry.fill',
-          stylers: [{ color: '#ffffff' }, { lightness: 17 }],
-        },
-        {
-          featureType: 'poi',
-          elementType: 'geometry',
-          stylers: [{ color: '#f5f5f5' }, { lightness: 21 }],
-        },
-      ];
-
-  const getModeIcon = (mode: MapViewDirectionsMode): string => {
-    const icons: Record<MapViewDirectionsMode, string> = {
-      DRIVING: 'car-outline',
-      WALKING: 'walk-outline',
-      BICYCLING: 'bicycle-outline',
-      TRANSIT: 'bus-outline',
-    };
-    return icons[mode] || 'navigate-outline';
-  };
-
-  // --- Extract nested ternaries into independent constants ---
-
-  // For travel mode buttons in Quick Actions
-  // (L853) Extract nested ternary from Ionicons color:
-  // travelMode === mode ? 'white' : isBlackAndWhite ? 'black' : '#912338'
-  // This will be computed inside the map callback for each mode.
-
-  // For Route Tabs:
-  // (L983) Shuttle Tab Icon Color:
-  const shuttleTabIconColor =
-    activeRouteTab === 'shuttle'
-      ? (isBlackAndWhite ? '#000' : '#912338')
-      : '#666';
-
-  // (L1183) Standard Tab Icon Color:
-  const standardTabIconColor =
-    activeRouteTab === 'standard'
-      ? (isBlackAndWhite ? '#000' : '#912338')
-      : '#666';
-
-  // For Expand/Collapse button:
-  // (L1150) Extract nested ternaries for icon name and text.
-  const expandIconName = expandedDirections ? 'chevron-down' : 'chevron-up';
-  const expandButtonText = expandedDirections ? 'Collapse' : 'Expand';
-
-  // --- End of nested ternary extractions ---
-
-  // Render helper components
-  const renderBuildingMarkers = () => (
-    // Use polygon.name as a unique key (instead of array index)
-    polygons.map((polygon) => (
-      <Polygon
-        key={polygon.name}
-        coordinates={polygon.boundaries}
-        fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
-        strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
-        strokeWidth={2}
-      />
-    ))
-  );
-
-  const renderShuttleMarkers = () => {
-    if (!showShuttles || !shuttleData) return null;
-    
-    return (
-      <>
-        {shuttleData.buses.map((bus) => (
-          <Marker
-            key={bus.ID}
-            coordinate={{
-              latitude: bus.Latitude,
-              longitude: bus.Longitude,
-            }}
-            title={`Shuttle ${bus.ID}`}
-            testID={`marker-${bus.ID}`}
-            tracksViewChanges={false}
-          >
-            <View
-              style={[
-                styles.customIconMarker,
-                isBlackAndWhite ? styles.markerBW : styles.shuttleMarker,
-              ]}
-            >
-              <Ionicons name="bus" size={20} color="white" />
-            </View>
-          </Marker>
-        ))}
-
-        {shuttleData.stations.map((station) => (
-          <Marker
-            key={station.ID}
-            coordinate={{
-              latitude: station.Latitude,
-              longitude: station.Longitude,
-            }}
-            title={station.ID === 'GPLoyola' ? 'Loyola Campus' : 'SGW Campus'}
-            testID={`marker-${station.ID}`}
-            tracksViewChanges={false}
-          >
-            <View
-              style={[
-                styles.customIconMarker,
-                isBlackAndWhite ? styles.markerBW : styles.stationMarker,
-              ]}
-            >
-              <Ionicons name="bus-outline" size={20} color="white" />
-            </View>
-          </Marker>
-        ))}
-      </>
-    );
-  };
+  // Determine map style based on accessibility settings
+  const mapStyle: MapStyleElement[] = getMapStyle(isBlackAndWhite);
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
-
-      {toastMessage && (
-        <Animated.View
-          style={[styles.toastContainer, { opacity: fadeInAnim }]}
-          testID="toastMessage"
-        >
-          <Text style={styles.toastText}>{toastMessage}</Text>
-        </Animated.View>
-      )}
-
+      {toastMessage && <Toast message={toastMessage} fadeInAnim={fadeInAnim} />}
       {userLocation && checkUserInBuilding() && (
         <View style={styles.buildingInfoBadge}>
           <Ionicons
@@ -794,7 +1118,6 @@ export default function DirectionsScreen() {
           </Text>
         </View>
       )}
-
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -807,8 +1130,15 @@ export default function DirectionsScreen() {
         showsCompass={true}
         showsScale={true}
       >
-        {renderBuildingMarkers()}
-
+        {polygons.map((polygon, idx) => (
+          <Polygon
+            key={idx}
+            coordinates={polygon.boundaries}
+            fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
+            strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
+            strokeWidth={2}
+          />
+        ))}
         {origin && (
           <Marker
             coordinate={origin}
@@ -841,15 +1171,11 @@ export default function DirectionsScreen() {
             </View>
           </Marker>
         )}
-
         {showShuttles &&
           shuttleData?.buses.map((bus) => (
             <Marker
               key={bus.ID}
-              coordinate={{
-                latitude: bus.Latitude,
-                longitude: bus.Longitude,
-              }}
+              coordinate={{ latitude: bus.Latitude, longitude: bus.Longitude }}
               title={`Shuttle ${bus.ID}`}
               testID={`marker-${bus.ID}`}
               tracksViewChanges={false}
@@ -864,7 +1190,6 @@ export default function DirectionsScreen() {
               </View>
             </Marker>
           ))}
-
         {showShuttles &&
           shuttleData?.stations.map((station) => (
             <Marker
@@ -887,7 +1212,6 @@ export default function DirectionsScreen() {
               </View>
             </Marker>
           ))}
-
         {showDirections && origin && destination && (
           <MapViewDirections
             origin={origin}
@@ -903,40 +1227,15 @@ export default function DirectionsScreen() {
           />
         )}
       </MapView>
-
-      <View style={styles.mapControls}>
-        <TouchableOpacity
-          style={styles.mapControlButton}
-          onPress={() => {
-            if (userLocation) {
-              moveTo(userLocation);
-            }
-          }}
-          testID="locateBtn"
-        >
-          <Ionicons
-            name="locate"
-            size={24}
-            color={isBlackAndWhite ? '#000' : '#912338'}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.mapControlButton}
-          onPress={toggleShuttles}
-          testID="shuttlesBtn"
-        >
-          <Ionicons
-            name="bus"
-            size={24}
-            color={
-              isBlackAndWhite ? '#000' : showShuttles ? '#1E88E5' : '#757575'
-            }
-          />
-        </TouchableOpacity>
-      </View>
-
-      {!showDirections && (
+      <MapControls
+        isBlackAndWhite={isBlackAndWhite}
+        userLocation={userLocation}
+        onLocatePress={() => {
+          if (userLocation) moveTo(userLocation);
+        }}
+        onToggleShuttles={toggleShuttles}
+      />
+      {!showDirections ? (
         <View
           style={[
             styles.searchContainer,
@@ -955,7 +1254,6 @@ export default function DirectionsScreen() {
             isLargeText={isLargeText}
             isBlackAndWhite={isBlackAndWhite}
           />
-
           <InputAutocomplete
             label="Destination"
             placeholder="Enter destination"
@@ -968,7 +1266,6 @@ export default function DirectionsScreen() {
             isLargeText={isLargeText}
             isBlackAndWhite={isBlackAndWhite}
           />
-
           <View style={styles.quickActionsSection}>
             <Text
               style={[styles.sectionHeader, isLargeText && styles.largeText]}
@@ -989,7 +1286,6 @@ export default function DirectionsScreen() {
                 />
                 <Text style={styles.actionButtonText}>My Location</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[styles.actionButton, styles.clearButton]}
                 onPress={clearPoints}
@@ -1005,7 +1301,6 @@ export default function DirectionsScreen() {
               </TouchableOpacity>
             </View>
           </View>
-
           <View style={styles.quickActionsSection}>
             <View style={styles.campusButtonsContainer}>
               <TouchableOpacity
@@ -1036,7 +1331,6 @@ export default function DirectionsScreen() {
               </TouchableOpacity>
             </View>
           </View>
-
           <View style={styles.quickActionsSection}>
             <Text
               style={[styles.sectionHeader, isLargeText && styles.largeText]}
@@ -1045,7 +1339,6 @@ export default function DirectionsScreen() {
             </Text>
             <View style={styles.modeContainer}>
               {['DRIVING', 'TRANSIT', 'WALKING', 'BICYCLING'].map((mode) => {
-                // (L853) Extract nested ternary for travel mode button icon color
                 const modeIconColor =
                   travelMode === mode
                     ? 'white'
@@ -1081,7 +1374,6 @@ export default function DirectionsScreen() {
               })}
             </View>
           </View>
-
           <TouchableOpacity
             style={styles.traceButton}
             onPress={traceRoute}
@@ -1094,431 +1386,52 @@ export default function DirectionsScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-      )}
-
-      {showDirections && (
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => {
-            setShowDirections(false);
-            setShowShuttleRoute(false);
-            setSteps([]);
-            resetOriginAndDestination();
-            setToastMessage('Returned to search view');
-          }}
-        >
-          <Ionicons name="arrow-back" size={20} color="white" />
-          <Text
-            style={[styles.backButtonText, isLargeText && styles.largeText]}
+      ) : (
+        <>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => {
+              setShowDirections(false);
+              setShowShuttleRoute(false);
+              setSteps([]);
+              resetOriginAndDestination();
+              setToastMessage('Returned to search view');
+            }}
           >
-            Back
-          </Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Directions */}
-      {steps.length > 0 && (
-        <View
-          style={[styles.directionsContainer, { height: directionsHeight }]}
-        >
-          {/* Handle for expanding/collapsing with PanResponder for swipe gestures */}
-          <Animated.View
-            style={[
-              styles.dragHandleContainer,
-              { transform: [{ translateY: panY }] },
-            ]}
-            {...panResponder.panHandlers}
-          >
-            <View style={styles.dragIndicator} />
-          </Animated.View>
-
-          <View style={styles.directionsHeaderRow}>
-            <View style={styles.directionsHeaderLeft}>
-              <Ionicons
-                name="navigate"
-                size={22}
-                color={isBlackAndWhite ? '#000' : '#912338'}
-                style={styles.directionsIcon}
-              />
-              <Text
-                style={[
-                  styles.directionsHeader,
-                  isLargeText && styles.largeText,
-                ]}
-              >
-                Directions
-              </Text>
-            </View>
-            <TouchableOpacity
-              style={styles.expandButton}
-              onPress={() => {
-                setExpandedDirections(!expandedDirections);
-                setDirectionsHeight(expandedDirections ? 180 : height * 0.7);
-              }}
-              testID="expandCollapseBtn"
+            <Ionicons name="arrow-back" size={20} color="white" />
+            <Text
+              style={[styles.backButtonText, isLargeText && styles.largeText]}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                {/* (L1150) Use extracted constants for expand icon and text */}
-                <Ionicons
-                  name={expandIconName}
-                  size={22}
-                  color={isBlackAndWhite ? '#000' : '#666'}
-                />
-                <Text>{expandButtonText}</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-
-          {/* Route summary */}
-          <View style={styles.routeSummary}>
-            <View style={styles.routePoints}>
-              <View style={styles.routePointRow}>
-                <View style={[styles.routePointDot, styles.originDot]} />
-                <Text
-                  style={[
-                    styles.routePointText,
-                    isLargeText && styles.largeText,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {origin ? formatLocationName(origin) : 'Origin'}
-                </Text>
-              </View>
-              <View style={styles.routeLineConnector} />
-              <View style={styles.routePointRow}>
-                <View style={[styles.routePointDot, styles.destinationDot]} />
-                <Text
-                  style={[
-                    styles.routePointText,
-                    isLargeText && styles.largeText,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {destination
-                    ? formatLocationName(destination)
-                    : 'Destination'}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.routeMetrics}>
-              <View style={styles.routeMetricItem}>
-                <Ionicons name="time-outline" size={18} color="#666" />
-                <Text style={styles.routeMetricText}>
-                  {Math.round(duration)} min
-                </Text>
-              </View>
-              <View style={styles.routeMetricDivider} />
-              <View style={styles.routeMetricItem}>
-                <Ionicons name="navigate-outline" size={18} color="#666" />
-                <Text style={styles.routeMetricText}>
-                  {distance.toFixed(1)} km
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Content container with scrollable area */}
-          <View style={styles.contentContainer}>
-            {/* Both shuttle and standard routes are available in a tabbed view */}
-            <View style={styles.routeTabsContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.routeTab,
-                  activeRouteTab === 'standard' && styles.activeRouteTab,
-                ]}
-                onPress={() => setActiveRouteTab('standard')}
-              >
-                {/* (L1183) Use extracted constant for standard tab icon color */}
-                <Ionicons
-                  name={getModeIcon(travelMode)}
-                  size={18}
-                  color={standardTabIconColor}
-                  style={styles.routeTabIcon}
-                />
-                <Text
-                  style={[
-                    styles.routeTabText,
-                    activeRouteTab === 'standard' && styles.activeRouteTabText,
-                    isLargeText && styles.largeText,
-                  ]}
-                >
-                  Standard Route
-                </Text>
-              </TouchableOpacity>
-
-              {showShuttleRoute && (
-                <TouchableOpacity
-                  style={[
-                    styles.routeTab,
-                    activeRouteTab === 'shuttle' && styles.activeRouteTab,
-                  ]}
-                  onPress={() => setActiveRouteTab('shuttle')}
-                >
-                  {/* (L983) Use extracted constant for shuttle tab icon color */}
-                  <Ionicons
-                    name="bus"
-                    size={18}
-                    color={shuttleTabIconColor}
-                    style={styles.routeTabIcon}
-                  />
-                  <Text
-                    style={[
-                      styles.routeTabText,
-                      activeRouteTab === 'shuttle' && styles.activeRouteTabText,
-                      isLargeText && styles.largeText,
-                    ]}
-                  >
-                    Shuttle Option
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-
-            {/* Scrollable content area */}
-            <ScrollView style={styles.scrollableContent}>
-              {/* Shuttle route details */}
-              {showShuttleRoute && activeRouteTab === 'shuttle' && (
-                <View style={styles.shuttleRouteContainer}>
-                  <View style={styles.shuttleRouteHeader}>
-                    <Ionicons
-                      name="school"
-                      size={20}
-                      color={isBlackAndWhite ? '#000' : '#912338'}
-                      style={styles.shuttleHeaderIcon}
-                    />
-                    <Text
-                      style={[
-                        styles.shuttleRouteHeaderText,
-                        isLargeText && styles.largeText,
-                      ]}
-                    >
-                      Concordia Shuttle Service
-                    </Text>
-                  </View>
-
-                  <View style={styles.shuttleInfoCard}>
-                    <View style={styles.shuttleInfoItem}>
-                      <Ionicons
-                        name="information-circle-outline"
-                        size={18}
-                        color="#666"
-                        style={styles.shuttleInfoIcon}
-                      />
-                      <Text
-                        style={[
-                          styles.shuttleRouteText,
-                          isLargeText && styles.largeText,
-                        ]}
-                      >
-                        Take the Concordia Shuttle between campuses
-                      </Text>
-                    </View>
-                    <View style={styles.shuttleInfoItem}>
-                      <Ionicons
-                        name="time-outline"
-                        size={18}
-                        color="#666"
-                        style={styles.shuttleInfoIcon}
-                      />
-                      <Text
-                        style={[
-                          styles.shuttleRouteText,
-                          isLargeText && styles.largeText,
-                        ]}
-                      >
-                        Runs every 30 minutes on weekdays
-                      </Text>
-                    </View>
-                    <View style={styles.shuttleInfoItem}>
-                      <Ionicons
-                        name="speedometer-outline"
-                        size={18}
-                        color="#666"
-                        style={styles.shuttleInfoIcon}
-                      />
-                      <Text
-                        style={[
-                          styles.shuttleRouteText,
-                          isLargeText && styles.largeText,
-                        ]}
-                      >
-                        Usually faster than public transit
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.shuttleDetailRow}>
-                    <View style={styles.shuttleDetailItem}>
-                      <Text style={styles.shuttleDetailLabel}>Duration</Text>
-                      <Text
-                        style={[
-                          styles.shuttleDetailValue,
-                          isLargeText && styles.largeText,
-                        ]}
-                      >
-                        ~30 min
-                      </Text>
-                    </View>
-                    <View style={styles.shuttleDetailItem}>
-                      <Text style={styles.shuttleDetailLabel}>Distance</Text>
-                      <Text
-                        style={[
-                          styles.shuttleDetailValue,
-                          isLargeText && styles.largeText,
-                        ]}
-                      >
-                        ~6.8 km
-                      </Text>
-                    </View>
-                    <View style={styles.shuttleDetailItem}>
-                      <Text style={styles.shuttleDetailLabel}>Cost</Text>
-                      <Text
-                        style={[
-                          styles.shuttleDetailValue,
-                          isLargeText && styles.largeText,
-                        ]}
-                      >
-                        Free
-                      </Text>
-                    </View>
-                  </View>
-
-                  <TouchableOpacity
-                    style={styles.shuttleScheduleButton}
-                    onPress={() =>
-                      Linking.openURL(
-                        'https://www.concordia.ca/maps/shuttle-bus.html#depart',
-                      )
-                    }
-                  >
-                    <Ionicons
-                      name="calendar-outline"
-                      size={16}
-                      color="white"
-                      style={styles.buttonIcon}
-                    />
-                    <Text style={styles.shuttleScheduleButtonText}>
-                      View Schedule
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {/* Standard route details */}
-              {activeRouteTab === 'standard' && (
-                <>
-                  <View style={styles.directionsStepsHeader}>
-                    <Ionicons
-                      name="list"
-                      size={18}
-                      color={isBlackAndWhite ? '#000' : '#912338'}
-                    />
-                    <Text
-                      style={[
-                        styles.directionsStepsTitle,
-                        isLargeText && styles.largeText,
-                      ]}
-                    >
-                      Route Steps
-                    </Text>
-                  </View>
-
-                  <View style={styles.stepsList}>
-                    {steps.map((step, index) => (
-                      <View style={styles.stepItem} key={`step-${index}-${stripHtml(step.html_instructions).slice(0, 10)}`}>
-                        <View style={styles.stepNumberContainer}>
-                          <Text style={styles.stepNumber}>{index + 1}</Text>
-                        </View>
-                        <Text
-                          style={[
-                            styles.stepText,
-                            isLargeText && styles.largeText,
-                          ]}
-                        >
-                          {stripHtml(step.html_instructions)}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-
-                  {/* Show additional info only for standard route */}
-                  <View style={styles.routeDetailsContainer}>
-                    <Text
-                      style={[
-                        styles.routeDetailsHeader,
-                        isLargeText && styles.largeText,
-                      ]}
-                    >
-                      Route Summary
-                    </Text>
-                    <View style={styles.routeDetailsList}>
-                      <View style={styles.routeDetailItem}>
-                        <Ionicons
-                          name="navigate-outline"
-                          size={18}
-                          color="#666"
-                        />
-                        <Text
-                          style={[
-                            styles.routeDetailsText,
-                            isLargeText && styles.largeText,
-                          ]}
-                        >
-                          Distance: {distance.toFixed(1)} km
-                        </Text>
-                      </View>
-                      <View style={styles.routeDetailItem}>
-                        <Ionicons name="time-outline" size={18} color="#666" />
-                        <Text
-                          style={[
-                            styles.routeDetailsText,
-                            isLargeText && styles.largeText,
-                          ]}
-                        >
-                          Duration: {Math.round(duration)} minutes
-                        </Text>
-                      </View>
-                      <View style={styles.routeDetailItem}>
-                        <Ionicons
-                          name={getModeIcon(travelMode)}
-                          size={18}
-                          color="#666"
-                        />
-                        <Text
-                          style={[
-                            styles.routeDetailsText,
-                            isLargeText && styles.largeText,
-                          ]}
-                        >
-                          Travel Mode:{' '}
-                          {travelMode.charAt(0) +
-                            travelMode.slice(1).toLowerCase()}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                </>
-              )}
-
-              {/* Add extra padding at bottom for better scrolling */}
-              <View style={styles.scrollPadding} />
-            </ScrollView>
-          </View>
-        </View>
+              Back
+            </Text>
+          </TouchableOpacity>
+          {steps.length > 0 && (
+            <DirectionsPanel
+              steps={steps}
+              origin={origin}
+              destination={destination}
+              distance={distance}
+              duration={duration}
+              panResponder={panResponder}
+              panY={panY}
+              isBlackAndWhite={isBlackAndWhite}
+              isLargeText={isLargeText}
+              expanded={expandedDirections}
+              onToggleExpand={() => setExpandedDirections(!expandedDirections)}
+              activeRouteTab={activeRouteTab}
+              setActiveRouteTab={setActiveRouteTab}
+              travelMode={travelMode}
+            />
+          )}
+        </>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  map: {
-    width,
-    height,
-  },
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  map: { width, height },
   searchContainer: {
     position: 'absolute',
     width: '85%',
@@ -1534,18 +1447,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     maxHeight: height * 0.7,
   },
-  inputContainer: {
-    marginBottom: 2,
-  },
+  inputContainer: { marginBottom: 2 },
   inputLabel: {
     fontSize: 16,
     fontWeight: '500',
     color: '#555',
     marginBottom: 8,
   },
-  quickActionsSection: {
-    marginVertical: 4,
-  },
+  quickActionsSection: { marginVertical: 4 },
   sectionHeader: {
     fontSize: 16,
     fontWeight: '600',
@@ -1573,17 +1482,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
-  clearButton: {
-    backgroundColor: '#912338',
-  },
-  actionButtonIcon: {
-    marginRight: 8,
-  },
-  actionButtonText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
-  },
+  clearButton: { backgroundColor: '#912338' },
+  actionButtonIcon: { marginRight: 8 },
+  actionButtonText: { color: 'white', fontWeight: '600', fontSize: 14 },
   campusButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1604,15 +1505,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#912338',
   },
-  campusPillText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
-  modeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
+  campusPillText: { fontSize: 14, fontWeight: '600', color: '#333' },
+  modeContainer: { flexDirection: 'row', justifyContent: 'space-between' },
   modeButton: {
     flex: 1,
     flexDirection: 'column',
@@ -1630,18 +1524,14 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  activeModeButton: {
-    backgroundColor: '#912338',
-  },
+  activeModeButton: { backgroundColor: '#912338' },
   modeButtonText: {
     color: '#333',
     fontSize: 12,
     fontWeight: '600',
     marginTop: 4,
   },
-  activeModeButtonText: {
-    color: 'white',
-  },
+  activeModeButtonText: { color: 'white' },
   traceButton: {
     backgroundColor: '#912338',
     paddingVertical: 12,
@@ -1660,12 +1550,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: 'center',
   },
-  mapControls: {
-    position: 'absolute',
-    top: 20,
-    right: 16,
-    zIndex: 1,
-  },
+  mapControls: { position: 'absolute', top: 20, right: 16, zIndex: 1 },
   mapControlButton: {
     backgroundColor: 'white',
     width: 44,
@@ -1694,21 +1579,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'white',
   },
-  markerBW: {
-    backgroundColor: '#000000',
-  },
-  originMarker: {
-    backgroundColor: '#4CAF50',
-  },
-  destinationMarker: {
-    backgroundColor: '#F44336',
-  },
-  shuttleMarker: {
-    backgroundColor: '#1E88E5',
-  },
-  stationMarker: {
-    backgroundColor: '#4CAF50',
-  },
+  markerBW: { backgroundColor: '#000000' },
+  originMarker: { backgroundColor: '#4CAF50' },
+  destinationMarker: { backgroundColor: '#F44336' },
+  shuttleMarker: { backgroundColor: '#1E88E5' },
+  stationMarker: { backgroundColor: '#4CAF50' },
   buildingInfoBadge: {
     position: 'absolute',
     top: Constants.statusBarHeight,
@@ -1726,14 +1601,8 @@ const styles = StyleSheet.create({
     elevation: 3,
     zIndex: 999,
   },
-  buildingIcon: {
-    marginRight: 6,
-  },
-  buildingInfoText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
+  buildingIcon: { marginRight: 6 },
+  buildingInfoText: { fontSize: 14, fontWeight: '500', color: '#333' },
   toastContainer: {
     position: 'absolute',
     bottom: 100,
@@ -1811,58 +1680,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 12,
   },
-  directionsHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  directionsIcon: {
-    marginRight: 8,
-  },
-  directionsHeader: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  expandButton: {
-    padding: 8,
-  },
+  directionsHeaderLeft: { flexDirection: 'row', alignItems: 'center' },
+  directionsIcon: { marginRight: 8 },
+  directionsHeader: { fontSize: 18, fontWeight: 'bold', color: '#333' },
+  expandButton: { padding: 8 },
   routeSummary: {
     paddingHorizontal: 20,
     paddingBottom: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  routePoints: {
-    marginBottom: 10,
-  },
+  routePoints: { marginBottom: 10 },
   routePointRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 6,
   },
-  routePointDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 12,
-  },
-  originDot: {
-    backgroundColor: '#4CAF50',
-  },
-  destinationDot: {
-    backgroundColor: '#F44336',
-  },
+  routePointDot: { width: 12, height: 12, borderRadius: 6, marginRight: 12 },
+  originDot: { backgroundColor: '#4CAF50' },
+  destinationDot: { backgroundColor: '#F44336' },
   routeLineConnector: {
     width: 2,
     height: 20,
     backgroundColor: '#ddd',
     marginLeft: 5,
   },
-  routePointText: {
-    fontSize: 14,
-    color: '#333',
-    flex: 1,
-  },
+  routePointText: { fontSize: 14, color: '#333', flex: 1 },
   routeMetrics: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -1877,24 +1720,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
   },
-  routeMetricDivider: {
-    width: 1,
-    height: 20,
-    backgroundColor: '#ddd',
-  },
+  routeMetricDivider: { width: 1, height: 20, backgroundColor: '#ddd' },
   routeMetricText: {
     marginLeft: 6,
     fontSize: 14,
     fontWeight: '500',
     color: '#555',
   },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  scrollableContent: {
-    flex: 1,
-  },
+  contentContainer: { flex: 1, paddingHorizontal: 20 },
+  scrollableContent: { flex: 1 },
   routeTabsContainer: {
     flexDirection: 'row',
     marginVertical: 15,
@@ -1910,21 +1744,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
-  routeTabIcon: {
-    marginRight: 8,
-  },
-  activeRouteTab: {
-    borderBottomColor: '#912338',
-  },
-  routeTabText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#666',
-  },
-  activeRouteTabText: {
-    color: '#912338',
-    fontWeight: 'bold',
-  },
+  routeTabIcon: { marginRight: 8 },
+  activeRouteTab: { borderBottomColor: '#912338' },
+  routeTabText: { fontSize: 14, fontWeight: '500', color: '#666' },
+  activeRouteTabText: { color: '#912338', fontWeight: 'bold' },
   shuttleRouteContainer: {
     backgroundColor: '#f9f9f9',
     borderRadius: 12,
@@ -1938,14 +1761,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  shuttleHeaderIcon: {
-    marginRight: 8,
-  },
-  shuttleRouteHeaderText: {
-    fontWeight: 'bold',
-    fontSize: 16,
-    color: '#333',
-  },
+  shuttleHeaderIcon: { marginRight: 8 },
+  shuttleRouteHeaderText: { fontWeight: 'bold', fontSize: 16, color: '#333' },
   shuttleInfoCard: {
     backgroundColor: 'white',
     borderRadius: 8,
@@ -1957,13 +1774,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  shuttleInfoIcon: {
-    marginRight: 10,
-  },
-  shuttleRouteText: {
-    fontSize: 14,
-    color: '#555',
-  },
+  shuttleInfoIcon: { marginRight: 10 },
+  shuttleRouteText: { fontSize: 14, color: '#555' },
   shuttleDetailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1974,20 +1786,9 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eee',
     marginVertical: 10,
   },
-  shuttleDetailItem: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  shuttleDetailLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 5,
-  },
-  shuttleDetailValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
+  shuttleDetailItem: { alignItems: 'center', flex: 1 },
+  shuttleDetailLabel: { fontSize: 12, color: '#666', marginBottom: 5 },
+  shuttleDetailValue: { fontSize: 16, fontWeight: 'bold', color: '#333' },
   shuttleScheduleButton: {
     backgroundColor: '#912338',
     flexDirection: 'row',
@@ -1999,9 +1800,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: 8,
   },
-  buttonIcon: {
-    marginRight: 8,
-  },
+  buttonIcon: { marginRight: 8 },
   shuttleScheduleButtonText: {
     color: 'white',
     fontWeight: '600',
@@ -2018,9 +1817,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginLeft: 8,
   },
-  stepsList: {
-    marginBottom: 20,
-  },
+  stepsList: { marginBottom: 20 },
   stepItem: {
     flexDirection: 'row',
     marginBottom: 12,
@@ -2038,17 +1835,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
     marginTop: 2,
   },
-  stepNumber: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  stepText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#555',
-    lineHeight: 20,
-  },
+  stepNumber: { color: 'white', fontSize: 12, fontWeight: 'bold' },
+  stepText: { flex: 1, fontSize: 14, color: '#555', lineHeight: 20 },
   routeDetailsContainer: {
     marginVertical: 10,
     padding: 15,
@@ -2061,32 +1849,18 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 12,
   },
-  routeDetailsList: {
-    marginTop: 5,
-  },
+  routeDetailsList: { marginTop: 5 },
   routeDetailItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
   },
-  routeDetailsText: {
-    fontSize: 14,
-    color: '#555',
-    marginLeft: 10,
-  },
-  scrollPadding: {
-    height: 30,
-  },
-  largeText: {
-    fontSize: 18,
-  },
-  blackAndWhiteText: {
-    color: '#000000',
-  },
+  routeDetailsText: { fontSize: 14, color: '#555', marginLeft: 10 },
+  scrollPadding: { height: 30 },
+  largeText: { fontSize: 18 },
+  blackAndWhiteText: { color: '#000000' },
   blackAndWhiteContainer: {
     backgroundColor: '#FFFFFF',
     borderColor: '#000000',
   },
 });
-
-export default DirectionsScreen;
