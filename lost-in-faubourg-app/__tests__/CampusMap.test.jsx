@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
 
 process.env.EXPO_OS = 'ios';
 
-// Override console.warn to ignore "No Place ID found" warnings.
 const originalConsoleWarn = console.warn;
 console.warn = (message, ...args) => {
   if (typeof message === 'string' && message.includes('No Place ID found')) {
@@ -22,17 +21,17 @@ jest.mock('react-native-maps', () => {
   const { View } = require('react-native');
   const PropTypes = require('prop-types');
 
-  const MockMapView = (props: any) => <View {...props}>{props.children}</View>;
+  const MockMapView = (props) => <View {...props}>{props.children}</View>;
   MockMapView.propTypes = {
     children: PropTypes.node,
   };
 
-  const MockMarker = (props: any) => <View {...props}>{props.children}</View>;
+  const MockMarker = (props) => <View {...props}>{props.children}</View>;
   MockMarker.propTypes = {
     children: PropTypes.node,
   };
 
-  const MockPolygon = (props: any) => <View {...props}>{props.children}</View>;
+  const MockPolygon = (props) => <View {...props}>{props.children}</View>;
   MockPolygon.propTypes = {
     children: PropTypes.node,
   };
@@ -72,7 +71,7 @@ jest.mock('../services/shuttleService', () => ({
     ],
     centerPoint: { Latitude: 45.4953534, Longitude: -73.578549 },
   }),
-  startShuttleTracking: jest.fn().mockImplementation((callback: any) => {
+  startShuttleTracking: jest.fn().mockImplementation((callback) => {
     callback({
       buses: [
         {
@@ -99,7 +98,7 @@ jest.mock('../services/shuttleService', () => ({
 jest.mock('@expo/vector-icons', () => {
   const { Text } = require('react-native');
   return {
-    Ionicons: (props: any) => <Text {...props} />,
+    Ionicons: (props) => <Text {...props} />,
   };
 });
 
@@ -113,6 +112,22 @@ const setLocationMock = (
 };
 
 const renderCampusMap = () => render(<CampusMap />);
+
+// Extracted helper function to compare polygon coordinates
+function checkPolygonCoordinates(polygon, polygonComponent) {
+  expect(polygonComponent.props.coordinates.length).toEqual(
+    polygon.boundaries.length,
+  );
+  polygonComponent.props.coordinates.forEach((coord, idx) => {
+    const expectedLat = polygon.boundaries[idx].latitude;
+    const expectedLon = polygon.boundaries[idx].longitude;
+    expect(Math.abs(coord.latitude - expectedLat)).toBeLessThan(0.001);
+    expect(Math.abs(coord.longitude - expectedLon)).toBeLessThan(0.001);
+  });
+  expect(polygonComponent.props.fillColor).toBe('#91233833');
+  expect(polygonComponent.props.strokeColor).toBe('#912338');
+  expect(polygonComponent.props.strokeWidth).toBe(2);
+}
 
 // --- Tests ---
 describe('CampusMap', () => {
@@ -214,34 +229,28 @@ describe('CampusMap', () => {
     },
   );
 
+  function verifyPolygons(flatChildren) {
+    polygons.forEach((polygon) => {
+      const polygonComponent = flatChildren.find((child) => {
+        return (
+          child.key &&
+          child.key.endsWith(polygon.name) &&
+          child.type.name === 'MockPolygon'
+        );
+      });
+      expect(polygonComponent).toBeTruthy();
+      checkPolygonCoordinates(polygon, polygonComponent);
+    });
+  }
+
   test('renders polygons correctly', async () => {
     setLocationMock();
     const { getByTestId } = renderCampusMap();
 
     await waitFor(() => {
       const mapView = getByTestId('mapView');
-      // Use Children.toArray() to safely convert children into an array
       const flatChildren = Children.toArray(mapView.props.children);
-      polygons.forEach((polygon) => {
-        // Adjust key comparison to account for React key prefix
-        const polygonComponent = flatChildren.find(
-          (child: any) =>
-            child.key && child.key.endsWith(polygon.name) &&
-            child.type.name === 'MockPolygon'
-        );
-        expect(polygonComponent).toBeTruthy();
-        // Compare each coordinate with a tolerance of 0.001
-        expect(polygonComponent.props.coordinates.length).toEqual(polygon.boundaries.length);
-        polygonComponent.props.coordinates.forEach((coord: any, idx: number) => {
-          const expectedLat = polygon.boundaries[idx].latitude;
-          const expectedLon = polygon.boundaries[idx].longitude;
-          expect(Math.abs(coord.latitude - expectedLat)).toBeLessThan(0.001);
-          expect(Math.abs(coord.longitude - expectedLon)).toBeLessThan(0.001);
-        });
-        expect(polygonComponent.props.fillColor).toBe('#91233833');
-        expect(polygonComponent.props.strokeColor).toBe('#912338');
-        expect(polygonComponent.props.strokeWidth).toBe(2);
-      });
+      verifyPolygons(flatChildren);
     });
   });
 
@@ -279,7 +288,7 @@ describe('CampusMap additional tests', () => {
     const originalStartShuttleTracking =
       require('../services/shuttleService').startShuttleTracking;
     require('../services/shuttleService').startShuttleTracking = jest.fn(
-      (callback: any) => {
+      (callback) => {
         callback({
           buses: [],
           stations: [],
@@ -337,11 +346,11 @@ describe('CampusMap accessibility customization', () => {
       const mapView = getByTestId('mapView');
       const flatChildren = Children.toArray(mapView.props.children);
       const polygonComponents = flatChildren.filter(
-        (child: any) =>
+        (child) =>
           child.props && child.props.coordinates && child.props.fillColor,
       );
       expect(polygonComponents.length).toBe(polygons.length);
-      polygonComponents.forEach((pc: any) => {
+      polygonComponents.forEach((pc) => {
         expect(pc.props.fillColor).toBe('#00000033');
         expect(pc.props.strokeColor).toBe('#000000');
         expect(pc.props.strokeWidth).toBe(2);
