@@ -71,14 +71,14 @@ function InputAutocomplete({
   currentValue,
   isLargeText,
   isBlackAndWhite,
-}: {
+}: Readonly<{
   label: string;
   placeholder: string;
   onPlaceSelected: (data: any, details: any) => void;
   currentValue?: string;
   isLargeText?: boolean;
   isBlackAndWhite?: boolean;
-}) {
+}>) {
   // Modern styling for Google Autocomplete
   const googleAutocompleteStyles = {
     container: { flex: 0, marginBottom: 6 },
@@ -220,7 +220,6 @@ export default function DirectionsScreen() {
 
   const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
-  const [_zoomLevel, setZoomLevel] = useState(15);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -359,8 +358,6 @@ export default function DirectionsScreen() {
     latitudeDelta: number;
     longitudeDelta: number;
   }) => {
-    const zoom = Math.round(Math.log(360 / region.latitudeDelta) / Math.LN2);
-    setZoomLevel(zoom);
   };
 
   const checkUserInBuilding = () => {

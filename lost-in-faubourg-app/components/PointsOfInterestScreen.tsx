@@ -378,11 +378,10 @@ export default function POIScreen() {
   // State
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [pois, setPOIs] = useState<POI[]>([]);
+  const [pois, setPois] = useState<POI[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [_mapReady, setMapReady] = useState<boolean>(false);
   
   // Animation values
   const [slideAnimation] = useState(new Animated.Value(0));
@@ -494,7 +493,7 @@ export default function POIScreen() {
       if (data.status !== 'OK') {
         console.error('Places API Error:', data.status);
         setMessage('Error fetching places');
-        setPOIs([]);
+        setPois([]);
         return;
       }
       
@@ -513,7 +512,7 @@ export default function POIScreen() {
         place_id: place.place_id
       }));
       
-      setPOIs(mappedPOIs);
+      setPois(mappedPOIs);
       
       if (mappedPOIs.length === 0) {
         setMessage('No places found');
@@ -674,7 +673,6 @@ export default function POIScreen() {
         showsCompass={true}
         showsScale={true}
         customMapStyle={mapStyle}
-        onMapReady={() => setMapReady(true)}
         onPress={() => selectedPOI && closeInfo()}
         testID="mapView"
       >

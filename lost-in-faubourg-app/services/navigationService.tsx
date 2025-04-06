@@ -35,7 +35,7 @@ async function getCoordinates(address) {
   } catch (error) {
     console.error(
       'Error fetching coordinates:',
-      error.response?.data || error.message,
+      error.response?.data ?? error.message,
     )
     return null
   }
@@ -103,7 +103,7 @@ export async function getDirections(start, destination, mode) {
   } catch (error) {
     console.error(
       'Error fetching directions:',
-      error.response?.data || error.message,
+      error.response?.data ?? error.message,
     )
     return null
   }

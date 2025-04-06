@@ -362,7 +362,6 @@ const CampusMap: React.FC = () => {
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
   const [openingHours, setOpeningHours] = useState<string>('Loading...');
   const [showOpeningHours, setShowOpeningHours] = useState<boolean>(true);
-  const [_mapReady, setMapReady] = useState<boolean>(false);
   
   // Animation state
   const [slideAnimation] = useState(new Animated.Value(0));
@@ -564,7 +563,6 @@ const CampusMap: React.FC = () => {
           showsMyLocationButton={false}
           showsCompass={true}
           showsScale={true}
-          onMapReady={() => setMapReady(true)}
           onPress={() => selectedBuilding && closeInfo()}
         >
           {renderBuildingMarkers()}

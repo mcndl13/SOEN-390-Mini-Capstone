@@ -4,6 +4,8 @@ import CampusMap from '../components/CampusMap';
 import * as Location from 'expo-location';
 import { polygons } from '../components/polygonCoordinates';
 import { AccessibilityContext } from '../components/AccessibilitySettings';
+import PropTypes from 'prop-types';
+
 
 process.env.EXPO_OS = 'ios';
 
@@ -18,7 +20,6 @@ console.warn = (message, ...args) => {
 
 // --- Mocks ---
 jest.mock('react-native-maps', () => {
-  const React = require('react');
   const { View } = require('react-native');
   const PropTypes = require('prop-types');
 
@@ -299,6 +300,10 @@ describe('CampusMap accessibility customization', () => {
       {children}
     </AccessibilityContext.Provider>
   );
+
+  CustomAccessibilityProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+  };
 
   test('renders polygons in black and white mode', async () => {
     setLocationMock();
