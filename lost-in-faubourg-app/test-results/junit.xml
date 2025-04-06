@@ -1,3 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="0" failures="0" errors="0" time="0.002">
+<testsuites name="jest tests" tests="17" failures="0" errors="0" time="4.427">
+  <testsuite name="POIScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-06T04:52:59" time="3.61" tests="17">
+    <testcase classname="POIScreen mapStyle is black and white when isBlackAndWhite is true" name="POIScreen mapStyle is black and white when isBlackAndWhite is true" time="0.244">
+    </testcase>
+    <testcase classname="POIScreen mapStyle is default when isBlackAndWhite is false" name="POIScreen mapStyle is default when isBlackAndWhite is false" time="0.048">
+    </testcase>
+    <testcase classname="POIScreen displays loading indicator when fetching location" name="POIScreen displays loading indicator when fetching location" time="0.086">
+    </testcase>
+    <testcase classname="POIScreen displays error message when location permission is denied" name="POIScreen displays error message when location permission is denied" time="0.083">
+    </testcase>
+    <testcase classname="POIScreen displays error message when location cannot be determined" name="POIScreen displays error message when location cannot be determined" time="0.075">
+    </testcase>
+    <testcase classname="POIScreen fetches POIs on search submission" name="POIScreen fetches POIs on search submission" time="0.039">
+    </testcase>
+    <testcase classname="POIScreen displays message when no POIs are found" name="POIScreen displays message when no POIs are found" time="0.083">
+    </testcase>
+    <testcase classname="POIScreen displays POIs on the map" name="POIScreen displays POIs on the map" time="0.116">
+    </testcase>
+    <testcase classname="POIScreen additional coverage applies large text styles when isLargeText is true" name="POIScreen additional coverage applies large text styles when isLargeText is true" time="0.022">
+    </testcase>
+    <testcase classname="POIScreen additional coverage displays error message when POI fetch fails" name="POIScreen additional coverage displays error message when POI fetch fails" time="0.078">
+    </testcase>
+    <testcase classname="POIScreen additional coverage displays correct icons for various POI types (covers determinePoiType)" name="POIScreen additional coverage displays correct icons for various POI types (covers determinePoiType)" time="0.045">
+    </testcase>
+    <testcase classname="Additional POIScreen tests displays multiple POIs markers on the map" name="Additional POIScreen tests displays multiple POIs markers on the map" time="0.092">
+    </testcase>
+    <testcase classname="Additional POIScreen tests handles empty search query gracefully" name="Additional POIScreen tests handles empty search query gracefully" time="0.031">
+    </testcase>
+    <testcase classname="Additional POIScreen tests displays error message when POI fetch returns non OK status" name="Additional POIScreen tests displays error message when POI fetch returns non OK status" time="0.086">
+    </testcase>
+    <testcase classname="Increased coverage tests does not fetch POIs for whitespace-only query" name="Increased coverage tests does not fetch POIs for whitespace-only query" time="0.034">
+    </testcase>
+    <testcase classname="Increased coverage tests displays POIs with incomplete data" name="Increased coverage tests displays POIs with incomplete data" time="0.085">
+    </testcase>
+    <testcase classname="Additional missing lines coverage shows success message when POIs are found (covers line 115)" name="Additional missing lines coverage shows success message when POIs are found (covers line 115)" time="0.081">
+    </testcase>
+  </testsuite>
 </testsuites>

@@ -38,7 +38,7 @@ const LOYOLA_COORDS: LocationCoords = {
 };
 
 // ===== Factory Pattern Implementation =====
-class MapComponentFactory {
+export class MapComponentFactory {
   // Create buildings using factory method
   static createBuildings(): Building[] {
     return polygons.map((polygon, index) => ({
