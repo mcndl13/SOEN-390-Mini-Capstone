@@ -368,7 +368,6 @@ describe('Toggle buttons functionality', () => {
   });
 });
 
-import { MapComponentFactory } from './MapComponentFactory';
 
 const mockBuildings = [
   { latitude: 45.495, name: 'SGW Building 1' },
@@ -379,8 +378,8 @@ const mockBuildings = [
 ];
 
 // Mock coordinates
-const SGW_COORDS = { lat: 45.4971, lng: -73.5790 };
-const LOYOLA_COORDS = { lat: 45.4580, lng: -73.6405 };
+const SGW_COORDS = { latitude: 45.4953534, longitude: -73.578549 };
+const LOYOLA_COORDS = { latitude: 45.4582, longitude: -73.6405 };
 
 describe('MapComponentFactory.createMapConfiguration', () => {
   beforeAll(() => {
