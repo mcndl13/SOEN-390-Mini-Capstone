@@ -106,9 +106,4 @@ const styles = StyleSheet.create({
     color: "white",
 
   },
-  webView: {
-    flex: 1, 
-    paddingBottom : 30, 
-    backgroundColor: "#912338", 
-  }
 });
