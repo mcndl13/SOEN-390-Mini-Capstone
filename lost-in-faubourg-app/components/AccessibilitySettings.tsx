@@ -39,7 +39,7 @@ const AccessibilitySettings = () => {
                 onPress={() => setModalVisible(true)}
                 testID="settings-button" // <-- added testID
             >
-                <Ionicons name="settings" size={24} color="black" />
+                <Ionicons name="settings-sharp" size={22} color="black" />
             </Pressable>
 
             <Modal
@@ -139,9 +139,9 @@ const styles = StyleSheet.create({
     settingsButton: {
         position: 'absolute',
         top: 54,
-        right: 7, // Moved more towards the left
+        right: 10, // Moved more towards the left
         padding: 10,
-        zIndex: 1000,
+        zIndex: 1,
     },
     closeButton: {
         alignSelf: 'flex-end',

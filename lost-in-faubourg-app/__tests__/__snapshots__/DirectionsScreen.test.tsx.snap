@@ -4,15 +4,64 @@ exports[`DirectionsScreen matches snapshot 1`] = `
 <View
   style={
     {
-      "alignItems": "center",
-      "backgroundColor": "#fff",
+      "backgroundColor": "#f5f5f5",
       "flex": 1,
-      "justifyContent": "center",
     }
   }
 >
   <View
-    customMapStyle={[]}
+    customMapStyle={
+      [
+        {
+          "elementType": "geometry",
+          "featureType": "water",
+          "stylers": [
+            {
+              "color": "#e9e9e9",
+            },
+            {
+              "lightness": 17,
+            },
+          ],
+        },
+        {
+          "elementType": "geometry",
+          "featureType": "landscape",
+          "stylers": [
+            {
+              "color": "#f5f5f5",
+            },
+            {
+              "lightness": 20,
+            },
+          ],
+        },
+        {
+          "elementType": "geometry.fill",
+          "featureType": "road.highway",
+          "stylers": [
+            {
+              "color": "#ffffff",
+            },
+            {
+              "lightness": 17,
+            },
+          ],
+        },
+        {
+          "elementType": "geometry",
+          "featureType": "poi",
+          "stylers": [
+            {
+              "color": "#f5f5f5",
+            },
+            {
+              "lightness": 21,
+            },
+          ],
+        },
+      ]
+    }
     initialRegion={
       {
         "latitude": 45.4953534,
@@ -22,6 +71,10 @@ exports[`DirectionsScreen matches snapshot 1`] = `
       }
     }
     onRegionChangeComplete={[Function]}
+    showsCompass={true}
+    showsMyLocationButton={false}
+    showsScale={true}
+    showsUserLocation={true}
     style={
       {
         "height": 1334,
@@ -70,8 +123,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -95,8 +148,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -120,8 +173,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -153,8 +206,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -194,8 +247,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -227,8 +280,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -272,8 +325,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -321,8 +374,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -346,8 +399,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -411,8 +464,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -488,8 +541,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -717,8 +770,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -750,8 +803,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -799,8 +852,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -824,8 +877,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -849,8 +902,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -930,8 +983,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -963,8 +1016,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -988,8 +1041,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1013,8 +1066,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1038,8 +1091,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1063,8 +1116,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1088,8 +1141,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1113,8 +1166,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1138,8 +1191,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1163,8 +1216,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1196,8 +1249,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1229,8 +1282,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1254,8 +1307,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1279,8 +1332,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1312,8 +1365,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1337,8 +1390,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1362,8 +1415,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1439,8 +1492,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1464,8 +1517,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1489,8 +1542,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1538,8 +1591,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1631,8 +1684,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1656,8 +1709,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1721,8 +1774,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1762,8 +1815,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1803,8 +1856,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1860,8 +1913,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1901,8 +1954,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -1926,8 +1979,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2007,8 +2060,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2032,8 +2085,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2101,8 +2154,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2134,8 +2187,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2215,8 +2268,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2240,8 +2293,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2281,8 +2334,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2394,8 +2447,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2419,8 +2472,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2444,8 +2497,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2593,8 +2646,8 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
     />
     <View
@@ -2698,676 +2751,874 @@ exports[`DirectionsScreen matches snapshot 1`] = `
           },
         ]
       }
-      fillColor="#912338cc"
-      strokeColor="#912338cc"
+      fillColor="#91233833"
+      strokeColor="#912338"
       strokeWidth={2}
-    />
-    <View
-      coordinate={
-        {
-          "latitude": 45,
-          "longitude": -73,
-        }
-      }
-      pinColor="blue"
-      title="My Location"
     />
   </View>
   <View
-    accessibilityState={
-      {
-        "busy": undefined,
-        "checked": undefined,
-        "disabled": undefined,
-        "expanded": undefined,
-        "selected": undefined,
-      }
-    }
-    accessibilityValue={
-      {
-        "max": undefined,
-        "min": undefined,
-        "now": undefined,
-        "text": undefined,
-      }
-    }
-    accessible={true}
-    collapsable={false}
-    focusable={true}
-    onClick={[Function]}
-    onResponderGrant={[Function]}
-    onResponderMove={[Function]}
-    onResponderRelease={[Function]}
-    onResponderTerminate={[Function]}
-    onResponderTerminationRequest={[Function]}
-    onStartShouldSetResponder={[Function]}
     style={
       {
-        "backgroundColor": "#912338",
-        "borderRadius": 20,
-        "opacity": 1,
-        "paddingHorizontal": 12,
-        "paddingVertical": 8,
         "position": "absolute",
-        "right": 20,
-        "shadowColor": "#000",
-        "shadowOffset": {
-          "height": 2,
-          "width": 2,
-        },
-        "shadowOpacity": 0.2,
-        "shadowRadius": 4,
-        "top": 10,
-        "zIndex": 999,
+        "right": 16,
+        "top": 20,
+        "zIndex": 1,
       }
     }
   >
-    <Text
-      style={
+    <View
+      accessibilityState={
         {
-          "color": "white",
-          "fontSize": 12,
-          "fontWeight": "600",
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
         }
       }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "white",
+          "borderRadius": 22,
+          "elevation": 2,
+          "height": 44,
+          "justifyContent": "center",
+          "marginBottom": 12,
+          "opacity": 1,
+          "shadowColor": "#000",
+          "shadowOffset": {
+            "height": 2,
+            "width": 0,
+          },
+          "shadowOpacity": 0.1,
+          "shadowRadius": 3,
+          "width": 44,
+        }
+      }
+      testID="locateBtn"
     >
-      Hide Shuttles
-    </Text>
+      <Text
+        color="#912338"
+        name="locate"
+        size={24}
+      >
+        icon
+      </Text>
+    </View>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "white",
+          "borderRadius": 22,
+          "elevation": 2,
+          "height": 44,
+          "justifyContent": "center",
+          "marginBottom": 12,
+          "opacity": 1,
+          "shadowColor": "#000",
+          "shadowOffset": {
+            "height": 2,
+            "width": 0,
+          },
+          "shadowOpacity": 0.1,
+          "shadowRadius": 3,
+          "width": 44,
+        }
+      }
+      testID="shuttlesBtn"
+    >
+      <Text
+        color="#1E88E5"
+        name="bus"
+        size={24}
+      >
+        icon
+      </Text>
+    </View>
   </View>
   <View
     style={
       [
         {
+          "alignSelf": "center",
           "backgroundColor": "white",
-          "borderRadius": 8,
-          "elevation": 4,
-          "padding": 20,
+          "borderRadius": 16,
+          "elevation": 5,
+          "maxHeight": 933.8,
+          "padding": 15,
           "position": "absolute",
           "shadowColor": "black",
           "shadowOffset": {
             "height": 2,
-            "width": 2,
+            "width": 0,
           },
-          "shadowOpacity": 0.5,
-          "shadowRadius": 4,
-          "top": 20,
-          "width": "90%",
+          "shadowOpacity": 0.1,
+          "shadowRadius": 8,
+          "top": 100,
+          "width": "85%",
         },
         false,
       ]
     }
   >
-    <Text
+    <View
       style={
-        [
-          {
-            "fontSize": 14,
-            "marginBottom": 4,
-          },
-          false,
-        ]
+        {
+          "marginBottom": 2,
+        }
       }
     >
-      Origin
-    </Text>
-    <Text />
-    <View>
-      <Text>
-        Enter origin
+      <Text
+        style={
+          [
+            {
+              "color": "#555",
+              "fontSize": 16,
+              "fontWeight": "500",
+              "marginBottom": 8,
+            },
+            false,
+            false,
+          ]
+        }
+      >
+        Origin
       </Text>
+      <View>
+        <Text>
+          Enter starting point
+        </Text>
+      </View>
     </View>
-    <Text
+    <View
       style={
-        [
-          {
-            "fontSize": 14,
-            "marginBottom": 4,
-          },
-          false,
-        ]
+        {
+          "marginBottom": 2,
+        }
       }
     >
-      Destination
-    </Text>
-    <Text />
-    <View>
-      <Text>
-        Enter destination
+      <Text
+        style={
+          [
+            {
+              "color": "#555",
+              "fontSize": 16,
+              "fontWeight": "500",
+              "marginBottom": 8,
+            },
+            false,
+            false,
+          ]
+        }
+      >
+        Destination
       </Text>
-    </View>
-    <View
-      style={
-        {
-          "flexDirection": "row",
-          "justifyContent": "space-between",
-          "marginTop": 10,
-        }
-      }
-    >
-      <View
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#0088ff",
-            "borderRadius": 15,
-            "flex": 1,
-            "marginRight": 5,
-            "opacity": 1,
-            "paddingHorizontal": 10,
-            "paddingVertical": 12,
-          }
-        }
-      >
-        <Text
-          style={
-            {
-              "color": "white",
-              "fontSize": 14,
-              "fontWeight": "600",
-            }
-          }
-        >
-          Use My Location
-        </Text>
-      </View>
-      <View
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#912338",
-            "borderRadius": 15,
-            "flex": 1,
-            "marginLeft": 5,
-            "opacity": 1,
-            "paddingHorizontal": 10,
-            "paddingVertical": 12,
-          }
-        }
-      >
-        <Text
-          style={
-            {
-              "color": "white",
-              "fontSize": 14,
-              "fontWeight": "600",
-            }
-          }
-        >
-          Clear Points
+      <View>
+        <Text>
+          Enter destination
         </Text>
       </View>
     </View>
     <View
       style={
         {
-          "flexDirection": "row",
-          "justifyContent": "space-between",
-          "marginVertical": 8,
+          "marginVertical": 4,
         }
       }
     >
+      <Text
+        style={
+          [
+            {
+              "color": "#555",
+              "fontSize": 16,
+              "fontWeight": "600",
+              "marginBottom": 6,
+            },
+            false,
+          ]
+        }
+      >
+        Quick Actions
+      </Text>
       <View
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
         style={
           {
-            "alignItems": "center",
-            "backgroundColor": "#fff",
-            "borderColor": "#912338",
-            "borderRadius": 15,
-            "borderWidth": 0.5,
-            "flex": 1,
-            "marginLeft": 8,
-            "marginRight": 8,
-            "opacity": 1,
-            "paddingVertical": 10,
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "marginBottom": 5,
           }
         }
       >
-        <Text
-          style={
+        <View
+          accessibilityState={
             {
-              "color": "#333",
-              "fontSize": 14,
-              "fontWeight": "600",
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
             }
           }
-        >
-          SGW Campus
-        </Text>
-      </View>
-      <View
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#fff",
-            "borderColor": "#912338",
-            "borderRadius": 15,
-            "borderWidth": 0.5,
-            "flex": 1,
-            "marginLeft": 8,
-            "marginRight": 8,
-            "opacity": 1,
-            "paddingVertical": 10,
-          }
-        }
-      >
-        <Text
-          style={
+          accessibilityValue={
             {
-              "color": "#333",
-              "fontSize": 14,
-              "fontWeight": "600",
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
             }
           }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "#0088ff",
+              "borderRadius": 12,
+              "elevation": 2,
+              "flex": 1,
+              "flexDirection": "row",
+              "justifyContent": "center",
+              "marginHorizontal": 5,
+              "opacity": 1,
+              "paddingHorizontal": 14,
+              "paddingVertical": 10,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.2,
+              "shadowRadius": 2,
+            }
+          }
+          testID="myLocationBtn"
         >
-          Loyola Campus
-        </Text>
+          <Text
+            color="white"
+            name="locate"
+            size={18}
+            style={
+              {
+                "marginRight": 8,
+              }
+            }
+          >
+            icon
+          </Text>
+          <Text
+            style={
+              {
+                "color": "white",
+                "fontSize": 14,
+                "fontWeight": "600",
+              }
+            }
+          >
+            My Location
+          </Text>
+        </View>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "#912338",
+              "borderRadius": 12,
+              "elevation": 2,
+              "flex": 1,
+              "flexDirection": "row",
+              "justifyContent": "center",
+              "marginHorizontal": 5,
+              "opacity": 1,
+              "paddingHorizontal": 14,
+              "paddingVertical": 10,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.2,
+              "shadowRadius": 2,
+            }
+          }
+          testID="clearPointsBtn"
+        >
+          <Text
+            color="white"
+            name="trash-outline"
+            size={18}
+            style={
+              {
+                "marginRight": 8,
+              }
+            }
+          >
+            icon
+          </Text>
+          <Text
+            style={
+              {
+                "color": "white",
+                "fontSize": 14,
+                "fontWeight": "600",
+              }
+            }
+          >
+            Clear Points
+          </Text>
+        </View>
       </View>
     </View>
     <View
       style={
         {
-          "flexDirection": "row",
-          "marginTop": 8,
+          "marginVertical": 4,
         }
       }
     >
       <View
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
         style={
           {
-            "alignItems": "center",
-            "backgroundColor": "#912338",
-            "borderColor": "#912338",
-            "borderRadius": 15,
-            "borderWidth": 0.5,
-            "flex": 1,
-            "marginRight": 8,
-            "opacity": 1,
-            "paddingVertical": 10,
+            "flexDirection": "row",
+            "justifyContent": "space-between",
           }
         }
       >
-        <Image
-          source={
+        <View
+          accessibilityState={
             {
-              "testUri": "../../../assets/images/transportModes/carWhite.png",
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
             }
           }
-          style={
+          accessibilityValue={
             {
-              "height": 25,
-              "width": 32,
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
             }
           }
-        />
-        <Text
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
           style={
-            [
-              {
-                "color": "#333",
-                "fontSize": 14,
-                "fontWeight": "600",
+            {
+              "alignItems": "center",
+              "backgroundColor": "white",
+              "borderColor": "#912338",
+              "borderRadius": 25,
+              "borderWidth": 1,
+              "elevation": 2,
+              "flex": 1,
+              "marginHorizontal": 6,
+              "opacity": 1,
+              "paddingHorizontal": 10,
+              "paddingVertical": 8,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 2,
+                "width": 0,
               },
-              {
-                "color": "#fff",
-              },
-              false,
-              false,
-            ]
+              "shadowOpacity": 0.1,
+              "shadowRadius": 4,
+            }
           }
         >
-          Driving
-        </Text>
+          <Text
+            style={
+              [
+                {
+                  "color": "#333",
+                  "fontSize": 14,
+                  "fontWeight": "600",
+                },
+                false,
+              ]
+            }
+          >
+            SGW
+          </Text>
+        </View>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "white",
+              "borderColor": "#912338",
+              "borderRadius": 25,
+              "borderWidth": 1,
+              "elevation": 2,
+              "flex": 1,
+              "marginHorizontal": 6,
+              "opacity": 1,
+              "paddingHorizontal": 10,
+              "paddingVertical": 8,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 2,
+                "width": 0,
+              },
+              "shadowOpacity": 0.1,
+              "shadowRadius": 4,
+            }
+          }
+        >
+          <Text
+            style={
+              [
+                {
+                  "color": "#333",
+                  "fontSize": 14,
+                  "fontWeight": "600",
+                },
+                false,
+              ]
+            }
+          >
+            Loyola
+          </Text>
+        </View>
       </View>
+    </View>
+    <View
+      style={
+        {
+          "marginVertical": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "#555",
+              "fontSize": 16,
+              "fontWeight": "600",
+              "marginBottom": 6,
+            },
+            false,
+          ]
+        }
+      >
+        Travel Mode
+      </Text>
       <View
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
         style={
           {
-            "alignItems": "center",
-            "backgroundColor": "#fff",
-            "borderColor": "#912338",
-            "borderRadius": 15,
-            "borderWidth": 0.5,
-            "flex": 1,
-            "marginRight": 8,
-            "opacity": 1,
-            "paddingVertical": 10,
+            "flexDirection": "row",
+            "justifyContent": "space-between",
           }
         }
       >
-        <Image
-          source={
+        <View
+          accessibilityState={
             {
-              "testUri": "../../../assets/images/transportModes/walkBlack.png",
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
             }
           }
-          style={
+          accessibilityValue={
             {
-              "height": 25,
-              "width": 32,
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
             }
           }
-        />
-        <Text
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
           style={
-            [
+            {
+              "alignItems": "center",
+              "backgroundColor": "#912338",
+              "borderColor": "#912338",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "elevation": 1,
+              "flex": 1,
+              "flexDirection": "column",
+              "justifyContent": "center",
+              "marginHorizontal": 4,
+              "opacity": 1,
+              "paddingVertical": 10,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.1,
+              "shadowRadius": 2,
+            }
+          }
+          testID="DRIVING"
+        >
+          <Text
+            color="white"
+            name="car-outline"
+            size={22}
+          >
+            icon
+          </Text>
+          <Text
+            style={
+              {
+                "color": "white",
+              }
+            }
+          >
+            Driving
+          </Text>
+        </View>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "white",
+              "borderColor": "#912338",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "elevation": 1,
+              "flex": 1,
+              "flexDirection": "column",
+              "justifyContent": "center",
+              "marginHorizontal": 4,
+              "opacity": 1,
+              "paddingVertical": 10,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
+              },
+              "shadowOpacity": 0.1,
+              "shadowRadius": 2,
+            }
+          }
+          testID="TRANSIT"
+        >
+          <Text
+            color="#912338"
+            name="bus-outline"
+            size={22}
+          >
+            icon
+          </Text>
+          <Text
+            style={
               {
                 "color": "#333",
-                "fontSize": 14,
+                "fontSize": 12,
                 "fontWeight": "600",
+                "marginTop": 4,
+              }
+            }
+          >
+            Transit
+          </Text>
+        </View>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "white",
+              "borderColor": "#912338",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "elevation": 1,
+              "flex": 1,
+              "flexDirection": "column",
+              "justifyContent": "center",
+              "marginHorizontal": 4,
+              "opacity": 1,
+              "paddingVertical": 10,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
               },
-              false,
-              false,
-              false,
-            ]
+              "shadowOpacity": 0.1,
+              "shadowRadius": 2,
+            }
           }
+          testID="WALKING"
         >
-          Walking
-        </Text>
-      </View>
-      <View
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#fff",
-            "borderColor": "#912338",
-            "borderRadius": 15,
-            "borderWidth": 0.5,
-            "flex": 1,
-            "marginRight": 8,
-            "opacity": 1,
-            "paddingVertical": 10,
-          }
-        }
-      >
-        <Image
-          source={
-            {
-              "testUri": "../../../assets/images/transportModes/bikeBlack.png",
-            }
-          }
-          style={
-            {
-              "height": 25,
-              "width": 32,
-            }
-          }
-        />
-        <Text
-          style={
-            [
+          <Text
+            color="#912338"
+            name="walk-outline"
+            size={22}
+          >
+            icon
+          </Text>
+          <Text
+            style={
               {
                 "color": "#333",
-                "fontSize": 14,
+                "fontSize": 12,
                 "fontWeight": "600",
+                "marginTop": 4,
+              }
+            }
+          >
+            Walking
+          </Text>
+        </View>
+        <View
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onClick={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          style={
+            {
+              "alignItems": "center",
+              "backgroundColor": "white",
+              "borderColor": "#912338",
+              "borderRadius": 12,
+              "borderWidth": 1,
+              "elevation": 1,
+              "flex": 1,
+              "flexDirection": "column",
+              "justifyContent": "center",
+              "marginHorizontal": 4,
+              "opacity": 1,
+              "paddingVertical": 10,
+              "shadowColor": "#000",
+              "shadowOffset": {
+                "height": 1,
+                "width": 0,
               },
-              false,
-              false,
-              false,
-            ]
+              "shadowOpacity": 0.1,
+              "shadowRadius": 2,
+            }
           }
+          testID="BICYCLING"
         >
-          Bicycling
-        </Text>
-      </View>
-      <View
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onClick={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "alignItems": "center",
-            "backgroundColor": "#fff",
-            "borderColor": "#912338",
-            "borderRadius": 15,
-            "borderWidth": 0.5,
-            "flex": 1,
-            "marginRight": 8,
-            "opacity": 1,
-            "paddingVertical": 10,
-          }
-        }
-      >
-        <Image
-          source={
-            {
-              "testUri": "../../../assets/images/transportModes/busBlack.png",
-            }
-          }
-          style={
-            {
-              "height": 25,
-              "width": 32,
-            }
-          }
-        />
-        <Text
-          style={
-            [
+          <Text
+            color="#912338"
+            name="bicycle-outline"
+            size={22}
+          >
+            icon
+          </Text>
+          <Text
+            style={
               {
                 "color": "#333",
-                "fontSize": 14,
+                "fontSize": 12,
                 "fontWeight": "600",
-              },
-              false,
-              false,
-              false,
-            ]
-          }
-        >
-          Transit
-        </Text>
+                "marginTop": 4,
+              }
+            }
+          >
+            Bicycling
+          </Text>
+        </View>
       </View>
     </View>
     <View
@@ -3400,29 +3651,38 @@ exports[`DirectionsScreen matches snapshot 1`] = `
       onStartShouldSetResponder={[Function]}
       style={
         {
-          "backgroundColor": "#fff",
-          "borderColor": "#912338",
-          "borderRadius": 15,
-          "borderWidth": 0.5,
-          "marginTop": 16,
+          "alignItems": "center",
+          "backgroundColor": "#912338",
+          "borderRadius": 12,
+          "elevation": 5,
+          "marginTop": 12,
           "opacity": 1,
           "paddingVertical": 12,
+          "shadowColor": "#000",
+          "shadowOffset": {
+            "height": 2,
+            "width": 0,
+          },
+          "shadowOpacity": 0.2,
+          "shadowRadius": 4,
         }
       }
+      testID="findRouteBtn"
     >
       <Text
         style={
           [
             {
+              "color": "white",
+              "fontSize": 16,
               "fontWeight": "600",
               "textAlign": "center",
             },
             false,
-            false,
           ]
         }
       >
-        Trace route
+        Find Route
       </Text>
     </View>
   </View>

@@ -1,4 +1,29 @@
-process.env.EXPO_OS = process.env.EXPO_OS || 'ios';
+import React from 'react';
+import { fireEvent, waitFor, act, within } from '@testing-library/react-native';
+import { stripHtml } from '../components/DirectionsScreen';
+import {
+  renderDirectionsScreen,
+  waitForTimeout,
+  traceRoute,
+  testBackButtonInteraction,
+  selectCampus,
+  selectMyLocation,
+} from './helpers/directionsTestHelpers';
+
+jest.mock(
+  '@env',
+  () => ({
+    GOOGLE_MAPS_API_KEY: 'dummy-key',
+  }),
+  { virtual: true },
+);
+
+try {
+  require.resolve('react-native/Libraries/Animated/NativeAnimatedHelper');
+  jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper', () => ({}));
+} catch (err) {
+  console.log(`NativeAnimatedHelper not found ${err}`);
+}
 
 jest.mock('expo-constants', () => ({
   statusBarHeight: 20,
@@ -28,12 +53,6 @@ jest.spyOn(global, 'fetch').mockImplementation(() => {
   } as any);
 });
 
-import React from 'react';
-import { fireEvent, waitFor, act } from '@testing-library/react-native';
-import { stripHtml } from '../components/DirectionsScreen';
-import { renderDirectionsScreen, waitForTimeout, traceRoute, testBackButtonInteraction, selectCampus, selectMyLocation } from './helpers/directionsTestHelpers';
-
-// Add default location definitions to be used in tests
 const defaultOrigin = { latitude: 45.4953534, longitude: -73.578549 };
 const defaultDestination = { latitude: 45.4582, longitude: -73.6405 };
 
@@ -108,27 +127,27 @@ jest.mock('../services/shuttleService', () => ({
 }));
 
 describe('DirectionsScreen', () => {
-  it('renders origin and destination input placeholders', async () => {
+  test('renders origin and destination input placeholders', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(0);
-    expect(rendered.getByText('Enter origin')).toBeTruthy();
+    expect(rendered.getByText('Enter starting point')).toBeTruthy();
     expect(rendered.getByText('Enter destination')).toBeTruthy();
   });
 
-  it('renders Use My Location and Clear Points buttons', async () => {
+  test('renders Use My Location and Clear Points buttons', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(0);
-    expect(rendered.getByText('Use My Location')).toBeTruthy();
+    expect(rendered.getByText('My Location')).toBeTruthy();
     expect(rendered.getByText('Clear Points')).toBeTruthy();
   });
 
-  it('renders Trace route button', async () => {
+  test('renders Trace route button', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(0);
-    expect(rendered.getByText('Trace route')).toBeTruthy();
+    expect(rendered.getByText('Find Route')).toBeTruthy();
   });
 
-  it('calls clearPoints when Clear Points is pressed', async () => {
+  test('calls clearPoints when Clear Points is pressed', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(0);
     await act(async () => {
@@ -139,13 +158,13 @@ describe('DirectionsScreen', () => {
     });
   });
 
-  it('matches snapshot', async () => {
+  test('matches snapshot', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(0);
     expect(rendered.toJSON()).toMatchSnapshot();
   });
 
-  it('sets steps to empty when API returns no steps', async () => {
+  test('sets steps to empty when API returns no steps', async () => {
     const rendered = renderDirectionsScreen({
       origin: defaultOrigin,
       destination: defaultDestination,
@@ -163,12 +182,13 @@ describe('DirectionsScreen', () => {
       await traceRoute(rendered);
       await waitForTimeout(700);
     });
-    expect(rendered.queryByText('Route Steps')).toBeNull();
-    expect(rendered.queryAllByText(/^\d+\./).length).toBe(0);
+    expect(rendered.queryByText('Turn-by-turn Directions')).toBeNull();
+    await waitFor(() => {
+      expect(rendered.queryAllByText(/^\d+\./).length).toBe(0);
+    });
   });
 });
 
-// Refactored duplicate interactions using helper functions
 describe('More DirectionsScreen interactions', () => {
   const { useRoute } = require('@react-navigation/native');
 
@@ -176,59 +196,62 @@ describe('More DirectionsScreen interactions', () => {
     useRoute.mockReturnValue({ params: {} });
   });
 
-  it('shows error when tracing route with no origin', async () => {
+  test('shows error when tracing route with no origin', async () => {
     const rendered = renderDirectionsScreen({
       destination: { latitude: 45.5, longitude: -73.6 },
     });
     await waitForTimeout(600);
-    fireEvent.press(rendered.getByText('Trace route'));
+    fireEvent.press(rendered.getByText('Find Route'));
     await waitFor(() => {
       expect(rendered.queryByText('Please set an origin point')).toBeTruthy();
     });
   });
 
-  it('shows error when tracing route with no destination', async () => {
+  test('shows error when tracing route with no destination', async () => {
     const rendered = renderDirectionsScreen({
       origin: { latitude: 45.5, longitude: -73.6 },
     });
     await waitForTimeout(600);
-    fireEvent.press(rendered.getByText('Trace route'));
+    fireEvent.press(rendered.getByText('Find Route'));
     await waitFor(() => {
-      expect(rendered.queryByText('Please set a destination point')).toBeTruthy();
+      expect(
+        rendered.queryByText('Please set a destination point'),
+      ).toBeTruthy();
     });
   });
 
-  it('sets campus points and toggles shuttle route', async () => {
+  test('sets campus points and toggles shuttle route', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(600);
-    await selectCampus(rendered, 'SGW Campus');
-    await selectCampus(rendered, 'Loyola Campus');
+    await selectCampus(rendered, 'SGW');
+    await selectCampus(rendered, 'Loyola');
     await traceRoute(rendered);
     await waitForTimeout(600);
-    expect(rendered.getByText('Back to Search')).toBeTruthy();
+    expect(rendered.getByText('Back')).toBeTruthy();
   });
 
-  it('toggles shuttle visibility', async () => {
+  test('toggles shuttle visibility', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(600);
-    const toggleButton = rendered.getByText(/Show Shuttles|Hide Shuttles/);
+    const toggleButton = rendered.getByTestId('shuttlesBtn');
     const initialText = toggleButton.props.children;
     fireEvent.press(toggleButton);
     await waitForTimeout(200);
-    const toggledText = rendered.getByText(/Show Shuttles|Hide Shuttles/).props.children;
+    const toggledText = rendered.getByTestId('shuttlesBtn').props.children;
     expect(toggledText).not.toEqual(initialText);
   });
 
-  it('handles back button press in directions view', async () => {
+  test('handles back button press in directions view', async () => {
     const rendered = renderDirectionsScreen({
       origin: defaultOrigin,
       destination: defaultDestination,
     });
+    fireEvent.press(rendered.getByText('Find Route'));
     await waitForTimeout(600);
     await testBackButtonInteraction(rendered);
   });
 
-  it('processes current location button press', async () => {
+  test('processes current location button press', async () => {
     const geometry = require('../utils/geometry');
     jest.spyOn(geometry, 'isUserInBuilding').mockReturnValue({
       latitude: 45.0 + 0.0001,
@@ -241,12 +264,11 @@ describe('More DirectionsScreen interactions', () => {
 });
 
 describe('Additional DirectionsScreen interactions', () => {
-
-  it('changes travel mode when mode buttons are pressed', async () => {
+  test('changes travel mode when mode buttons are pressed', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(600);
-    const drivingButton = rendered.getAllByText('Driving')[0];
-    const walkingButton = rendered.getAllByText('Walking')[0];
+    const drivingButton = rendered.getByTestId('DRIVING');
+    const walkingButton = rendered.getByTestId('WALKING');
     await act(async () => {
       fireEvent.press(walkingButton);
       await waitForTimeout(100);
@@ -259,42 +281,46 @@ describe('Additional DirectionsScreen interactions', () => {
     expect(rendered.getByText('Driving')).toBeTruthy();
   });
 
-  it('expands and collapses the directions panel when expand button is pressed', async () => {
+  test('expands and collapses the directions panel when expand button is pressed', async () => {
     const rendered = renderDirectionsScreen({
       origin: defaultOrigin,
       destination: defaultDestination,
     });
-    await waitForTimeout(700);
+    fireEvent.press(rendered.getByText('Find Route'));
+    await waitForTimeout(800);
     const expandButton = await waitFor(() =>
-      rendered.getByText(/Expand|Collapse/),
+      rendered.getByTestId('expandCollapseBtn'),
     );
     expect(expandButton).toBeTruthy();
-    expect(expandButton.props.children).toBe('Expand');
+    const { getByText } = within(expandButton);
+    expect(getByText('Collapse')).toBeTruthy();
     fireEvent.press(expandButton);
-    await waitForTimeout(200);
-    expect(rendered.getByText('Collapse')).toBeTruthy();
-    fireEvent.press(rendered.getByText('Collapse'));
-    await waitForTimeout(200);
-    expect(rendered.getByText('Expand')).toBeTruthy();
+    await waitFor(() => {
+      expect(within(expandButton).getByText('Expand')).toBeTruthy();
+    });
+    fireEvent.press(expandButton);
+    await waitFor(() => {
+      expect(within(expandButton).getByText('Collapse')).toBeTruthy();
+    });
   });
 
-  it('handles campus button presses via onPlaceSelected callback', async () => {
+  test('handles campus button presses via onPlaceSelected callback', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(600);
-    await selectCampus(rendered, 'SGW Campus');
-    await selectCampus(rendered, 'Loyola Campus');
+    await selectCampus(rendered, 'SGW');
+    await selectCampus(rendered, 'Loyola');
   });
 
-  it('handles error in fetching detailed directions', async () => {
+  test('handles error in fetching detailed directions', async () => {
     const rendered = renderDirectionsScreen({
       origin: defaultOrigin,
       destination: defaultDestination,
     });
-    jest.spyOn(global, 'fetch').mockImplementationOnce(() =>
-      Promise.reject(new Error('Test error')),
-    );
+    jest
+      .spyOn(global, 'fetch')
+      .mockImplementationOnce(() => Promise.reject(new Error('Test error')));
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    fireEvent.press(rendered.getByText('Trace route'));
+    fireEvent.press(rendered.getByText('Find Route'));
     await waitForTimeout(800);
     expect(errorSpy).toHaveBeenCalledWith(
       'Directions fetch error',
@@ -303,22 +329,22 @@ describe('Additional DirectionsScreen interactions', () => {
     errorSpy.mockRestore();
   });
 
-  it('expands directions panel via button press', async () => {
+  test('expands directions panel via button press', async () => {
     const rendered = renderDirectionsScreen({
       origin: defaultOrigin,
       destination: defaultDestination,
     });
-    fireEvent.press(rendered.getByText('Trace route'));
+    fireEvent.press(rendered.getByText('Find Route'));
     await waitForTimeout(800);
     const expandButton = rendered.getByText(/Expand|Collapse/);
-    expect(expandButton.props.children).toBe('Expand');
+    expect(expandButton.props.children).toBe('Collapse');
     fireEvent.press(expandButton);
     await waitFor(() => {
-      expect(rendered.getByText('Collapse')).toBeTruthy();
+      expect(rendered.getByText('Expand')).toBeTruthy();
     });
   });
 
-  it('renders route steps when API returns steps', async () => {
+  test('renders route steps when API returns steps', async () => {
     const rendered = renderDirectionsScreen({
       origin: defaultOrigin,
       destination: defaultDestination,
@@ -331,18 +357,18 @@ describe('Additional DirectionsScreen interactions', () => {
       rendered.getAllByText('Route Steps'),
     );
     expect(routeStepsHeaders[0]).toBeTruthy();
-    expect(rendered.getByText(/^1\./)).toBeTruthy();
+    expect(rendered.getByText(/^1$/)).toBeTruthy();
   });
 });
 
 describe('Helper function stripHtml', () => {
-  it('removes HTML tags correctly', () => {
+  test('removes HTML tags correctly', () => {
     const input = '<b>Hello</b> <i>World</i>! This is <u>test</u>.';
     const output = stripHtml(input);
     expect(output).toBe('Hello World! This is test.');
   });
 
-  it('returns empty string for empty input', () => {
+  test('returns empty string for empty input', () => {
     expect(stripHtml('')).toBe('');
   });
 });
