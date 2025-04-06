@@ -378,7 +378,7 @@ export default function POIScreen() {
   // State
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [pois, setPOIs] = useState<POI[]>([]);
+  const [pois] = useState<POI[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
   const [message, setMessage] = useState<string | null>(null);
