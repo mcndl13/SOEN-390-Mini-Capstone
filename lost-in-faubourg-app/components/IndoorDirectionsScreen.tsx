@@ -4,7 +4,7 @@ import { WebView } from 'react-native-webview';
 
 function IndoorDirectionsScreen() {
   const [selectedBuilding, setSelectedBuilding] = useState(null);
-  const webViewRef = useRef(null);
+  const webViewRef = useRef<WebView>(null);
 
   const buildings = [
     {
@@ -32,9 +32,9 @@ function IndoorDirectionsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Select a Building</Text>
-      {buildings.map((building, index) => (
+      {buildings.map((building) => (
         <TouchableOpacity
-          key={index}
+          key={building.name}
           style={styles.buildingButton}
           onPress={() => setSelectedBuilding(building)}
         >
@@ -57,7 +57,7 @@ function IndoorDirectionsScreen() {
               <Text style={styles.headerButtonText}>Close</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => webViewRef.current && webViewRef.current.reload()}
+              onPress={() => webViewRef.current?.reload()}
               style={styles.headerButton}
             >
               <Text style={styles.headerButtonText}>Reload</Text>
