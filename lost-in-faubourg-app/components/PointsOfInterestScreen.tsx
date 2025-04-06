@@ -817,7 +817,7 @@ const styles = StyleSheet.create({
   // Search bar
   searchContainer: {
     position: 'absolute',
-    top: Constants.statusBarHeight + 60,
+    top: Constants.statusBarHeight + 1,
     left: 0,
     right: 0,
     paddingHorizontal: 15,
