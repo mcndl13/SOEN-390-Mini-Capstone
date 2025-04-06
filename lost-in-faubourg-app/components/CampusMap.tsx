@@ -200,9 +200,13 @@ const MapControls = ({
   recenterMap: () => void, 
   toggleShuttles: () => void 
 }) => {
-  const busIconColor = isBlackAndWhite 
-    ? "#000" 
-    : (showShuttles ? "#1E88E5" : "#757575");
+  let busIconColor = "#757575";
+  if (showShuttles) {
+    busIconColor = "#1E88E5";
+  }
+  if (isBlackAndWhite) {
+    busIconColor = "#000";
+  }
   return (
     <View style={styles.mapControls}>
       <TouchableOpacity 
@@ -412,7 +416,6 @@ const CampusMap: React.FC = () => {
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
   const [openingHours, setOpeningHours] = useState<string>('Loading...');
   const [showOpeningHours, setShowOpeningHours] = useState<boolean>(true);
-  const [_mapReady, setMapReady] = useState<boolean>(false);
   
   // Animation state
   const [slideAnimation] = useState(new Animated.Value(0));
@@ -480,7 +483,7 @@ const CampusMap: React.FC = () => {
         selectedBuilding.latitude,
         selectedBuilding.longitude,
       );
-      setOpeningHours(hours || 'No hours available');
+      setOpeningHours(hours ?? 'No hours available');
     };
     fetchOpeningHours();
   }, [selectedBuilding]);
@@ -527,9 +530,9 @@ const CampusMap: React.FC = () => {
   );
   
   const renderBuildingPolygons = () => (
-    polygons.map((polygon, index) => (
+    polygons.map((polygon) => (
       <Polygon
-        key={index}
+        key={polygon.name} // Assuming 'name' is unique for each polygon
         coordinates={polygon.boundaries}
         fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
         strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
@@ -593,6 +596,10 @@ const CampusMap: React.FC = () => {
     );
   };
   
+  function setMapReady(isReady: boolean): void {
+    console.log(`Map is ${isReady ? 'ready' : 'not ready'}`);
+  }
+
   // Main render
   return (
     <View style={styles.container}>
@@ -610,7 +617,6 @@ const CampusMap: React.FC = () => {
           showsCompass={true}
           showsScale={true}
           onMapReady={() => setMapReady(true)}
-          onPress={() => selectedBuilding && closeInfo()}
         >
           {renderBuildingMarkers()}
           {renderBuildingPolygons()}

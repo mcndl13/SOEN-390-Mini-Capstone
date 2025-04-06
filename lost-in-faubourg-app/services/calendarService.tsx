@@ -21,8 +21,8 @@ export async function getCalendarEvents(token: string) {
     if (data.items && Array.isArray(data.items)) {
       return data.items.map((event: any) => ({
         summary: event.summary,
-        start: event.start?.dateTime || event.start?.date,
-        location: event.location || "N/A",
+        start: event.start?.dateTime ?? event.start?.date,
+        location: event.location ?? "N/A",
       }));
     } else {
       console.warn("No events found in the calendar.");

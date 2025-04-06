@@ -198,10 +198,15 @@ const QuickSearchButtons = ({ options, searchQuery, handleQuickSearch, isLoading
         disabled={isLoading}
       >
         {(() => {
-          // Extract the nested ternary into a constant
-          const iconColor = searchQuery === option.id 
-            ? "white" 
-            : (isBlackAndWhite ? "#000" : "#333");
+          // Determine the icon color based on searchQuery and isBlackAndWhite
+          let iconColor;
+          if (searchQuery === option.id) {
+            iconColor = "white";
+          } else if (isBlackAndWhite) {
+            iconColor = "#000";
+          } else {
+            iconColor = "#333";
+          }
             
           return (
             <Ionicons 
@@ -422,11 +427,10 @@ export default function POIScreen() {
   // State
   const [userLocation, setUserLocation] = useState<Coordinates | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [pois, setPOIs] = useState<POI[]>([]);
+  const [pointsOfInterest, setPointsOfInterest] = useState<POI[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedPOI, setSelectedPOI] = useState<POI | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [_mapReady, setMapReady] = useState<boolean>(false);
   
   // Animation values
   const [slideAnimation] = useState(new Animated.Value(0));
@@ -538,7 +542,7 @@ export default function POIScreen() {
       if (data.status !== 'OK') {
         console.error('Places API Error:', data.status);
         setMessage('Error fetching places');
-        setPOIs([]);
+        setPointsOfInterest([]);
         return;
       }
       
@@ -557,7 +561,7 @@ export default function POIScreen() {
         place_id: place.place_id
       }));
       
-      setPOIs(mappedPOIs);
+      setPointsOfInterest(mappedPOIs);
       
       if (mappedPOIs.length === 0) {
         setMessage('No places found');
@@ -662,7 +666,7 @@ export default function POIScreen() {
 
   // Render POI markers
   const renderPOIMarkers = () => {
-    return pois.map((poi) => (
+    return pointsOfInterest.map((poi) => (
       <Marker
         key={poi.id}
         coordinate={poi.coordinates}
@@ -688,9 +692,9 @@ export default function POIScreen() {
 
   // Render building polygons
   const renderBuildingPolygons = () => {
-    return polygons.map((polygon, idx) => (
+    return polygons.map((polygon) => (
       <Polygon
-        key={idx}
+        key={polygon.name}
         coordinates={polygon.boundaries}
         fillColor={isBlackAndWhite ? "#00000033" : "#91233833"}
         strokeColor={isBlackAndWhite ? "#000000" : "#912338"}
@@ -718,7 +722,7 @@ export default function POIScreen() {
         showsCompass={true}
         showsScale={true}
         customMapStyle={mapStyle}
-        onMapReady={() => setMapReady(true)}
+        // Removed onMapReady handler
         onPress={() => selectedPOI && closeInfo()}
         testID="mapView"
       >

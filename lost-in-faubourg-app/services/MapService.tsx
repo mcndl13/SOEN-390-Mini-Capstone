@@ -1,6 +1,5 @@
 // services/mapService.ts
 import * as Location from 'expo-location';
-import { Alert } from 'react-native';
 import { GOOGLE_MAPS_API_KEY } from '@env';
 import { isUserInBuilding } from '../utils/geometry';
 
@@ -10,6 +9,8 @@ export interface Coordinates {
   longitude: number;
   name?: string;
 }
+
+import { Dimensions } from 'react-native';
 
 // Campus coordinates
 export const SGW_COORDS: Coordinates = { latitude: 45.4953534, longitude: -73.578549 };
@@ -22,8 +23,6 @@ export const INITIAL_POSITION = {
   latitudeDelta: 0.02,
   longitudeDelta: 0.02 * (Dimensions.get('window').width / Dimensions.get('window').height),
 };
-
-import { Dimensions } from 'react-native';
 
 class MapService {
   private static instance: MapService;

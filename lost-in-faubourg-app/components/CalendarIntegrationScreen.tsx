@@ -47,7 +47,7 @@ export default function CalendarIntegrationScreen() {
   const redirectUri = makeRedirectUri();
 
   // Google Sign-In request
-  const [request, response, promptAsync] = Google.useAuthRequest({
+  const [, response, promptAsync] = Google.useAuthRequest({
     androidClientId: "876949776030-i8f75o4us24vdeavtfv4q4rnjfpfg00b.apps.googleusercontent.com",
     webClientId: "876949776030-i8f75o4us24vdeavtfv4q4rnjfpfg00b.apps.googleusercontent.com",
     iosClientId : "876949776030-uot2pvtbrfq8ushvtgn1rp54f70i9b2h.apps.googleusercontent.com",
@@ -166,10 +166,10 @@ export default function CalendarIntegrationScreen() {
       {events.length > 0 ? (
         <>
           {events.map((event, index) => (
-            <View key={index} style={styles.eventContainer}>
+            <View key={event.summary + event.start} style={styles.eventContainer}>
               <Text style={styles.eventTitle}>{event.summary}</Text>
               <Text style={styles.eventDetails}>{`Start: ${event.start}`}</Text>
-              <Text style={styles.eventDetails}>{`Location: ${event.location || "N/A"}`}</Text>
+              <Text style={styles.eventDetails}>{`Location: ${event.location ?? "N/A"}`}</Text>
               {index === 0 && event.location && event.location !== "N/A" && (
                 <TouchableOpacity style={styles.getDirectionsButton} onPress={handleGetDirections}>
                   <Text style={styles.buttonText}>Get directions</Text>

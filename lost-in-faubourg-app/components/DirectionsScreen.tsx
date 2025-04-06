@@ -17,6 +17,7 @@ import MapView, {
   Polygon,
   PROVIDER_DEFAULT,
   MapStyleElement,
+  Region,
 } from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import Constants from 'expo-constants';
@@ -71,14 +72,14 @@ function InputAutocomplete({
   currentValue,
   isLargeText,
   isBlackAndWhite,
-}: {
+}: Readonly<{
   label: string;
   placeholder: string;
   onPlaceSelected: (data: any, details: any) => void;
   currentValue?: string;
   isLargeText?: boolean;
   isBlackAndWhite?: boolean;
-}) {
+}>) {
   // Modern styling for Google Autocomplete
   const googleAutocompleteStyles = {
     container: { flex: 0, marginBottom: 6 },
@@ -220,7 +221,7 @@ export default function DirectionsScreen() {
 
   const [shuttleData, setShuttleData] = useState<ShuttleData | null>(null);
   const [showShuttles, setShowShuttles] = useState<boolean>(true);
-  const [_zoomLevel, setZoomLevel] = useState(15);
+  // Removed unused zoomLevel state
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -353,15 +354,7 @@ export default function DirectionsScreen() {
     }
   };
 
-  const onRegionChange = (region: {
-    latitude: number;
-    longitude: number;
-    latitudeDelta: number;
-    longitudeDelta: number;
-  }) => {
-    const zoom = Math.round(Math.log(360 / region.latitudeDelta) / Math.LN2);
-    setZoomLevel(zoom);
-  };
+  // Removed onRegionChange function as zoomLevel is no longer used
 
   const checkUserInBuilding = () => {
     if (!userLocation) return null;
@@ -420,7 +413,10 @@ export default function DirectionsScreen() {
 
   // Replace the original formatLocationName with an updated version that accepts currentUserLocation.
   const formatLocationName = (
-    location: { latitude: number; longitude: number; name?: string } | null | undefined,
+    location:
+      | { latitude: number; longitude: number; name?: string }
+      | null
+      | undefined,
     currentUserLocation?: { latitude: number; longitude: number } | null,
   ) => {
     if (!location) return '';
@@ -669,15 +665,22 @@ export default function DirectionsScreen() {
         },
       ];
 
-  const getModeIcon = (mode: MapViewDirectionsMode): keyof typeof Ionicons.glyphMap => {
-    const icons: Record<MapViewDirectionsMode, keyof typeof Ionicons.glyphMap> = {
-      DRIVING: 'car-outline',
-      WALKING: 'walk-outline',
-      BICYCLING: 'bicycle-outline',
-      TRANSIT: 'bus-outline',
-    };
+  const getModeIcon = (
+    mode: MapViewDirectionsMode,
+  ): keyof typeof Ionicons.glyphMap => {
+    const icons: Record<MapViewDirectionsMode, keyof typeof Ionicons.glyphMap> =
+      {
+        DRIVING: 'car-outline',
+        WALKING: 'walk-outline',
+        BICYCLING: 'bicycle-outline',
+        TRANSIT: 'bus-outline',
+      };
     return icons[mode] || 'navigate-outline';
   };
+
+  function onRegionChange(region: Region): void {
+    console.log('Region changed to:', region);
+  }
 
   return (
     <View style={styles.container}>
@@ -720,9 +723,9 @@ export default function DirectionsScreen() {
         showsCompass={true}
         showsScale={true}
       >
-        {polygons.map((polygon, idx) => (
+        {polygons.map((polygon) => (
           <Polygon
-            key={idx}
+            key={polygon.name}
             coordinates={polygon.boundaries}
             fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
             strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
@@ -850,9 +853,10 @@ export default function DirectionsScreen() {
           <Ionicons
             name="bus"
             size={24}
-            color={
-              isBlackAndWhite ? '#000' : showShuttles ? '#1E88E5' : '#757575'
-            }
+            color={(() => {
+              const color = isBlackAndWhite ? '#000' : '#757575';
+              return showShuttles ? '#1E88E5' : color;
+            })()}
           />
         </TouchableOpacity>
       </View>
@@ -981,9 +985,12 @@ export default function DirectionsScreen() {
                     color={
                       travelMode === mode
                         ? 'white'
-                        : isBlackAndWhite
-                        ? 'black'
-                        : '#912338'
+                        : (() => {
+                            const baseColor = isBlackAndWhite
+                              ? 'black'
+                              : '#912338';
+                            return baseColor;
+                          })()
                     }
                   />
                   <Text
@@ -1145,12 +1152,12 @@ export default function DirectionsScreen() {
                 ]}
                 onPress={() => setActiveRouteTab('standard')}
               >
-               {(() => {
-                  // Extract the nested ternary into a constant using an IIFE
-                  const routeTabIconColor = activeRouteTab === 'standard'
-                    ? (isBlackAndWhite ? '#000' : '#912338')
-                    : '#666';
-                    
+                {(() => {
+                  // Extract the nested ternary into independent constants using an IIFE
+                  const baseColor = isBlackAndWhite ? '#000' : '#912338';
+                  const routeTabIconColor =
+                    activeRouteTab === 'standard' ? baseColor : '#666';
+
                   return (
                     <Ionicons
                       name={getModeIcon(travelMode)}
@@ -1180,10 +1187,10 @@ export default function DirectionsScreen() {
                   onPress={() => setActiveRouteTab('shuttle')}
                 >
                   {(() => {
-                    const shuttleTabIconColor = activeRouteTab === 'shuttle'
-                      ? (isBlackAndWhite ? '#000' : '#912338')
-                      : '#666';
-                      
+                    const baseColor = isBlackAndWhite ? '#000' : '#912338';
+                    const shuttleTabIconColor =
+                      activeRouteTab === 'shuttle' ? baseColor : '#666';
+
                     return (
                       <Ionicons
                         name="bus"
@@ -1357,7 +1364,12 @@ export default function DirectionsScreen() {
 
                   <View style={styles.stepsList}>
                     {steps.map((step, index) => (
-                      <View style={styles.stepItem} key={`step-${index}-${stripHtml(step.html_instructions).slice(0, 10)}`}>
+                      <View
+                        style={styles.stepItem}
+                        key={`step-${index}-${stripHtml(
+                          step.html_instructions,
+                        ).slice(0, 10)}`}
+                      >
                         <View style={styles.stepNumberContainer}>
                           <Text style={styles.stepNumber}>{index + 1}</Text>
                         </View>
