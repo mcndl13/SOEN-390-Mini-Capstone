@@ -1,10 +1,12 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import CampusMap from '../components/CampusMap';
+import CampusMap, { MapComponentFactory } from '../components/CampusMap';
 import * as Location from 'expo-location';
 import { polygons } from '../components/polygonCoordinates';
 import { AccessibilityContext } from '../components/AccessibilitySettings';
-import { MapComponentFactory } from '../components/CampusMap';
+import PropTypes from 'prop-types';
+
+
 
 process.env.EXPO_OS = 'ios';
 
@@ -19,7 +21,6 @@ console.warn = (message, ...args) => {
 
 // --- Mocks ---
 jest.mock('react-native-maps', () => {
-  const React = require('react');
   const { View } = require('react-native');
   const PropTypes = require('prop-types');
 
@@ -288,18 +289,23 @@ describe('CampusMap additional tests', () => {
 });
 
 describe('CampusMap accessibility customization', () => {
-  const CustomAccessibilityProvider = ({ children }) => (
-    <AccessibilityContext.Provider
-      value={{
-        isBlackAndWhite: true,
-        isLargeText: false,
-        setIsBlackAndWhite: jest.fn(),
-        setIsLargeText: jest.fn(),
-      }}
-    >
-      {children}
-    </AccessibilityContext.Provider>
-  );
+    const CustomAccessibilityProvider = ({ children }) => {
+  CustomAccessibilityProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+  };
+    const accessibilityValue = React.useMemo(() => ({
+      isBlackAndWhite: true,
+      isLargeText: false,
+      setIsBlackAndWhite: jest.fn(),
+      setIsLargeText: jest.fn(),
+    }), []);
+
+    return (
+      <AccessibilityContext.Provider value={accessibilityValue}>
+        {children}
+      </AccessibilityContext.Provider>
+    );
+  };
 
   test('renders polygons in black and white mode', async () => {
     setLocationMock();
@@ -314,10 +320,10 @@ describe('CampusMap accessibility customization', () => {
       const flatChildren = React.Children.toArray(
         mapView.props.children,
       ).flat();
-      const polygonComponents = flatChildren.filter(
-        (child) =>
-          child.props && child.props.coordinates && child.props.fillColor,
-      );
+      const isPolygonComponent = (child) =>
+        child.props?.coordinates?.fillColor;
+
+      const polygonComponents = flatChildren.filter(isPolygonComponent);
       expect(polygonComponents.length).toBe(polygons.length);
       polygonComponents.forEach((pc) => {
         expect(pc.props.fillColor).toBe('#00000033');
