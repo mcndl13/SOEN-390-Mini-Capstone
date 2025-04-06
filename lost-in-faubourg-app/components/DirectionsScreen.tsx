@@ -179,7 +179,6 @@ function getModeIcon(mode: MapViewDirectionsMode): string {
 }
 
 // -- Custom Hooks --
-
 function useInitializeLocation(
   setUserLocation: React.Dispatch<
     React.SetStateAction<{ latitude: number; longitude: number } | null>
@@ -803,6 +802,40 @@ function showShuttleRouteOption(
   return activeRouteTab === 'shuttle';
 }
 
+// -- Helper Functions for traceRoute refactoring --
+
+// Extract validation of route points to reduce nested conditions.
+function validateRoute(
+  origin: { latitude: number; longitude: number } | null,
+  destination: { latitude: number; longitude: number } | null,
+): string | null {
+  if (!origin) return 'Please set an origin point';
+  if (!destination) return 'Please set a destination point';
+  return null;
+}
+
+// Extract map movement logic.
+function moveMapToRoute(
+  mapRef: React.RefObject<MapView>,
+  finalOrigin: { latitude: number; longitude: number },
+  finalDestination: { latitude: number; longitude: number },
+) {
+  mapRef.current?.fitToCoordinates([finalOrigin, finalDestination], {
+    edgePadding: EDGE_PADDING,
+    animated: true,
+  });
+}
+
+// The missing traceRouteOnReady function is defined here.
+const traceRouteOnReady = (result: { distance: number; duration: number }) => {
+  if (result) {
+    setDistance(result.distance);
+    setDuration(result.duration);
+    setExpandedDirections(true);
+  }
+  fetchDetailedDirections(origin, destination, travelMode);
+};
+
 // -- Main Component --
 export default function DirectionsScreen() {
   const { isBlackAndWhite, isLargeText } = useContext(AccessibilityContext);
@@ -841,7 +874,7 @@ export default function DirectionsScreen() {
   const panY = useRef(new Animated.Value(0)).current;
   const fadeInAnim = useRef(new Animated.Value(0)).current;
 
-  // PanResponder for handling swipe gestures in the directions panel
+  // PanResponder for handling swipe gestures in the directions panel.
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -867,7 +900,7 @@ export default function DirectionsScreen() {
     }),
   ).current;
 
-  // Initialize location and shuttle tracking via custom hooks
+  // Initialize location and shuttle tracking via custom hooks.
   useInitializeLocation(setUserLocation);
   useShuttleTracking(setShuttleData);
 
@@ -897,7 +930,7 @@ export default function DirectionsScreen() {
     }
   }, [route.params]);
 
-  // Toast fade effect
+  // Toast fade effect.
   useEffect(() => {
     if (toastMessage) {
       Animated.timing(fadeInAnim, {
@@ -918,12 +951,12 @@ export default function DirectionsScreen() {
     }
   }, [toastMessage]);
 
-  // Toggle route tab based on shuttle route availability
+  // Toggle route tab based on shuttle route availability.
   useEffect(() => {
     setActiveRouteTab(showShuttleRoute ? 'shuttle' : 'standard');
   }, [showShuttleRoute]);
 
-  // Update zoom level on region change
+  // Update zoom level on region change.
   const onRegionChange = (region: {
     latitude: number;
     longitude: number;
@@ -1037,6 +1070,30 @@ export default function DirectionsScreen() {
     }
   };
 
+  // --- Refactored traceRoute Function ---
+  // Helper: Validate route points.
+  function validateRoute(
+    origin: { latitude: number; longitude: number } | null,
+    destination: { latitude: number; longitude: number } | null,
+  ): string | null {
+    if (!origin) return 'Please set an origin point';
+    if (!destination) return 'Please set a destination point';
+    return null;
+  }
+
+  // Helper: Animate map to the route coordinates.
+  function moveMapToRoute(
+    mapRef: React.RefObject<MapView>,
+    finalOrigin: { latitude: number; longitude: number },
+    finalDestination: { latitude: number; longitude: number },
+  ) {
+    mapRef.current?.fitToCoordinates([finalOrigin, finalDestination], {
+      edgePadding: EDGE_PADDING,
+      animated: true,
+    });
+  }
+
+  // Missing function: traceRouteOnReady – invoked when MapViewDirections is ready.
   const traceRouteOnReady = (result: {
     distance: number;
     duration: number;
@@ -1049,25 +1106,21 @@ export default function DirectionsScreen() {
     fetchDetailedDirections(origin, destination, travelMode);
   };
 
+  // Refactored traceRoute using helper functions.
   const traceRoute = () => {
     console.log('Tracing route with:', { origin, destination });
-    if (!origin) {
-      setToastMessage('Please set an origin point');
+    const error = validateRoute(origin, destination);
+    if (error) {
+      setToastMessage(error);
       return;
     }
-    if (!destination) {
-      setToastMessage('Please set a destination point');
-      return;
-    }
-    const finalOrigin = snapToNearestBuilding(origin);
-    const finalDestination = snapToNearestBuilding(destination);
+    const finalOrigin = snapToNearestBuilding(origin!);
+    const finalDestination = snapToNearestBuilding(destination!);
     setShowDirections(true);
-    const shuttleApplicable = isShuttleRouteApplicable(origin, destination);
-    setShowShuttleRoute(shuttleApplicable);
-    mapRef.current?.fitToCoordinates([finalOrigin, finalDestination], {
-      edgePadding: EDGE_PADDING,
-      animated: true,
-    });
+    setShowShuttleRoute(isShuttleRouteApplicable(origin, destination));
+    moveMapToRoute(mapRef, finalOrigin, finalDestination);
+    // Optionally fetch detailed directions after moving the map.
+    fetchDetailedDirections(origin, destination, travelMode);
   };
 
   const setCampusPoint = (
@@ -1096,7 +1149,7 @@ export default function DirectionsScreen() {
     mapRef.current?.animateToRegion(INITIAL_POSITION, 1000);
   };
 
-  // Determine map style based on accessibility settings
+  // Determine map style based on accessibility settings.
   const mapStyle: MapStyleElement[] = getMapStyle(isBlackAndWhite);
 
   return (
