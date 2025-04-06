@@ -6,8 +6,6 @@ import { polygons } from '../components/polygonCoordinates';
 import { AccessibilityContext } from '../components/AccessibilitySettings';
 import PropTypes from 'prop-types';
 
-
-
 process.env.EXPO_OS = 'ios';
 
 // Override console.warn to ignore "No Place ID found" warnings.
@@ -221,10 +219,10 @@ describe('CampusMap', () => {
     await waitFor(() => {
       const mapView = getByTestId('mapView');
       const flatChildren = mapView.props.children.flat();
-      polygons.forEach((polygon, index) => {
+      polygons.forEach((polygon) => {
         const polygonComponent = flatChildren.find(
           (child) =>
-            child.key === index.toString() && child.type.name === 'MockPolygon',
+            child.key === polygon.name && child.type.name === 'MockPolygon',
         );
         expect(polygonComponent).toBeTruthy();
         expect(polygonComponent.props.coordinates).toEqual(polygon.boundaries);
@@ -289,16 +287,19 @@ describe('CampusMap additional tests', () => {
 });
 
 describe('CampusMap accessibility customization', () => {
-    const CustomAccessibilityProvider = ({ children }) => {
-  CustomAccessibilityProvider.propTypes = {
-    children: PropTypes.node.isRequired,
-  };
-    const accessibilityValue = React.useMemo(() => ({
-      isBlackAndWhite: true,
-      isLargeText: false,
-      setIsBlackAndWhite: jest.fn(),
-      setIsLargeText: jest.fn(),
-    }), []);
+  const CustomAccessibilityProvider = ({ children }) => {
+    CustomAccessibilityProvider.propTypes = {
+      children: PropTypes.node.isRequired,
+    };
+    const accessibilityValue = React.useMemo(
+      () => ({
+        isBlackAndWhite: true,
+        isLargeText: false,
+        setIsBlackAndWhite: jest.fn(),
+        setIsLargeText: jest.fn(),
+      }),
+      [],
+    );
 
     return (
       <AccessibilityContext.Provider value={accessibilityValue}>
@@ -311,19 +312,26 @@ describe('CampusMap accessibility customization', () => {
     setLocationMock();
     const { getByTestId } = render(
       <CustomAccessibilityProvider>
-        <CampusMap />
+        <CampusMap
+          defaultRegion={{
+            latitude: 45.4953534,
+            longitude: -73.578549,
+            latitudeDelta: 0.005,
+            longitudeDelta: 0.005,
+          }}
+        />
       </CustomAccessibilityProvider>,
     );
 
     await waitFor(() => {
       const mapView = getByTestId('mapView');
+      // Use fillColor prop directly to filter polygon components
       const flatChildren = React.Children.toArray(
         mapView.props.children,
       ).flat();
-      const isPolygonComponent = (child) =>
-        child.props?.coordinates?.fillColor;
-
-      const polygonComponents = flatChildren.filter(isPolygonComponent);
+      const polygonComponents = flatChildren.filter(
+        (child) => child.props?.fillColor,
+      );
       expect(polygonComponents.length).toBe(polygons.length);
       polygonComponents.forEach((pc) => {
         expect(pc.props.fillColor).toBe('#00000033');
@@ -374,7 +382,6 @@ describe('Toggle buttons functionality', () => {
   });
 });
 
-
 const mockBuildings = [
   { latitude: 45.495, name: 'SGW Building 1' },
   { latitude: 45.496, name: 'SGW Building 2' },
@@ -383,13 +390,14 @@ const mockBuildings = [
   { latitude: 45.48, name: 'Out of Range' },
 ];
 
-// Mock coordinates
 const SGW_COORDS = { latitude: 45.4953534, longitude: -73.578549 };
 const LOYOLA_COORDS = { latitude: 45.4582, longitude: -73.6405 };
 
 describe('MapComponentFactory.createMapConfiguration', () => {
   beforeAll(() => {
-    jest.spyOn(MapComponentFactory, 'createBuildings').mockImplementation(() => mockBuildings);
+    jest
+      .spyOn(MapComponentFactory, 'createBuildings')
+      .mockImplementation(() => mockBuildings);
   });
 
   const testCases = [
@@ -425,4 +433,3 @@ describe('MapComponentFactory.createMapConfiguration', () => {
     });
   });
 });
-

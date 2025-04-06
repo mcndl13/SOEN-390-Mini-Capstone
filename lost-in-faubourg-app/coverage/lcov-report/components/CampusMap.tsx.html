@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.64% </span>
+                <span class="strong">94.78% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>106/112</span>
+                <span class='fraction'>109/115</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">94.39% </span>
+                <span class="strong">94.54% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>101/107</span>
+                <span class='fraction'>104/110</span>
             </div>
         
             
@@ -907,7 +907,13 @@
 <a name='L842'></a><a href='#L842'>842</a>
 <a name='L843'></a><a href='#L843'>843</a>
 <a name='L844'></a><a href='#L844'>844</a>
-<a name='L845'></a><a href='#L845'>845</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L845'></a><a href='#L845'>845</a>
+<a name='L846'></a><a href='#L846'>846</a>
+<a name='L847'></a><a href='#L847'>847</a>
+<a name='L848'></a><a href='#L848'>848</a>
+<a name='L849'></a><a href='#L849'>849</a>
+<a name='L850'></a><a href='#L850'>850</a>
+<a name='L851'></a><a href='#L851'>851</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1110,7 +1116,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">260x</span>
+<span class="cline-any cline-yes">260x</span>
+<span class="cline-any cline-yes">259x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">260x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">260x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1321,7 +1331,6 @@
 <span class="cline-any cline-yes">260x</span>
 <span class="cline-any cline-yes">260x</span>
 <span class="cline-any cline-yes">260x</span>
-<span class="cline-any cline-yes">260x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">260x</span>
@@ -1389,7 +1398,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">57x</span>
+<span class="cline-any cline-yes">56x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">125x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1503,6 +1512,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">260x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1518,7 +1531,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1953,9 +1965,13 @@ const MapControls = ({
   recenterMap: () =&gt; void, 
   toggleShuttles: () =&gt; void 
 }) =&gt; {
-  const busIconColor = isBlackAndWhite 
-    ? "#000" 
-    : (showShuttles ? "#1E88E5" : "#757575");
+  let busIconColor = "#757575";
+  if (showShuttles) {
+    busIconColor = "#1E88E5";
+  }
+  if (isBlackAndWhite) {
+    busIconColor = "#000";
+  }
   return (
     &lt;View style={styles.mapControls}&gt;
       &lt;TouchableOpacity 
@@ -2165,7 +2181,6 @@ const CampusMap: React.FC = () =&gt; {
   const [showShuttles, setShowShuttles] = useState&lt;boolean&gt;(true);
   const [openingHours, setOpeningHours] = useState&lt;string&gt;('Loading...');
   const [showOpeningHours, setShowOpeningHours] = useState&lt;boolean&gt;(true);
-  const [_mapReady, setMapReady] = useState&lt;boolean&gt;(false);
   
   // Animation state
   const [slideAnimation] = useState(new Animated.Value(0));
@@ -2233,7 +2248,7 @@ const CampusMap: React.FC = () =&gt; {
         selectedBuilding.latitude,
         selectedBuilding.longitude,
       );
-      setOpeningHours(hours || <span class="branch-1 cbranch-no" title="branch not covered" >'No hours available')</span>;
+      setOpeningHours(hours ?? <span class="branch-1 cbranch-no" title="branch not covered" >'No hours available')</span>;
     };
     fetchOpeningHours();
   }, [selectedBuilding]);
@@ -2280,9 +2295,9 @@ const CampusMap: React.FC = () =&gt; {
   );
   
   const renderBuildingPolygons = () =&gt; (
-    polygons.map((polygon, index) =&gt; (
+    polygons.map((polygon) =&gt; (
       &lt;Polygon
-        key={index}
+        key={polygon.name} // Assuming 'name' is unique for each polygon
         coordinates={polygon.boundaries}
         fillColor={isBlackAndWhite ? '#00000033' : '#91233833'}
         strokeColor={isBlackAndWhite ? '#000000' : '#912338'}
@@ -2346,6 +2361,10 @@ const CampusMap: React.FC = () =&gt; {
     );
   };
   
+  function <span class="fstat-no" title="function not covered" >setMapReady(</span>isReady: boolean): void {
+<span class="cstat-no" title="statement not covered" >    console.log(`Map is ${isReady ? 'ready' : 'not ready'}`);</span>
+  }
+&nbsp;
   // Main render
   return (
     &lt;View style={styles.container}&gt;
@@ -2363,7 +2382,6 @@ const CampusMap: React.FC = () =&gt; {
           showsCompass={true}
           showsScale={true}
           onMapReady={<span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >setMapReady(true)}</span>
-          onPress={<span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >selectedBuilding &amp;&amp; closeInfo()}</span>
         &gt;
           {renderBuildingMarkers()}
           {renderBuildingPolygons()}
@@ -2602,7 +2620,7 @@ export default CampusMap;</pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-04-06T12:59:40.731Z
+                at 2025-04-06T15:20:28.704Z
             </div>
         <script src="../prettify.js"></script>
         <script>
