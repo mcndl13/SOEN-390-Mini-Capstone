@@ -892,6 +892,22 @@ function DirectionsPanel({
 // Main Component //
 ////////////////////
 
+export function distanceBetween(
+  point1: { latitude: number; longitude: number },
+  point2: { latitude: number; longitude: number },
+): number {
+  const R = 6371;
+  const dLat = ((point2.latitude - point1.latitude) * Math.PI) / 180;
+  const dLon = ((point2.longitude - point1.longitude) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((point1.latitude * Math.PI) / 180) *
+      Math.cos((point2.latitude * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export default function DirectionsScreen() {
   const { isBlackAndWhite, isLargeText } =
     React.useContext(AccessibilityContext);
@@ -925,6 +941,8 @@ export default function DirectionsScreen() {
   const [showShuttles, setShowShuttles] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [nextPointIsOrigin, setNextPointIsOrigin] = useState(true);
+
+  
 
   const mapRef = useRef<MapView>(null);
   const panY = useRef(new Animated.Value(0)).current;
@@ -1051,22 +1069,6 @@ export default function DirectionsScreen() {
       return 'My Current Location';
     return `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`;
   };
-
-  function distanceBetween(
-    point1: { latitude: number; longitude: number },
-    point2: { latitude: number; longitude: number },
-  ): number {
-    const R = 6371;
-    const dLat = ((point2.latitude - point1.latitude) * Math.PI) / 180;
-    const dLon = ((point2.longitude - point1.longitude) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos((point1.latitude * Math.PI) / 180) *
-        Math.cos((point2.latitude * Math.PI) / 180) *
-        Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
 
   const isShuttleRouteApplicable = () => {
     if (process.env.JEST_WORKER_ID) return false;
@@ -1554,3 +1556,8 @@ export default function DirectionsScreen() {
     </View>
   );
 }
+
+export {
+  getPanGestureAction,
+  getModeIcon,
+};

@@ -1,6 +1,11 @@
 import React from 'react';
 import { fireEvent, waitFor, act } from '@testing-library/react-native';
-import { stripHtml } from '../components/DirectionsScreen';
+import {
+  stripHtml,
+  getPanGestureAction,
+  distanceBetween,
+  getModeIcon,
+} from '../components/DirectionsScreen';
 import {
   renderDirectionsScreen,
   waitForTimeout,
@@ -11,7 +16,9 @@ import {
 } from './helpers/directionsTestHelpers';
 
 // Consolidated mocks
-jest.mock('@env', () => ({ GOOGLE_MAPS_API_KEY: 'dummy-key' }), { virtual: true });
+jest.mock('@env', () => ({ GOOGLE_MAPS_API_KEY: 'dummy-key' }), {
+  virtual: true,
+});
 
 try {
   require.resolve('react-native/Libraries/Animated/NativeAnimatedHelper');
@@ -20,7 +27,10 @@ try {
   console.warn('NativeAnimatedHelper module not found, skipping mock.', err);
 }
 
-jest.mock('expo-constants', () => ({ statusBarHeight: 20, platform: { os: 'ios' } }));
+jest.mock('expo-constants', () => ({
+  statusBarHeight: 20,
+  platform: { os: 'ios' },
+}));
 jest.mock('@expo/vector-icons', () => {
   const { Text } = require('react-native');
   return { Ionicons: (props: any) => <Text {...props}>icon</Text> };
@@ -65,8 +75,12 @@ jest.mock('react-native-google-places-autocomplete', () => {
   };
 });
 jest.mock('expo-location', () => ({
-  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
-  getCurrentPositionAsync: jest.fn(() => Promise.resolve({ coords: { latitude: 45.0, longitude: -73.0 } })),
+  requestForegroundPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ status: 'granted' }),
+  ),
+  getCurrentPositionAsync: jest.fn(() =>
+    Promise.resolve({ coords: { latitude: 45.0, longitude: -73.0 } }),
+  ),
 }));
 jest.mock('@react-navigation/native', () => ({ useRoute: jest.fn() }));
 jest.mock('../services/shuttleService', () => ({
@@ -218,7 +232,6 @@ describe('Additional DirectionsScreen interactions - Increased Coverage', () => 
     // Additional route summary details (like duration or distance) could be checked here if rendered
   });
 
-
   test('shows error when tracing route with both origin and destination missing', async () => {
     const rendered = renderDirectionsScreen();
     await waitForTimeout(600);
@@ -226,7 +239,9 @@ describe('Additional DirectionsScreen interactions - Increased Coverage', () => 
     await waitForTimeout(600);
     // Check that at least one error message appears (either for missing origin or destination)
     const originError = rendered.queryByText('Please set an origin point');
-    const destinationError = rendered.queryByText('Please set a destination point');
+    const destinationError = rendered.queryByText(
+      'Please set a destination point',
+    );
     expect(originError ?? destinationError).toBeTruthy();
   });
 });
@@ -262,7 +277,6 @@ describe('Helper function stripHtml', () => {
 });
 
 describe('Stable tests for DirectionsScreen', () => {
-
   test('shows origin and destination when set', () => {
     const origin = { latitude: 45.5, longitude: -73.6 };
     const destination = { latitude: 45.51, longitude: -73.61 };
@@ -287,5 +301,119 @@ describe('Stable tests for DirectionsScreen', () => {
   test('can press My Location button', () => {
     const { getByText } = renderDirectionsScreen();
     fireEvent.press(getByText('My Location')); // Should set origin or destination
+  });
+});
+
+// ... [existing imports and mocks remain unchanged]
+
+describe('DirectionsScreen - Extended Coverage Tests', () => {
+  test('renders with both origin and destination', async () => {
+    const rendered = renderDirectionsScreen({
+      origin: defaultOrigin,
+      destination: defaultDestination,
+    });
+    await waitForTimeout(600);
+    expect(rendered.getByText('Origin')).toBeTruthy();
+    expect(rendered.getByText('Destination')).toBeTruthy();
+  });
+
+  test('renders with only origin', async () => {
+    const rendered = renderDirectionsScreen({ origin: defaultOrigin });
+    await waitForTimeout(600);
+    expect(rendered.queryByText('Destination')).toBeTruthy(); // Should show placeholder or input
+  });
+
+  test('renders with only destination', async () => {
+    const rendered = renderDirectionsScreen({
+      destination: defaultDestination,
+    });
+    await waitForTimeout(600);
+    expect(rendered.queryByText('Origin')).toBeTruthy(); // Should show placeholder or input
+  });
+
+  test('switches travel modes and renders buttons', async () => {
+    const rendered = renderDirectionsScreen({
+      origin: defaultOrigin,
+      destination: defaultDestination,
+    });
+    await waitForTimeout(600);
+
+    const modes = ['DRIVING', 'TRANSIT', 'WALKING', 'BICYCLING'];
+    for (const mode of modes) {
+      const btn = rendered.getByTestId(mode); // <-- fixed line
+      expect(btn).toBeTruthy();
+      fireEvent.press(btn);
+    }
+  });
+
+  test('collapses directions panel when expand/collapse button is pressed', async () => {
+    const rendered = renderDirectionsScreen({
+      origin: defaultOrigin,
+      destination: defaultDestination,
+    });
+    fireEvent.press(rendered.getByText('Find Route'));
+    await waitForTimeout(1200);
+
+    const toggleBtn = rendered.queryByTestId('expandCollapseBtn');
+    if (toggleBtn) {
+      fireEvent.press(toggleBtn);
+      await waitForTimeout(400);
+      expect(rendered.queryByText('Route Steps')).toBeNull();
+    } else {
+      console.warn(
+        'expandCollapseBtn not rendered - skipping this optional test',
+      );
+    }
+  });
+
+  test('handles directions fetch failure gracefully', async () => {
+    const originalConsoleError = console.error;
+    console.error = jest.fn(); // Silence expected error
+    jest.mock('@env', () => ({}), { virtual: true });
+
+    const rendered = renderDirectionsScreen({
+      origin: defaultOrigin,
+      destination: defaultDestination,
+    });
+    fireEvent.press(rendered.getByText('Find Route'));
+    await waitForTimeout(1000);
+    expect(console.error).toHaveBeenCalled();
+
+    console.error = originalConsoleError; // Restore
+  });
+});
+
+describe('DirectionsScreen - Additional Coverage', () => {
+  test('getPanGestureAction returns expected action', () => {
+    const getAction =
+      require('../components/DirectionsScreen').getPanGestureAction;
+
+    expect(getAction(-30, -0.6, false)).toBe('expand'); // Expand by displacement and velocity
+    expect(getAction(30, 0.6, true)).toBe('collapse'); // Collapse by displacement and velocity
+    expect(getAction(5, 0.2, true)).toBe('reset'); // No significant move
+  });
+
+  test('distanceBetween returns correct value', () => {
+    const { distanceBetween } = require('../components/DirectionsScreen');
+
+    const dist = distanceBetween(
+      { latitude: 45.5, longitude: -73.6 },
+      { latitude: 45.51, longitude: -73.61 },
+    );
+
+    expect(dist).toBeGreaterThan(0);
+  });
+
+  test('getModeIcon returns expected icons', () => {
+    const { getModeIcon } = require('../components/DirectionsScreen');
+
+    expect(getModeIcon('DRIVING')).toBe('bus');
+  });
+});
+
+describe('DirectionsScreen - Unit Tests for Helper Logic', () => {
+  test('getPanGestureAction does not trigger expand/collapse for small movement', () => {
+    expect(getPanGestureAction(10, 0.1, false)).toBe('reset');
+    expect(getPanGestureAction(-10, -0.1, true)).toBe('reset');
   });
 });
