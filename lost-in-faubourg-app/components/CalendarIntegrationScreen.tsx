@@ -142,7 +142,7 @@ export default function CalendarIntegrationScreen() {
         // Navigate to the Directions screen with both origin and destination
         navigation.navigate("Directions", { origin, destination });
       } catch (error) {
-        Alert.alert("Error", "Could not determine the location for directions.");
+        console.log("Error", "Could not determine the location for directions.", error);
       }
     } else {
       Alert.alert("No upcoming events", "There are no upcoming events available.");

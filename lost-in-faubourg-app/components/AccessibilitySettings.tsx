@@ -14,13 +14,15 @@ export const AccessibilityProvider: React.FC<{ children: React.ReactNode }> = ({
     const [isBlackAndWhite, setIsBlackAndWhite] = useState(false);
     const [isLargeText, setIsLargeText] = useState(false);
 
+    const contextValue = React.useMemo(() => ({
+        isBlackAndWhite,
+        isLargeText,
+        setIsBlackAndWhite,
+        setIsLargeText,
+    }), [isBlackAndWhite, isLargeText]);
+
     return (
-        <AccessibilityContext.Provider value={{
-            isBlackAndWhite,
-            isLargeText,
-            setIsBlackAndWhite,
-            setIsLargeText,
-        }}>
+        <AccessibilityContext.Provider value={contextValue}>
             {children}
         </AccessibilityContext.Provider>
     );
