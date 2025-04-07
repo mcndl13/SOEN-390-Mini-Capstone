@@ -86,6 +86,6 @@ npx expo start --tunnel
 - **Back-End**: Firebase
 - **Tools**: GitHub, ZenHub
 - **Testing**: Jest, Maestro
-- **Report**: https://sonarcloud.io/project/overview?id=mcndl13_SOEN-390-Mini-Capstone
+- **Report**: [https://sonarcloud.io/project/overview?id=mcndl13_SOEN-390-Mini-Capstone](https://sonarcloud.io/summary/new_code?id=mcndl13_SOEN-390-Mini-Capstone&branch=main)
 
 ---
