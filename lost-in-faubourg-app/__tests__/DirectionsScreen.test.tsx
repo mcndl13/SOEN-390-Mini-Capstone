@@ -3,8 +3,6 @@ import { fireEvent, waitFor, act } from '@testing-library/react-native';
 import {
   stripHtml,
   getPanGestureAction,
-  distanceBetween,
-  getModeIcon,
 } from '../components/DirectionsScreen';
 import {
   renderDirectionsScreen,
