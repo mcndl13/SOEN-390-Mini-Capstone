@@ -82,7 +82,7 @@ export const fetchShuttlePositions = async (): Promise<ShuttleData> => {
  */
 const processShuttleData = (data: any): ShuttleData => {
   // Extract the Points array from the response
-  const points = data.d?.Points || [];
+  const points = data.d?.Points ?? [];
   
   // Filter the points to separate buses and stations
   const buses = points.filter((point: ShuttlePoint) => 
@@ -94,7 +94,7 @@ const processShuttleData = (data: any): ShuttleData => {
   );
   
   // Get the center point
-  const centerPoint = data.d?.CenterPoint || {
+  const centerPoint = data.d?.CenterPoint ?? {
     Latitude: 45.48469766613475,
     Longitude: -73.6083984375,
   };
