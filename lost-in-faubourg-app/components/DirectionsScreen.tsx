@@ -1119,7 +1119,7 @@ export default function DirectionsScreen() {
       console.log('Directions API response:', data.status);
       if (data.routes?.length) {
         const leg = data.routes[0].legs?.[0];
-        setSteps(leg?.steps || []);
+        setSteps(leg?.steps ?? []);
       }
     } catch (err) {
       console.error('Directions fetch error', err);

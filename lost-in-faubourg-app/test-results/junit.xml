@@ -1,53 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="24" failures="0" errors="0" time="11.192">
-  <testsuite name="IndoorDirectionsScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-07T00:16:13" time="0.765" tests="4">
-    <testcase classname="IndoorDirectionsScreen renders building options" name="IndoorDirectionsScreen renders building options" time="0.203">
+<testsuites name="jest tests" tests="24" failures="0" errors="0" time="16.048">
+  <testsuite name="IndoorDirectionsScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-07T00:18:29" time="2.826" tests="4">
+    <testcase classname="IndoorDirectionsScreen renders building options" name="IndoorDirectionsScreen renders building options" time="0.332">
     </testcase>
-    <testcase classname="IndoorDirectionsScreen opens and closes modal when a building is selected" name="IndoorDirectionsScreen opens and closes modal when a building is selected" time="0.009">
+    <testcase classname="IndoorDirectionsScreen opens and closes modal when a building is selected" name="IndoorDirectionsScreen opens and closes modal when a building is selected" time="0.012">
     </testcase>
-    <testcase classname="IndoorDirectionsScreen calls WebView.reload when Reload button is pressed" name="IndoorDirectionsScreen calls WebView.reload when Reload button is pressed" time="0.006">
+    <testcase classname="IndoorDirectionsScreen calls WebView.reload when Reload button is pressed" name="IndoorDirectionsScreen calls WebView.reload when Reload button is pressed" time="0.01">
     </testcase>
-    <testcase classname="IndoorDirectionsScreen closes modal on onRequestClose" name="IndoorDirectionsScreen closes modal on onRequestClose" time="0.008">
+    <testcase classname="IndoorDirectionsScreen closes modal on onRequestClose" name="IndoorDirectionsScreen closes modal on onRequestClose" time="0.018">
     </testcase>
   </testsuite>
-  <testsuite name="DirectionsScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-07T00:16:13" time="10.465" tests="20">
-    <testcase classname="DirectionsScreen renders origin and destination input placeholders" name="DirectionsScreen renders origin and destination input placeholders" time="0.085">
+  <testsuite name="DirectionsScreen" errors="0" failures="0" skipped="0" timestamp="2025-04-07T00:18:29" time="13.717" tests="20">
+    <testcase classname="DirectionsScreen renders origin and destination input placeholders" name="DirectionsScreen renders origin and destination input placeholders" time="0.089">
     </testcase>
-    <testcase classname="DirectionsScreen renders Use My Location and Clear Points buttons" name="DirectionsScreen renders Use My Location and Clear Points buttons" time="0.018">
+    <testcase classname="DirectionsScreen renders Use My Location and Clear Points buttons" name="DirectionsScreen renders Use My Location and Clear Points buttons" time="0.009">
     </testcase>
-    <testcase classname="DirectionsScreen renders Trace route button" name="DirectionsScreen renders Trace route button" time="0.009">
+    <testcase classname="DirectionsScreen renders Trace route button" name="DirectionsScreen renders Trace route button" time="0.013">
     </testcase>
-    <testcase classname="DirectionsScreen calls clearPoints when Clear Points is pressed" name="DirectionsScreen calls clearPoints when Clear Points is pressed" time="0.014">
+    <testcase classname="DirectionsScreen calls clearPoints when Clear Points is pressed" name="DirectionsScreen calls clearPoints when Clear Points is pressed" time="0.051">
     </testcase>
-    <testcase classname="DirectionsScreen matches snapshot" name="DirectionsScreen matches snapshot" time="0.014">
+    <testcase classname="DirectionsScreen matches snapshot" name="DirectionsScreen matches snapshot" time="0.013">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions shows error when tracing route with no origin" name="More DirectionsScreen interactions shows error when tracing route with no origin" time="0.677">
+    <testcase classname="More DirectionsScreen interactions shows error when tracing route with no origin" name="More DirectionsScreen interactions shows error when tracing route with no origin" time="0.627">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions shows error when tracing route with no destination" name="More DirectionsScreen interactions shows error when tracing route with no destination" time="0.626">
+    <testcase classname="More DirectionsScreen interactions shows error when tracing route with no destination" name="More DirectionsScreen interactions shows error when tracing route with no destination" time="0.662">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions sets campus points and toggles shuttle route" name="More DirectionsScreen interactions sets campus points and toggles shuttle route" time="1.944">
+    <testcase classname="More DirectionsScreen interactions sets campus points and toggles shuttle route" name="More DirectionsScreen interactions sets campus points and toggles shuttle route" time="2.001">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions toggles shuttle visibility" name="More DirectionsScreen interactions toggles shuttle visibility" time="0.84">
+    <testcase classname="More DirectionsScreen interactions toggles shuttle visibility" name="More DirectionsScreen interactions toggles shuttle visibility" time="0.86">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions handles back button press in directions view" name="More DirectionsScreen interactions handles back button press in directions view" time="0.638">
+    <testcase classname="More DirectionsScreen interactions handles back button press in directions view" name="More DirectionsScreen interactions handles back button press in directions view" time="0.73">
     </testcase>
-    <testcase classname="More DirectionsScreen interactions processes current location button press" name="More DirectionsScreen interactions processes current location button press" time="0.629">
+    <testcase classname="More DirectionsScreen interactions processes current location button press" name="More DirectionsScreen interactions processes current location button press" time="0.93">
     </testcase>
-    <testcase classname="Additional DirectionsScreen interactions - Increased Coverage renders route summary when valid origin and destination are provided" name="Additional DirectionsScreen interactions - Increased Coverage renders route summary when valid origin and destination are provided" time="1.222">
+    <testcase classname="Additional DirectionsScreen interactions - Increased Coverage renders route summary when valid origin and destination are provided" name="Additional DirectionsScreen interactions - Increased Coverage renders route summary when valid origin and destination are provided" time="1.325">
     </testcase>
-    <testcase classname="Additional DirectionsScreen interactions - Increased Coverage shows error when tracing route with both origin and destination missing" name="Additional DirectionsScreen interactions - Increased Coverage shows error when tracing route with both origin and destination missing" time="1.243">
+    <testcase classname="Additional DirectionsScreen interactions - Increased Coverage shows error when tracing route with both origin and destination missing" name="Additional DirectionsScreen interactions - Increased Coverage shows error when tracing route with both origin and destination missing" time="1.27">
     </testcase>
-    <testcase classname="Additional DirectionsScreen interactions - New Tests collapses directions panel on pressing the &quot;Back&quot; button" name="Additional DirectionsScreen interactions - New Tests collapses directions panel on pressing the &quot;Back&quot; button" time="1.842">
+    <testcase classname="Additional DirectionsScreen interactions - New Tests collapses directions panel on pressing the &quot;Back&quot; button" name="Additional DirectionsScreen interactions - New Tests collapses directions panel on pressing the &quot;Back&quot; button" time="2.012">
     </testcase>
-    <testcase classname="Helper function stripHtml removes HTML tags correctly" name="Helper function stripHtml removes HTML tags correctly" time="0.001">
+    <testcase classname="Helper function stripHtml removes HTML tags correctly" name="Helper function stripHtml removes HTML tags correctly" time="0.014">
     </testcase>
-    <testcase classname="Helper function stripHtml returns empty string for empty input" name="Helper function stripHtml returns empty string for empty input" time="0.001">
+    <testcase classname="Helper function stripHtml returns empty string for empty input" name="Helper function stripHtml returns empty string for empty input" time="0">
     </testcase>
-    <testcase classname="Stable tests for DirectionsScreen shows origin and destination when set" name="Stable tests for DirectionsScreen shows origin and destination when set" time="0.028">
+    <testcase classname="Stable tests for DirectionsScreen shows origin and destination when set" name="Stable tests for DirectionsScreen shows origin and destination when set" time="0.011">
     </testcase>
-    <testcase classname="Stable tests for DirectionsScreen shuttle button is present and can be pressed" name="Stable tests for DirectionsScreen shuttle button is present and can be pressed" time="0.018">
+    <testcase classname="Stable tests for DirectionsScreen shuttle button is present and can be pressed" name="Stable tests for DirectionsScreen shuttle button is present and can be pressed" time="0.029">
     </testcase>
-    <testcase classname="Stable tests for DirectionsScreen locate button is present and clickable" name="Stable tests for DirectionsScreen locate button is present and clickable" time="0.013">
+    <testcase classname="Stable tests for DirectionsScreen locate button is present and clickable" name="Stable tests for DirectionsScreen locate button is present and clickable" time="0.016">
     </testcase>
     <testcase classname="Stable tests for DirectionsScreen can press My Location button" name="Stable tests for DirectionsScreen can press My Location button" time="0.017">
     </testcase>

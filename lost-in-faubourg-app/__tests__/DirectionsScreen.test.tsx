@@ -17,7 +17,7 @@ try {
   require.resolve('react-native/Libraries/Animated/NativeAnimatedHelper');
   jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper', () => ({}));
 } catch (err) {
-  console.warn('NativeAnimatedHelper module not found, skipping mock.');
+  console.warn('NativeAnimatedHelper module not found, skipping mock.', err);
 }
 
 jest.mock('expo-constants', () => ({ statusBarHeight: 20, platform: { os: 'ios' } }));
@@ -227,7 +227,7 @@ describe('Additional DirectionsScreen interactions - Increased Coverage', () => 
     // Check that at least one error message appears (either for missing origin or destination)
     const originError = rendered.queryByText('Please set an origin point');
     const destinationError = rendered.queryByText('Please set a destination point');
-    expect(originError || destinationError).toBeTruthy();
+    expect(originError ?? destinationError).toBeTruthy();
   });
 });
 
