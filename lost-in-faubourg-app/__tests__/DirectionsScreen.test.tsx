@@ -10,51 +10,30 @@ import {
   selectMyLocation,
 } from './helpers/directionsTestHelpers';
 
-// --- Existing mocks and setup remain unchanged ---
-jest.mock(
-  '@env',
-  () => ({
-    GOOGLE_MAPS_API_KEY: 'dummy-key',
-  }),
-  { virtual: true },
-);
+// Consolidated mocks
+jest.mock('@env', () => ({ GOOGLE_MAPS_API_KEY: 'dummy-key' }), { virtual: true });
 
 try {
   require.resolve('react-native/Libraries/Animated/NativeAnimatedHelper');
   jest.mock('react-native/Libraries/Animated/NativeAnimatedHelper', () => ({}));
 } catch (err) {
-  console.log(`NativeAnimatedHelper not found ${err}`);
+  console.warn('NativeAnimatedHelper module not found, skipping mock.');
 }
 
-jest.mock('expo-constants', () => ({
-  statusBarHeight: 20,
-  platform: { os: 'ios' },
-}));
-
+jest.mock('expo-constants', () => ({ statusBarHeight: 20, platform: { os: 'ios' } }));
 jest.mock('@expo/vector-icons', () => {
   const { Text } = require('react-native');
-  return {
-    Ionicons: (props: any) => <Text {...props}>icon</Text>,
-  };
+  return { Ionicons: (props: any) => <Text {...props}>icon</Text> };
 });
-
-beforeAll(() => {
-  process.env.EXPO_OS = 'ios';
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-});
-
-jest.mock('react-native-maps-directions', () => {
-  return {
-    __esModule: true,
-    default: (props: any) => {
-      if (props.onReady) {
-        setTimeout(() => props.onReady({ distance: 5, duration: 10 }), 10);
-      }
-      return null;
-    },
-  };
-});
-
+jest.mock('react-native-maps-directions', () => ({
+  __esModule: true,
+  default: (props: any) => {
+    if (props.onReady) {
+      setTimeout(() => props.onReady({ distance: 5, duration: 10 }), 10);
+    }
+    return null;
+  },
+}));
 jest.mock('react-native-maps', () => {
   const React = require('react');
   const { View } = require('react-native');
@@ -74,7 +53,6 @@ jest.mock('react-native-maps', () => {
     Polygon: (props: any) => <View {...props} />,
   };
 });
-
 jest.mock('react-native-google-places-autocomplete', () => {
   const { View, Text } = require('react-native');
   return {
@@ -86,20 +64,11 @@ jest.mock('react-native-google-places-autocomplete', () => {
     ),
   };
 });
-
 jest.mock('expo-location', () => ({
-  requestForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: 'granted' }),
-  ),
-  getCurrentPositionAsync: jest.fn(() =>
-    Promise.resolve({ coords: { latitude: 45.0, longitude: -73.0 } }),
-  ),
+  requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
+  getCurrentPositionAsync: jest.fn(() => Promise.resolve({ coords: { latitude: 45.0, longitude: -73.0 } })),
 }));
-
-jest.mock('@react-navigation/native', () => ({
-  useRoute: jest.fn(),
-}));
-
+jest.mock('@react-navigation/native', () => ({ useRoute: jest.fn() }));
 jest.mock('../services/shuttleService', () => ({
   fetchShuttlePositions: jest.fn(),
   startShuttleTracking: (callback: Function) => {
@@ -107,6 +76,15 @@ jest.mock('../services/shuttleService', () => ({
     return () => {};
   },
 }));
+
+// Shared setup
+beforeAll(() => {
+  process.env.EXPO_OS = 'ios';
+  jest.spyOn(console, 'log').mockImplementation(() => {});
+});
+
+const defaultOrigin = { latitude: 45.4953534, longitude: -73.578549 };
+const defaultDestination = { latitude: 45.4582, longitude: -73.6405 };
 
 // --- Existing tests ---
 describe('DirectionsScreen', () => {
@@ -201,8 +179,6 @@ describe('More DirectionsScreen interactions', () => {
   });
 
   test('handles back button press in directions view', async () => {
-    const defaultOrigin = { latitude: 45.4953534, longitude: -73.578549 };
-    const defaultDestination = { latitude: 45.4582, longitude: -73.6405 };
     const rendered = renderDirectionsScreen({
       origin: defaultOrigin,
       destination: defaultDestination,
@@ -255,156 +231,6 @@ describe('Additional DirectionsScreen interactions - Increased Coverage', () => 
   });
 });
 
-
-jest.mock('react-native-google-places-autocomplete', () => {
-  const { View, Text } = require('react-native');
-  return {
-    __esModule: true,
-    GooglePlacesAutocomplete: (props: any) => (
-      <View>
-        <Text>{props.placeholder}</Text>
-      </View>
-    ),
-  };
-});
-
-jest.mock('expo-location', () => ({
-  requestForegroundPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: 'granted' }),
-  ),
-  getCurrentPositionAsync: jest.fn(() =>
-    Promise.resolve({ coords: { latitude: 45.0, longitude: -73.0 } }),
-  ),
-}));
-
-jest.mock('@react-navigation/native', () => ({
-  useRoute: jest.fn(),
-}));
-
-jest.mock('../services/shuttleService', () => ({
-  fetchShuttlePositions: jest.fn(),
-  startShuttleTracking: (callback: Function) => {
-    callback({ buses: [], stations: [] });
-    return () => {};
-  },
-}));
-
-describe('DirectionsScreen', () => {
-  test('renders origin and destination input placeholders', async () => {
-    const rendered = renderDirectionsScreen();
-    await waitForTimeout(0);
-    expect(rendered.getByText('Enter starting point')).toBeTruthy();
-    expect(rendered.getByText('Enter destination')).toBeTruthy();
-  });
-
-  test('renders Use My Location and Clear Points buttons', async () => {
-    const rendered = renderDirectionsScreen();
-    await waitForTimeout(0);
-    expect(rendered.getByText('My Location')).toBeTruthy();
-    expect(rendered.getByText('Clear Points')).toBeTruthy();
-  });
-
-  test('renders Trace route button', async () => {
-    const rendered = renderDirectionsScreen();
-    await waitForTimeout(0);
-    expect(rendered.getByText('Find Route')).toBeTruthy();
-  });
-
-  test('calls clearPoints when Clear Points is pressed', async () => {
-    const rendered = renderDirectionsScreen();
-    await waitForTimeout(0);
-    await act(async () => {
-      fireEvent.press(rendered.getByText('Clear Points'));
-    });
-    await waitFor(() => {
-      expect(rendered.queryByText('Points cleared')).toBeTruthy();
-    });
-  });
-
-  test('matches snapshot', async () => {
-    const rendered = renderDirectionsScreen();
-    await waitForTimeout(0);
-    expect(rendered.toJSON()).toMatchSnapshot();
-  });
-});
-
-describe('More DirectionsScreen interactions', () => {
-  const { useRoute } = require('@react-navigation/native');
-
-  afterEach(() => {
-    useRoute.mockReturnValue({ params: {} });
-  });
-
-  test('shows error when tracing route with no origin', async () => {
-    const rendered = renderDirectionsScreen({
-      destination: { latitude: 45.5, longitude: -73.6 },
-    });
-    await waitForTimeout(600);
-    fireEvent.press(rendered.getByText('Find Route'));
-    await waitFor(() => {
-      expect(rendered.queryByText('Please set an origin point')).toBeTruthy();
-    });
-  });
-
-  test('shows error when tracing route with no destination', async () => {
-    const rendered = renderDirectionsScreen({
-      origin: { latitude: 45.5, longitude: -73.6 },
-    });
-    await waitForTimeout(600);
-    fireEvent.press(rendered.getByText('Find Route'));
-    await waitFor(() => {
-      expect(
-        rendered.queryByText('Please set a destination point'),
-      ).toBeTruthy();
-    });
-  });
-
-  test('sets campus points and toggles shuttle route', async () => {
-    const rendered = renderDirectionsScreen();
-    await waitForTimeout(600);
-    await selectCampus(rendered, 'SGW');
-    await selectCampus(rendered, 'Loyola');
-    await traceRoute(rendered);
-    await waitForTimeout(600);
-    expect(rendered.getByText('Back')).toBeTruthy();
-  });
-
-  test('toggles shuttle visibility', async () => {
-    const rendered = renderDirectionsScreen();
-    await waitForTimeout(600);
-    const toggleButton = rendered.getByTestId('shuttlesBtn');
-    const initialText = toggleButton.props.children;
-    fireEvent.press(toggleButton);
-    await waitForTimeout(200);
-    const toggledText = rendered.getByTestId('shuttlesBtn').props.children;
-    expect(toggledText).not.toEqual(initialText);
-  });
-
-  test('handles back button press in directions view', async () => {
-    const rendered = renderDirectionsScreen({
-      origin: defaultOrigin,
-      destination: defaultDestination,
-    });
-    fireEvent.press(rendered.getByText('Find Route'));
-    await waitForTimeout(600);
-    await testBackButtonInteraction(rendered);
-  });
-
-  test('processes current location button press', async () => {
-    const geometry = require('../utils/geometry');
-    jest.spyOn(geometry, 'isUserInBuilding').mockReturnValue({
-      latitude: 45.0 + 0.0001,
-      longitude: -73.0 + 0.0001,
-    });
-    const rendered = renderDirectionsScreen();
-    await waitForTimeout(600);
-    await selectMyLocation(rendered, /Building location set/);
-  });
-});
-
-const defaultOrigin = { latitude: 45.4953534, longitude: -73.578549 };
-const defaultDestination = { latitude: 45.4582, longitude: -73.6405 };
-
 describe('Additional DirectionsScreen interactions - New Tests', () => {
   test('collapses directions panel on pressing the "Back" button', async () => {
     const rendered = renderDirectionsScreen({
@@ -415,13 +241,10 @@ describe('Additional DirectionsScreen interactions - New Tests', () => {
       fireEvent.press(rendered.getByText('Find Route'));
     });
     await waitForTimeout(1200);
-    // The "Back" button appears in the expanded panel.
     const backButton = rendered.getByText('Back');
     expect(backButton).toBeTruthy();
-    // Press the "Back" button to collapse the panel.
     fireEvent.press(backButton);
     await waitForTimeout(600);
-    // After collapse, the panel should no longer show route steps.
     expect(rendered.queryByText('Route Steps')).toBeNull();
   });
 });
